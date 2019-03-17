@@ -5,7 +5,9 @@ import android.view.MotionEvent;
 public class TouchListener {
     private final MyGLSurfaceView view;
     private DragState state = DragState.NONE;
-    private MotionEvent ev;
+    private float evX;
+    private float evY;
+//    private MotionEvent ev;
 
     public TouchListener(MyGLSurfaceView myGLSurfaceView) {
         this.view = myGLSurfaceView;
@@ -37,7 +39,7 @@ public class TouchListener {
         } else
         if (e.getAction() == MotionEvent.ACTION_MOVE) {
             int width = view.getWidth();
-            float dx = e.getX() - ev.getX();
+            float dx = e.getX() - evX;
 
             switch (state) {
                 case LEFT:
@@ -55,6 +57,7 @@ public class TouchListener {
             }
         }
 
-        ev = e;
+        evX = e.getX();
+        evY = e.getY();
     }
 }

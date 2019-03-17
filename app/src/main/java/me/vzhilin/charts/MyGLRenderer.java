@@ -10,7 +10,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Scroll scroll;
 
     private ScrollComponent mScrollComponent;
-    private Triangle mTriangle;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -18,9 +17,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
 
+    private int width;
+    private int height;
+
     public MyGLRenderer(Scroll scroll) {
         this.scroll = scroll;
     }
+
+    long time;
 
     public void onDrawFrame(GL10 unused) {
 
@@ -44,9 +48,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
-        // Draw shape
-//        mTriangle.draw(mMVPMatrix);
-        mScrollComponent.draw(mMVPMatrix);
+        mScrollComponent.draw(width, height, mMVPMatrix);
     }
 
     @Override
@@ -55,20 +57,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // initialize a triangle
-        mTriangle = new Triangle(scroll);
         mScrollComponent = new ScrollComponent(scroll);
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-
-        float ratio = (float) width / height;
-
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
-//        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
-
         Matrix.orthoM(mProjectionMatrix, 0, 0, +width, height, 0, 3, 7);
+
+        this.width = width;
+        this.height = height;
     }
 
     public static int loadShader(int type, String shaderCode){

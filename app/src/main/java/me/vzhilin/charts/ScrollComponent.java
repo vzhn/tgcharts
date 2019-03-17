@@ -45,13 +45,16 @@ public class ScrollComponent {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float triangleCoords[] = {   // in counterclockwise order:
-            0.0f, 0.0f, 0.0f, // top
-            0.0f, 150.0f, 0.0f, // bottom left
-            150.0f, 150.0f, 0.0f  // bottom right
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
     };
 
     // Set color with red, green, blue and alpha (opacity) values
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
+    float color[] = { 0, 0, 0, 1.0f };
 
 
     public ScrollComponent(Scroll scroll) {
@@ -87,7 +90,7 @@ public class ScrollComponent {
         GLES20.glLinkProgram(mProgram);
     }
 
-    public void draw(float[] mvpMatrix) {
+    public void draw(int width, int height, float[] mvpMatrix) {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
@@ -99,6 +102,27 @@ public class ScrollComponent {
 
         vertexBuffer.clear();
         // add the coordinates to the FloatBuffer
+
+        triangleCoords[0] = 0f;
+        triangleCoords[1] = height - ViewConstants.SCROLL_HEIGHT;
+
+        triangleCoords[3] = width;
+        triangleCoords[4] = height - ViewConstants.SCROLL_HEIGHT;
+
+        float leftX = (float) (scroll.getLeft() * width);
+        float rightX = (float) (scroll.getRight() * width);
+        triangleCoords[6] = leftX;
+        triangleCoords[7] = height - ViewConstants.SCROLL_HEIGHT;
+
+        triangleCoords[9] = leftX;
+        triangleCoords[10] = height;
+
+        triangleCoords[12] = rightX;
+        triangleCoords[13] = height - ViewConstants.SCROLL_HEIGHT;
+
+        triangleCoords[15] = rightX;
+        triangleCoords[16] = height;
+
         vertexBuffer.put(triangleCoords);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
@@ -121,7 +145,7 @@ public class ScrollComponent {
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
