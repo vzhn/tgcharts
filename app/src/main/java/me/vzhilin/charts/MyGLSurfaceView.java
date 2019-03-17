@@ -1,9 +1,16 @@
 package me.vzhilin.charts;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.JsonReader;
 import android.view.MotionEvent;
+import me.vzhilin.charts.data.Data;
+import me.vzhilin.charts.data.DataParser;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 class MyGLSurfaceView extends GLSurfaceView {
 
@@ -26,6 +33,20 @@ class MyGLSurfaceView extends GLSurfaceView {
         setRenderer(renderer);
 
         touchListener = new TouchListener(this);
+        Data data = readResource(context.getResources());
+
+        System.err.println(data);
+    }
+
+    private Data readResource(Resources rs) {
+        try {
+            JsonReader reader = new JsonReader(new InputStreamReader(rs.openRawResource(R.raw.chart_data)));
+            return new DataParser(reader).parse();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
     }
 
 

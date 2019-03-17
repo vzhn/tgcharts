@@ -3,6 +3,10 @@ package me.vzhilin.charts;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.JsonReader;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
     private GLSurfaceView gLView;
@@ -11,11 +15,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Create a GLSurfaceView instance and set it
-        // as the ContentView for this Activity.
-//        gLView = new MyGLSurfaceView(this);
-//        setContentView(gLView);
-
     }
 }
