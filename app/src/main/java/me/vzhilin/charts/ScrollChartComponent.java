@@ -1,6 +1,6 @@
 package me.vzhilin.charts;
 
-import android.opengl.GLES20;
+import android.graphics.Color;
 import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
 
@@ -15,7 +15,8 @@ public class ScrollChartComponent {
 
         Column xColumn = chart.getXColumn();
         for (Column yColumn: chart.getYColumns()) {
-            subcomponents.add(new ScrollChartColumn(xColumn, yColumn));
+            int color = Color.parseColor(chart.getColor(yColumn.getLabel()));
+            subcomponents.add(new ScrollChartColumn(xColumn, yColumn, color));
         }
     }
 

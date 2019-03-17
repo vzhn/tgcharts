@@ -39,4 +39,8 @@ public class Chart {
     public Collection<Column> getYColumns() {
         return columns.values();
     }
+
+    public String getColor(String label) {
+        return colors.get(label);
+    }
 }

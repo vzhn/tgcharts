@@ -6,6 +6,9 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.JsonReader;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import me.vzhilin.charts.data.Data;
 import me.vzhilin.charts.data.DataParser;
 

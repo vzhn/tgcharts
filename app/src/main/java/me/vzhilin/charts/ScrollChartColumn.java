@@ -1,5 +1,6 @@
 package me.vzhilin.charts;
 
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import me.vzhilin.charts.data.Column;
@@ -42,9 +43,13 @@ final class ScrollChartColumn {
 
     private FloatBuffer vertexBuffer;
 
-    public ScrollChartColumn(Column xColumn, Column yColumn) {
+    public ScrollChartColumn(Column xColumn, Column yColumn, int c) {
         ByteBuffer bb = ByteBuffer.allocateDirect(xColumn.size() * 3 * 4);
         bb.order(ByteOrder.nativeOrder());
+
+        color[0] = Color.red(c) / 255f;
+        color[1] = Color.green(c) / 255f;
+        color[2] = Color.blue(c) / 255f;
 
         vertexCount = xColumn.size();
         vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -132,8 +137,9 @@ final class ScrollChartColumn {
         // Pass the projection and view transformation to the shader
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
-        // Draw the triangle
+        GLES20.glLineWidth(4f);
         GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, vertexCount);
+        GLES20.glLineWidth(1f);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
