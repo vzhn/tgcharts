@@ -1,5 +1,6 @@
 package me.vzhilin.charts;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.opengl.GLSurfaceView;
@@ -8,7 +9,10 @@ import android.util.JsonReader;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import me.vzhilin.charts.data.Chart;
+import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.data.Data;
 import me.vzhilin.charts.data.DataParser;
 
@@ -16,16 +20,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 class MyGLSurfaceView extends GLSurfaceView {
-
     private final MyGLRenderer renderer;
     private final TouchListener touchListener;
-//    private final Scroll scroll;
+
+    private final Model model;
 
     public MyGLSurfaceView(Context context, AttributeSet attrs){
         super(context, attrs);
 
         Data data = readResource(context.getResources());
-        Model model = new Model(data.getChart(0));
+        model = new Model(data.getChart(0));
         model.setScrollLeft(0.5);
         model.setScrollRight(0.6);
 
@@ -35,8 +39,30 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);
-
         touchListener = new TouchListener(model);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        LinearLayout mailLayout = ((Activity) getContext()).findViewById(R.id.mainLayout);
+
+        Chart chart = model.getChart();
+        for (final Column yColumn: chart.getYColumns()) {
+            CheckBox checkBox = new CheckBox(getContext());
+            String label = yColumn.getLabel();
+            checkBox.setText(label);
+            checkBox.setTextColor(chart.getColor(label));
+            mailLayout.addView(checkBox);
+
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    yColumn.setVisible(isChecked);
+                }
+            });
+        }
     }
 
     private Data readResource(Resources rs) {

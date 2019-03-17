@@ -37,6 +37,7 @@ final class ScrollChartColumn {
 
     private final int vertexStride;
     private final int vertexCount;
+    private final Column yColumn;
 
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
@@ -44,6 +45,7 @@ final class ScrollChartColumn {
     private FloatBuffer vertexBuffer;
 
     public ScrollChartColumn(Column xColumn, Column yColumn, int c) {
+        this.yColumn = yColumn;
         ByteBuffer bb = ByteBuffer.allocateDirect(xColumn.size() * 3 * 4);
         bb.order(ByteOrder.nativeOrder());
 
@@ -98,6 +100,9 @@ final class ScrollChartColumn {
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
+        if (!yColumn.isVisible()) {
+            return;
+        }
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 

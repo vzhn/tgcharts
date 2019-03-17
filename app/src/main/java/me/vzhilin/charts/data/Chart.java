@@ -1,8 +1,9 @@
 package me.vzhilin.charts.data;
 
+import android.graphics.Color;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Chart {
@@ -40,7 +41,7 @@ public class Chart {
         return columns.values();
     }
 
-    public String getColor(String label) {
-        return colors.get(label);
+    public int getColor(String label) {
+        return Color.parseColor(colors.get(label));
     }
 }
