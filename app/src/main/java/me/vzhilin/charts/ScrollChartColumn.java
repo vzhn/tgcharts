@@ -1,0 +1,120 @@
+package me.vzhilin.charts;
+
+import android.opengl.GLES20;
+import me.vzhilin.charts.data.Column;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.util.Iterator;
+
+import static me.vzhilin.charts.ScrollComponent.COORDS_PER_VERTEX;
+
+final class ScrollChartColumn {
+    private final int mProgram;
+    private final String vertexShaderCode =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "}";
+
+    private final String fragmentShaderCode =
+            "precision mediump float;" +
+                    "uniform vec4 vColor;" +
+                    "void main() {" +
+                    "  gl_FragColor = vColor;" +
+                    "}";
+
+    private final Column xColumn;
+    private final Column yColumn;
+
+    private final int vertexStride;
+    private final int vertexCount;
+
+    // Set color with red, green, blue and alpha (opacity) values
+    float color[] = { 0, 0, 0, 1.0f };
+
+    private FloatBuffer vertexBuffer;
+
+    public ScrollChartColumn(Column xColumn, Column yColumn) {
+        this.xColumn = xColumn;
+        this.yColumn = yColumn;
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(xColumn.size() * 3 * 4);
+        bb.order(ByteOrder.nativeOrder());
+
+        vertexCount = xColumn.size();
+        vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
+        vertexBuffer = bb.asFloatBuffer();
+
+        Iterator<Double> itX = xColumn.iterator();
+        Iterator<Double> itY = yColumn.iterator();
+
+        while (itX.hasNext()) {
+            float x = itX.next().floatValue();
+            float y = itY.next().floatValue();
+
+            vertexBuffer.put(x);
+            vertexBuffer.put(y);
+            vertexBuffer.put(0);
+        }
+
+        vertexBuffer.position(0);
+
+        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+
+        // create empty OpenGL ES Program
+        mProgram = GLES20.glCreateProgram();
+
+        // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, vertexShader);
+
+        // add the fragment shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader);
+
+        // creates OpenGL ES program executables
+        GLES20.glLinkProgram(mProgram);
+    }
+
+    public void draw(int width, int height, float[] mvpMatrix) {
+        // Add program to OpenGL ES environment
+        GLES20.glUseProgram(mProgram);
+
+        // get handle to vertex shader's vPosition member
+        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+        // Prepare the triangle coordinate data
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                vertexStride, vertexBuffer);
+
+        // get handle to fragment shader's vColor member
+        int mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+
+        // Set color for drawing the triangle
+        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+
+        // get handle to shape's transformation matrix
+        int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        // Pass the projection and view transformation to the shader
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+        // Draw the triangle
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
+
+        // Disable vertex array
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
+    }
+}

@@ -51,4 +51,8 @@ public class Model {
         this.scrollLeft = scrollLeft;
         this.scrollRight = scrollRight;
     }
+
+    public Chart getChart() {
+        return chart;
+    }
 }

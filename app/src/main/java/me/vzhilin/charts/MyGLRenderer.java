@@ -8,6 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Model model;
+    private ScrollChartComponent scrollChartComponent;
 
     private ScrollComponent mScrollComponent;
 
@@ -20,8 +21,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public MyGLRenderer(Model model) {
         this.model = model;
     }
-
-    long time;
 
     public void onDrawFrame(GL10 unused) {
 
@@ -46,6 +45,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+        scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
     }
 
     @Override
@@ -55,6 +55,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // initialize a triangle
         mScrollComponent = new ScrollComponent(model);
+        scrollChartComponent = new ScrollChartComponent(model);
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

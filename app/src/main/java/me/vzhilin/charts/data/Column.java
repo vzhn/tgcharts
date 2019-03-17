@@ -1,5 +1,6 @@
 package me.vzhilin.charts.data;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class Column {
@@ -13,5 +14,13 @@ public class Column {
 
     public String getLabel() {
         return label;
+    }
+
+    public Iterator<Double> iterator() {
+        return data.iterator();
+    }
+
+    public int size() {
+        return data.size();
     }
 }
