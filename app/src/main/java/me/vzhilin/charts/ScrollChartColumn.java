@@ -1,11 +1,13 @@
 package me.vzhilin.charts;
 
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 import me.vzhilin.charts.data.Column;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Collections;
 import java.util.Iterator;
 
 import static me.vzhilin.charts.ScrollComponent.COORDS_PER_VERTEX;
@@ -16,23 +18,21 @@ final class ScrollChartColumn {
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // Note that the uMVPMatrix factor *must be first* in order
-                    // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
-                    "}";
+            "attribute vec4 vPosition;" +
+            "void main() {" +
+            // the matrix must be included as a modifier of gl_Position
+            // Note that the uMVPMatrix factor *must be first* in order
+            // for the matrix multiplication product to be correct.
+            "  gl_Position = uMVPMatrix * vPosition;" +
+            "}";
 
     private final String fragmentShaderCode =
             "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
+            "uniform vec4 vColor;" +
+            "void main() {" +
+            "  gl_FragColor = vColor;" +
+            "}";
 
-    private final Column xColumn;
-    private final Column yColumn;
 
     private final int vertexStride;
     private final int vertexCount;
@@ -43,9 +43,6 @@ final class ScrollChartColumn {
     private FloatBuffer vertexBuffer;
 
     public ScrollChartColumn(Column xColumn, Column yColumn) {
-        this.xColumn = xColumn;
-        this.yColumn = yColumn;
-
         ByteBuffer bb = ByteBuffer.allocateDirect(xColumn.size() * 3 * 4);
         bb.order(ByteOrder.nativeOrder());
 
@@ -57,9 +54,20 @@ final class ScrollChartColumn {
         Iterator<Double> itX = xColumn.iterator();
         Iterator<Double> itY = yColumn.iterator();
 
+        double maxY = Collections.max(yColumn.values());
+        double minY = Collections.min(yColumn.values());
+        double deltaY = maxY - minY;
+
+        double maxX = Collections.max(xColumn.values());
+        double minX = Collections.min(xColumn.values());
+        double deltaX = maxX - minX;
+
+        double xFactor = 1.0 / deltaX;
+        double yFactor = 1.0 / deltaY;
+
         while (itX.hasNext()) {
-            float x = itX.next().floatValue();
-            float y = itY.next().floatValue();
+            float x = (float) ((itX.next().floatValue() - minX) * xFactor) * 2f - 1f;
+            float y = (float) ((itY.next().floatValue() - minY) * yFactor) * 2f - 1f;
 
             vertexBuffer.put(x);
             vertexBuffer.put(y);
@@ -108,11 +116,24 @@ final class ScrollChartColumn {
         // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
 
+        float[] identity = new float[] {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+        };
+        Matrix.setIdentityM(identity, 0);
+        float scaleFactor = (float) ViewConstants.SCROLL_HEIGHT / height;
+
+        Matrix.scaleM(identity, 0, 1f, scaleFactor, 1f);
+
+        Matrix.translateM(identity, 0, 0, - 1f / scaleFactor + 1f, 0);
+
         // Pass the projection and view transformation to the shader
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
