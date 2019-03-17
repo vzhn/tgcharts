@@ -3,26 +3,27 @@ package me.vzhilin.charts;
 import android.view.MotionEvent;
 
 public class TouchListener {
-    private final MyGLSurfaceView view;
+    private final Model model;
+
     private DragState state = DragState.NONE;
     private float evX;
     private float evY;
 //    private MotionEvent ev;
 
-    public TouchListener(MyGLSurfaceView myGLSurfaceView) {
-        this.view = myGLSurfaceView;
+    public TouchListener(Model model) {
+        this.model = model;
     }
 
     public void onTouchEvent(MotionEvent e) {
-        Scroll scroll = view.getScroll();
+//        Scroll scroll = view.getScroll();
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
-            int width = view.getWidth();
+            int width = model.getWidth();
 
-            double xleft = scroll.getLeft() * width;
-            double xright = scroll.getRight() * width;
+            double xleft = model.getScrollLeft() * width;
+            double xright = model.getScrollRight() * width;
 
-            int ypos = view.getHeight() - ViewConstants.SCROLL_HEIGHT;
-            if (!(e.getY() < ypos) && !(e.getY() > view.getHeight())) {
+            int ypos = model.getHeight() - ViewConstants.SCROLL_HEIGHT;
+            if (!(e.getY() < ypos) && !(e.getY() > model.getHeight())) {
                 if (Math.abs(e.getX() - xleft) < 10) {
                     state = DragState.LEFT;
                 } else
@@ -38,19 +39,19 @@ public class TouchListener {
             state = DragState.NONE;
         } else
         if (e.getAction() == MotionEvent.ACTION_MOVE) {
-            int width = view.getWidth();
+            int width = model.getWidth();
             float dx = e.getX() - evX;
 
             switch (state) {
                 case LEFT:
-                    scroll.setLeft(scroll.getLeft() + (double) dx / width);
+                    model.setScrollLeft(model.getScrollLeft() + (double) dx / width);
                     break;
                 case RIGHT:
-                    scroll.setRight(scroll.getRight() + (double) dx / width);
+                    model.setScrollRight(model.getScrollRight() + (double) dx / width);
                     break;
                 case BOTH:
-                    scroll.setLeftRight(scroll.getLeft() + (double) dx / width,
-                            scroll.getRight() + (double) dx / width);
+                    model.setScroll(model.getScrollLeft() + (double) dx / width,
+                            model.getScrollRight() + (double) dx / width);
                     break;
                 case NONE:
                     break;

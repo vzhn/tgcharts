@@ -7,7 +7,7 @@ import android.opengl.Matrix;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
-    private final Scroll scroll;
+    private final Model model;
 
     private ScrollComponent mScrollComponent;
 
@@ -17,11 +17,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
 
-    private int width;
-    private int height;
-
-    public MyGLRenderer(Scroll scroll) {
-        this.scroll = scroll;
+    public MyGLRenderer(Model model) {
+        this.model = model;
     }
 
     long time;
@@ -48,7 +45,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
-        mScrollComponent.draw(width, height, mMVPMatrix);
+        mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
     }
 
     @Override
@@ -57,15 +54,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // initialize a triangle
-        mScrollComponent = new ScrollComponent(scroll);
+        mScrollComponent = new ScrollComponent(model);
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
         Matrix.orthoM(mProjectionMatrix, 0, 0, +width, height, 0, 3, 7);
 
-        this.width = width;
-        this.height = height;
+        model.setWidth(width);
+        model.setHeight(height);
     }
 
     public static int loadShader(int type, String shaderCode){

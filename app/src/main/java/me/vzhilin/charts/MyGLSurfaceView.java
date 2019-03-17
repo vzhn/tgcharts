@@ -16,26 +16,24 @@ class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer renderer;
     private final TouchListener touchListener;
-    private final Scroll scroll;
+//    private final Scroll scroll;
 
     public MyGLSurfaceView(Context context, AttributeSet attrs){
         super(context, attrs);
 
+        Data data = readResource(context.getResources());
+        Model model = new Model(data.getChart(0));
+        model.setScrollLeft(0.5);
+        model.setScrollRight(0.6);
+
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(2);
-
-        scroll = new Scroll();
-        scroll.setLeft(0.5);
-        scroll.setRight(0.6);
-        renderer = new MyGLRenderer(scroll);
+        renderer = new MyGLRenderer(model);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);
 
-        touchListener = new TouchListener(this);
-        Data data = readResource(context.getResources());
-
-        System.err.println(data);
+        touchListener = new TouchListener(model);
     }
 
     private Data readResource(Resources rs) {
@@ -54,9 +52,5 @@ class MyGLSurfaceView extends GLSurfaceView {
     public boolean onTouchEvent(MotionEvent event) {
         touchListener.onTouchEvent(event);
         return true;
-    }
-
-    public Scroll getScroll() {
-        return scroll;
     }
 }

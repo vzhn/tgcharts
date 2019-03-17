@@ -8,4 +8,8 @@ public class Data {
     public Data(List<Chart> charts) {
         this.charts = charts;
     }
+
+    public Chart getChart(int idx) {
+        return charts.get(idx);
+    }
 }

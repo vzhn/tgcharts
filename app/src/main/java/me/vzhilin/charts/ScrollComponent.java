@@ -7,8 +7,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class ScrollComponent {
-    private final Scroll scroll;
-
+    private final Model model;
 
     private final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
@@ -57,8 +56,8 @@ public class ScrollComponent {
     float color[] = { 0, 0, 0, 1.0f };
 
 
-    public ScrollComponent(Scroll scroll) {
-        this.scroll = scroll;
+    public ScrollComponent(Model model) {
+        this.model = model;
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -109,8 +108,8 @@ public class ScrollComponent {
         triangleCoords[3] = width;
         triangleCoords[4] = height - ViewConstants.SCROLL_HEIGHT;
 
-        float leftX = (float) (scroll.getLeft() * width);
-        float rightX = (float) (scroll.getRight() * width);
+        float leftX = (float) (model.getScrollLeft() * width);
+        float rightX = (float) (model.getScrollRight() * width);
         triangleCoords[6] = leftX;
         triangleCoords[7] = height - ViewConstants.SCROLL_HEIGHT;
 
