@@ -1,6 +1,11 @@
 package me.vzhilin.charts;
 
 import me.vzhilin.charts.data.Chart;
+import me.vzhilin.charts.data.Column;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Model {
     private final Chart chart;
@@ -10,6 +15,8 @@ public class Model {
 
     private int width;
     private int height;
+
+    private List<Animation> animationList = new ArrayList();
 
     public Model(Chart chart) {
         this.chart = chart;
@@ -54,5 +61,59 @@ public class Model {
 
     public Chart getChart() {
         return chart;
+    }
+
+    public void setVisible(String label, final boolean visible) {
+        final Column yColumn = chart.getYColumn(label);
+        if (yColumn.isVisible() != visible) {
+            yColumn.setVisible(visible);
+
+            if (visible) {
+                animationList.add(new Animation(0f, 1.0f, 20) {
+                    @Override
+                    public boolean tick() {
+                        boolean tick = super.tick();
+                        yColumn.incOpacity(getDelta());
+                        return tick;
+                    }
+                });
+            } else {
+                animationList.add(new Animation(1.0f, 0f, 20) {
+                    @Override
+                    public boolean tick() {
+                        boolean tick = super.tick();
+                        yColumn.incOpacity(getDelta());
+                        return tick;
+                    }
+                });
+            }
+        }
+
+        refreshYScaleFactors();
+    }
+
+    private void refreshYScaleFactors() {
+        double max = 0;
+        for (Column yColumn: chart.getYColumns()) {
+            if (yColumn.isVisible()) {
+                max = Math.max(max, yColumn.getMaxValue());
+            }
+        }
+
+        for (Column yColumn: chart.getYColumns()) {
+            if (yColumn.isVisible()) {
+                yColumn.setScrollYScaleFactor((float) (yColumn.getMaxValue() / max));
+            }
+        }
+    }
+
+    public void tick() {
+        Iterator<Animation> it = animationList.iterator();
+        while (it.hasNext()) {
+            Animation v = it.next();
+            if (!v.tick()) {
+                it.remove();
+            }
+        }
     }
 }

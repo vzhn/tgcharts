@@ -44,4 +44,8 @@ public class Chart {
     public int getColor(String label) {
         return Color.parseColor(colors.get(label));
     }
+
+    public Column getYColumn(String label) {
+        return columns.get(label);
+    }
 }

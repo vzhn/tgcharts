@@ -100,9 +100,9 @@ final class ScrollChartColumn {
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
-        if (!yColumn.isVisible()) {
-            return;
-        }
+//        if (!yColumn.isVisible()) {
+//            return;
+//        }
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
@@ -120,6 +120,8 @@ final class ScrollChartColumn {
         // get handle to fragment shader's vColor member
         int mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
+        color[3] = yColumn.getOpacity();
+
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
@@ -133,7 +135,7 @@ final class ScrollChartColumn {
             0.0f, 0.0f, 0.0f, 1.0f,
         };
         Matrix.setIdentityM(identity, 0);
-        float scaleFactor = (float) ViewConstants.SCROLL_HEIGHT / height;
+        float scaleFactor = (float) ViewConstants.SCROLL_HEIGHT / height * yColumn.getScrollYScaleFactor();
 
         Matrix.scaleM(identity, 0, 1f, scaleFactor, 1f);
 

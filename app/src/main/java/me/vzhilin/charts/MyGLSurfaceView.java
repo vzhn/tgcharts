@@ -51,7 +51,7 @@ class MyGLSurfaceView extends GLSurfaceView {
         Chart chart = model.getChart();
         for (final Column yColumn: chart.getYColumns()) {
             CheckBox checkBox = new CheckBox(getContext());
-            String label = yColumn.getLabel();
+            final String label = yColumn.getLabel();
             checkBox.setText(label);
             checkBox.setTextColor(chart.getColor(label));
             mailLayout.addView(checkBox);
@@ -59,7 +59,8 @@ class MyGLSurfaceView extends GLSurfaceView {
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    yColumn.setVisible(isChecked);
+                    model.setVisible(label, isChecked);
+
                 }
             });
         }
