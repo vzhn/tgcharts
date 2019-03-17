@@ -16,13 +16,13 @@ class MyGLSurfaceView extends GLSurfaceView {
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(2);
 
-        renderer = new MyGLRenderer();
+        scroll = new Scroll();
+        renderer = new MyGLRenderer(scroll);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);
 
         touchListener = new TouchListener(this);
-        scroll = new Scroll();
     }
 
     @Override

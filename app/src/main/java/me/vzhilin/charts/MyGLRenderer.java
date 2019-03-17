@@ -7,6 +7,9 @@ import android.opengl.Matrix;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
+    private final Scroll scroll;
+
+    private ScrollComponent mScrollComponent;
     private Triangle mTriangle;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -15,13 +18,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
 
+    public MyGLRenderer(Scroll scroll) {
+        this.scroll = scroll;
+    }
+
     public void onDrawFrame(GL10 unused) {
 
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -6, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, +6, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // Create a rotation and translation for the cube
         Matrix.setIdentityM(mRotationMatrix, 0);
@@ -38,7 +45,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
         // Draw shape
-        mTriangle.draw(mMVPMatrix);
+//        mTriangle.draw(mMVPMatrix);
+        mScrollComponent.draw(mMVPMatrix);
     }
 
     @Override
@@ -47,7 +55,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // initialize a triangle
-        mTriangle = new Triangle();
+        mTriangle = new Triangle(scroll);
+        mScrollComponent = new ScrollComponent(scroll);
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -57,7 +66,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+//        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+
+        Matrix.orthoM(mProjectionMatrix, 0, 0, +width, height, 0, 3, 7);
     }
 
     public static int loadShader(int type, String shaderCode){

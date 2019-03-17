@@ -6,21 +6,21 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class Triangle {
+public class ScrollComponent {
+    private final Scroll scroll;
+
 
     private final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "uniform mat4 uMVPMatrix;" +
-            "attribute vec4 vPosition;" +
-            "void main() {" +
-            // the matrix must be included as a modifier of gl_Position
-            // Note that the uMVPMatrix factor *must be first* in order
-            // for the matrix multiplication product to be correct.
-            "  gl_Position = uMVPMatrix * vPosition;" +
-            "}";
-
-    private final Scroll scroll;
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "}";
 
     // Use to access and set the view transformation
     private int mMVPMatrixHandle;
@@ -45,15 +45,16 @@ public class Triangle {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float triangleCoords[] = {   // in counterclockwise order:
-             0.0f, 0.0f, 0.0f, // top
-             0.0f, 1.0f, 0.0f, // bottom left
-             1.0f, 1.0f, 0.0f  // bottom right
+            0.0f, 0.0f, 0.0f, // top
+            0.0f, 150.0f, 0.0f, // bottom left
+            150.0f, 150.0f, 0.0f  // bottom right
     };
 
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
 
-    public Triangle(Scroll scroll) {
+
+    public ScrollComponent(Scroll scroll) {
         this.scroll = scroll;
 
         // initialize vertex byte buffer for shape coordinates
