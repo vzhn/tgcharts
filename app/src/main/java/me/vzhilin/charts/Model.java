@@ -2,6 +2,9 @@ package me.vzhilin.charts;
 
 import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
+import me.vzhilin.charts.transitions.LinearTransition;
+import me.vzhilin.charts.transitions.SinTransition;
+import me.vzhilin.charts.transitions.Transition;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,7 +19,9 @@ public class Model {
     private int width;
     private int height;
 
-    private List<Animation> animationList = new ArrayList();
+    private List<Transition> animationList = new ArrayList();
+    private double maxFactor;
+    private double smoothMaxFactor = -1;
 
     public Model(Chart chart) {
         this.chart = chart;
@@ -48,15 +53,52 @@ public class Model {
 
     public void setScrollLeft(double scrollLeft) {
         this.scrollLeft = scrollLeft;
+
+        refreshMaxFactor();
     }
 
     public void setScrollRight(double scrollRight) {
         this.scrollRight = scrollRight;
+
+        refreshMaxFactor();
     }
 
     public void setScroll(double scrollLeft, double scrollRight) {
-        this.scrollLeft = scrollLeft;
-        this.scrollRight = scrollRight;
+        if (scrollLeft >= 0 && scrollRight <= 1 && scrollLeft < scrollRight) {
+            this.scrollLeft = scrollLeft;
+            this.scrollRight = scrollRight;
+
+            refreshMaxFactor();
+        }
+    }
+
+    private void refreshMaxFactor() {
+        double max = 0;
+        for (Column column: chart.getYColumns()) {
+            if (column.isVisible()) {
+                max = Math.max(max, column.getMaxValue(scrollLeft, scrollRight));
+            }
+        }
+
+        max = Math.ceil(max / 50) * 50;
+
+        if (max != maxFactor) {
+            if (smoothMaxFactor == -1) {
+                smoothMaxFactor = maxFactor;
+            }
+
+            animationList.add(new SinTransition((float) maxFactor, (float) max, 20) {
+                @Override
+                public boolean tick() {
+                    boolean b = super.tick();
+                    smoothMaxFactor += getDelta();
+                    return b;
+                }
+            });
+
+            maxFactor = max;
+            System.err.println(maxFactor);
+        }
     }
 
     public Chart getChart() {
@@ -69,7 +111,7 @@ public class Model {
             yColumn.setVisible(visible);
 
             if (visible) {
-                animationList.add(new Animation(0f, 1.0f, 20) {
+                animationList.add(new LinearTransition(0f, 1.0f, 20) {
                     @Override
                     public boolean tick() {
                         boolean tick = super.tick();
@@ -78,7 +120,7 @@ public class Model {
                     }
                 });
             } else {
-                animationList.add(new Animation(1.0f, 0f, 20) {
+                animationList.add(new LinearTransition(1.0f, 0f, 20) {
                     @Override
                     public boolean tick() {
                         boolean tick = super.tick();
@@ -87,6 +129,8 @@ public class Model {
                     }
                 });
             }
+
+            refreshMaxFactor();
         }
 
         refreshScrollScaleFactors();
@@ -107,7 +151,7 @@ public class Model {
 
                 yColumn.setScrollYScaleFactor(newScaleFactor);
 
-                animationList.add(new Animation(prevScaleFactor, newScaleFactor, 20) {
+                animationList.add(new LinearTransition(prevScaleFactor, newScaleFactor, 20) {
                     @Override
                     public boolean tick() {
                         boolean tick = super.tick();
@@ -120,21 +164,20 @@ public class Model {
     }
 
     public void tick() {
-        Iterator<Animation> it = animationList.iterator();
+        Iterator<Transition> it = animationList.iterator();
         while (it.hasNext()) {
-            Animation v = it.next();
+            Transition v = it.next();
             if (!v.tick()) {
                 it.remove();
             }
         }
     }
 
-    public double getMaxValue(double scrollLeft, double scrollRight) {
-        double max = 0;
-        for (Column column: chart.getYColumns()) {
-            max = Math.max(max, column.getMaxValue(scrollLeft, scrollRight));
-        }
+    public double getSmoothMaxFactor() {
+        return smoothMaxFactor;
+    }
 
-        return max;
+    public double getMaxValue(double scrollLeft, double scrollRight) {
+        return maxFactor;
     }
 }

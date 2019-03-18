@@ -1,5 +1,6 @@
 package me.vzhilin.charts.graphics;
 
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
@@ -40,6 +41,10 @@ public class ChartComponent {
     public ChartComponent(Model model, Column xColumn, Column yColumn, int c) {
         this.model = model;
         this.yColumn = yColumn;
+
+        color[0] = Color.red(c) / 255f;
+        color[1] = Color.green(c) / 255f;
+        color[2] = Color.blue(c) / 255f;
 
         int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -93,28 +98,23 @@ public class ChartComponent {
 
         float scrollFactor = (float) ViewConstants.SCROLL_HEIGHT / height;
 
-        double absoluteMax = model.getMaxValue(model.getScrollLeft(), model.getScrollRight());
+        double absoluteMax = model.getSmoothMaxFactor();
         double maxFactor = yColumn.getMaxValue() / absoluteMax;
 
-        float yScaleFactor = 2f;//1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height;
+        float yScaleFactor = 2f;
         yScaleFactor *= (1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height);
         yScaleFactor *= maxFactor;
 
         float xScaleFactor = 1f / (float) (model.getScrollRight() - model.getScrollLeft());
-
-//        Matrix.translateM(identity, 0, 0, -1f, 0);
-
         Matrix.scaleM(identity, 0, xScaleFactor, yScaleFactor, 1f);
         Matrix.translateM(identity, 0, - (float) model.getScrollLeft() + (float) (1 - model.getScrollRight()), 0, 0);
-
         Matrix.translateM(identity, 0, 0, -1/yScaleFactor, 0);
-
         Matrix.translateM(identity, 0, 0, 2 * scrollFactor / yScaleFactor, 0);
 
         // Pass the projection and view transformation to the shader
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
-        GLES20.glLineWidth(4f);
+        GLES20.glLineWidth(6f);
         GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, yColumn.getVertexCount());
         GLES20.glLineWidth(1f);
 
