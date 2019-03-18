@@ -7,6 +7,8 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class ScrollComponent {
+    private static final int FRAME_WIDTH_2 = 20;
+    private static final int FRAME_WIDTH_1 = 5;
     private final Model model;
 
     private final String vertexShaderCode =
@@ -43,14 +45,16 @@ public class ScrollComponent {
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = {   // in counterclockwise order:
-        0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f,
-    };
+//    static float triangleCoords[] = {   // in counterclockwise order:
+//        0.0f, 0.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f,
+//        0.0f, 0.0f, 0.0f,
+//    };
+
+    static float triangleCoords[] = new float[3 * 24];
 
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
@@ -102,25 +106,86 @@ public class ScrollComponent {
         vertexBuffer.clear();
         // add the coordinates to the FloatBuffer
 
-        triangleCoords[0] = 0f;
-        triangleCoords[1] = height - ViewConstants.SCROLL_HEIGHT;
-
-        triangleCoords[3] = width;
-        triangleCoords[4] = height - ViewConstants.SCROLL_HEIGHT;
-
         float leftX = (float) (model.getScrollLeft() * width);
         float rightX = (float) (model.getScrollRight() * width);
-        triangleCoords[6] = leftX;
-        triangleCoords[7] = height - ViewConstants.SCROLL_HEIGHT;
+        int topY = height - ViewConstants.SCROLL_HEIGHT;
+        int bottomY = height;
 
-        triangleCoords[9] = leftX;
-        triangleCoords[10] = height;
+        //-------------------- TOP
+        triangleCoords[0] = leftX - FRAME_WIDTH_2;
+        triangleCoords[1] = topY - FRAME_WIDTH_1;
 
-        triangleCoords[12] = rightX;
-        triangleCoords[13] = height - ViewConstants.SCROLL_HEIGHT;
+        triangleCoords[3] = leftX - FRAME_WIDTH_2;
+        triangleCoords[4] = topY;
 
-        triangleCoords[15] = rightX;
-        triangleCoords[16] = height;
+        triangleCoords[6] = rightX + FRAME_WIDTH_2;
+        triangleCoords[7] = topY;
+
+        triangleCoords[9] = rightX + FRAME_WIDTH_2;
+        triangleCoords[10] = topY;
+
+        triangleCoords[12] = rightX + FRAME_WIDTH_2;
+        triangleCoords[13] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[15] = leftX - FRAME_WIDTH_2;
+        triangleCoords[16] = topY - FRAME_WIDTH_1;
+
+//        //------------------- RIGHT
+        triangleCoords[18] = rightX;
+        triangleCoords[19] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[21] = rightX + FRAME_WIDTH_2;
+        triangleCoords[22] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[24] = rightX;
+        triangleCoords[25] = bottomY - FRAME_WIDTH_1;
+
+        triangleCoords[27] = rightX + FRAME_WIDTH_2;
+        triangleCoords[28] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[30] = rightX + FRAME_WIDTH_2;
+        triangleCoords[31] = bottomY - FRAME_WIDTH_1;
+
+        triangleCoords[33] = rightX;
+        triangleCoords[34] = bottomY - FRAME_WIDTH_1;
+//
+//        // ---------------------- BOTTOM
+        triangleCoords[36] = leftX - FRAME_WIDTH_2;
+        triangleCoords[37] = bottomY - FRAME_WIDTH_1;
+
+        triangleCoords[39] = leftX - FRAME_WIDTH_2;;
+        triangleCoords[40] = bottomY;
+
+        triangleCoords[42] = rightX + FRAME_WIDTH_2;
+        triangleCoords[43] = bottomY;
+
+        triangleCoords[45] = rightX + FRAME_WIDTH_2;
+        triangleCoords[46] = bottomY;
+
+        triangleCoords[48] = rightX + FRAME_WIDTH_2;
+        triangleCoords[49] = bottomY - FRAME_WIDTH_1;
+
+        triangleCoords[51] = leftX;
+        triangleCoords[52] = bottomY - FRAME_WIDTH_1;
+//
+//        //-------------------------- RIGHT
+        triangleCoords[54] = leftX - FRAME_WIDTH_2;
+        triangleCoords[55] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[57] = leftX;
+        triangleCoords[58] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[60] = leftX - FRAME_WIDTH_2;
+        triangleCoords[61] = bottomY - FRAME_WIDTH_1;
+
+        triangleCoords[63] = leftX;
+        triangleCoords[64] = topY - FRAME_WIDTH_1;
+
+        triangleCoords[66] = leftX;
+        triangleCoords[67] = bottomY - FRAME_WIDTH_1;
+
+        triangleCoords[69] = leftX - FRAME_WIDTH_2;
+        triangleCoords[70] = bottomY - FRAME_WIDTH_1;
 
         vertexBuffer.put(triangleCoords);
         // set the buffer to read the first coordinate
@@ -135,7 +200,7 @@ public class ScrollComponent {
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES20.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_FRAME_COLOR, 0);
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -144,7 +209,7 @@ public class ScrollComponent {
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);

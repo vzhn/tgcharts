@@ -135,7 +135,7 @@ final class ScrollChartColumn {
             0.0f, 0.0f, 0.0f, 1.0f,
         };
         Matrix.setIdentityM(identity, 0);
-        float scaleFactor = (float) ViewConstants.SCROLL_HEIGHT / height * yColumn.getScrollYScaleFactor();
+        float scaleFactor = (float) ViewConstants.SCROLL_HEIGHT / height * yColumn.getAnimatedScrollYScaleFactor();
 
         Matrix.scaleM(identity, 0, 1f, scaleFactor, 1f);
 

@@ -100,9 +100,21 @@ public class Model {
             }
         }
 
-        for (Column yColumn: chart.getYColumns()) {
+        for (final Column yColumn: chart.getYColumns()) {
             if (yColumn.isVisible()) {
-                yColumn.setScrollYScaleFactor((float) (yColumn.getMaxValue() / max));
+                float prevScaleFactor = yColumn.getScrollYScaleFactor();
+                float newScaleFactor = (float) (yColumn.getMaxValue() / max);
+
+                yColumn.setScrollYScaleFactor(newScaleFactor);
+
+                animationList.add(new Animation(prevScaleFactor, newScaleFactor, 20) {
+                    @Override
+                    public boolean tick() {
+                        boolean tick = super.tick();
+                        yColumn.incAnimatedScrollScaleFactor(getDelta());
+                        return tick;
+                    }
+                });
             }
         }
     }

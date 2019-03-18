@@ -13,7 +13,9 @@ public class Column {
 
     private float opacity = 0f;
     private boolean visible;
+
     private float scrollYScaleFactor = 1.0f;
+    private float animatedScrollYScaleFactor = 1.0f;
 
     public Column(String label, List<Double> data) {
         this.label = label;
@@ -69,5 +71,17 @@ public class Column {
 
     public void setScrollYScaleFactor(float factor) {
         this.scrollYScaleFactor = factor;
+    }
+
+    public float getAnimatedScrollYScaleFactor() {
+        return animatedScrollYScaleFactor;
+    }
+
+    public void setAnimatedScrollYScaleFactor(float animatedScrollYScaleFactor) {
+        this.animatedScrollYScaleFactor = animatedScrollYScaleFactor;
+    }
+
+    public void incAnimatedScrollScaleFactor(float delta) {
+        this.animatedScrollYScaleFactor += delta;
     }
 }
