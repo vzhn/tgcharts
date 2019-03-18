@@ -8,8 +8,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Model model;
-    private ScrollChartComponent scrollChartComponent;
 
+    private ScrollChartComponent scrollChartComponent;
+    private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -46,6 +47,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+        scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
         model.tick();
     }
@@ -60,6 +62,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // initialize a triangle
         mScrollComponent = new ScrollComponent(model);
         scrollChartComponent = new ScrollChartComponent(model);
+        scrollRibbonComponent = new ScrollRibbonComponent(model);
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
