@@ -106,4 +106,16 @@ public class Column {
     public int getVertexCount() {
         return vertexCount;
     }
+
+    public double getMaxValue(double left, double right) {
+        int ix1 = (int) Math.floor(left * (data.size() - 1));
+        int ix2 = (int) Math.ceil(right * (data.size() - 1));
+
+        double v = 0;
+        for (int i = ix1; i < ix2; i++) {
+            v = Math.max(v, data.get(i));
+        }
+
+        return v;
+    }
 }

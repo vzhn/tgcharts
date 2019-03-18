@@ -91,14 +91,25 @@ public class ChartComponent {
         };
         Matrix.setIdentityM(identity, 0);
 
-        float yScaleFactor = 1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height;
-//        yScaleFactor *= 0.25;
+        float scrollFactor = (float) ViewConstants.SCROLL_HEIGHT / height;
+
+        double absoluteMax = model.getMaxValue(model.getScrollLeft(), model.getScrollRight());
+        double maxFactor = yColumn.getMaxValue() / absoluteMax;
+
+        float yScaleFactor = 2f;//1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height;
+        yScaleFactor *= (1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height);
+        yScaleFactor *= maxFactor;
+
         float xScaleFactor = 1f / (float) (model.getScrollRight() - model.getScrollLeft());
+
+//        Matrix.translateM(identity, 0, 0, -1f, 0);
 
         Matrix.scaleM(identity, 0, xScaleFactor, yScaleFactor, 1f);
         Matrix.translateM(identity, 0, - (float) model.getScrollLeft() + (float) (1 - model.getScrollRight()), 0, 0);
 
-        Matrix.translateM(identity, 0, 0, (float) ViewConstants.SCROLL_HEIGHT / height / yScaleFactor, 0);
+        Matrix.translateM(identity, 0, 0, -1/yScaleFactor, 0);
+
+        Matrix.translateM(identity, 0, 0, 2 * scrollFactor / yScaleFactor, 0);
 
         // Pass the projection and view transformation to the shader
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);

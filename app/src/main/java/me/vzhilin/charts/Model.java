@@ -128,4 +128,13 @@ public class Model {
             }
         }
     }
+
+    public double getMaxValue(double scrollLeft, double scrollRight) {
+        double max = 0;
+        for (Column column: chart.getYColumns()) {
+            max = Math.max(max, column.getMaxValue(scrollLeft, scrollRight));
+        }
+
+        return max;
+    }
 }
