@@ -3,6 +3,7 @@ package me.vzhilin.charts;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import me.vzhilin.charts.graphics.GridComponent;
 import me.vzhilin.charts.graphics.ScrollChartComponent;
 import me.vzhilin.charts.graphics.ScrollComponent;
 import me.vzhilin.charts.graphics.ScrollRibbonComponent;
@@ -12,6 +13,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Model model;
 
+    private GridComponent mGridComponent;
     private ScrollChartComponent scrollChartComponent;
     private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
@@ -21,6 +23,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
+    ;
 
     public MyGLRenderer(Model model) {
         this.model = model;
@@ -48,6 +51,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
+        mGridComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
@@ -63,6 +67,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         // initialize a triangle
+        mGridComponent = new GridComponent(model);
         mScrollComponent = new ScrollComponent(model);
         scrollChartComponent = new ScrollChartComponent(model);
         scrollRibbonComponent = new ScrollRibbonComponent(model);

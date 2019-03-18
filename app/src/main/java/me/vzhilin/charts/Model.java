@@ -97,7 +97,6 @@ public class Model {
             });
 
             maxFactor = max;
-            System.err.println(maxFactor);
         }
     }
 
@@ -177,7 +176,7 @@ public class Model {
         return smoothMaxFactor;
     }
 
-    public double getMaxValue(double scrollLeft, double scrollRight) {
+    public double getMaxValue() {
         return maxFactor;
     }
 }
