@@ -1,5 +1,6 @@
-package me.vzhilin.charts;
+package me.vzhilin.charts.graphics;
 
+import me.vzhilin.charts.Model;
 import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
 

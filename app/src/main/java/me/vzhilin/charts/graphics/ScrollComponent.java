@@ -1,17 +1,15 @@
-package me.vzhilin.charts;
+package me.vzhilin.charts.graphics;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
+import me.vzhilin.charts.Model;
+import me.vzhilin.charts.MyGLRenderer;
+import me.vzhilin.charts.ViewConstants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import static me.vzhilin.charts.ScrollComponent.COORDS_PER_VERTEX;
-
-public class ScrollRibbonComponent {
-    private static final int FRAME_WIDTH_2 = 20;
-    private static final int FRAME_WIDTH_1 = 5;
+public class ScrollComponent {
     private final Model model;
 
     private final String vertexShaderCode =
@@ -38,6 +36,9 @@ public class ScrollRibbonComponent {
 
     private final int mProgram;
 
+    private int mPositionHandle;
+    private int mColorHandle;
+
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
@@ -46,12 +47,13 @@ public class ScrollRibbonComponent {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
 
-    static float triangleCoords[] = new float[3 * 12];
+    static float triangleCoords[] = new float[3 * 24];
 
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
 
-    public ScrollRibbonComponent(Model model) {
+
+    public ScrollComponent(Model model) {
         this.model = model;
 
         // initialize vertex byte buffer for shape coordinates
@@ -84,64 +86,103 @@ public class ScrollRibbonComponent {
         GLES20.glLinkProgram(mProgram);
     }
 
-    public void draw(int width, int height, float[] mMVPMatrix) {
+    public void draw(int width, int height, float[] mvpMatrix) {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
         // get handle to vertex shader's vPosition member
-        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         vertexBuffer.clear();
+        // add the coordinates to the FloatBuffer
 
         float leftX = (float) (model.getScrollLeft() * width);
         float rightX = (float) (model.getScrollRight() * width);
         int topY = height - ViewConstants.SCROLL_HEIGHT;
         int bottomY = height;
 
-        triangleCoords[0] = 0;
+        //-------------------- TOP
+        triangleCoords[0] = leftX - ViewConstants.FRAME_WIDTH_2;
         triangleCoords[1] = topY - ViewConstants.FRAME_WIDTH_1;
 
         triangleCoords[3] = leftX - ViewConstants.FRAME_WIDTH_2;
-        triangleCoords[4] = topY - ViewConstants.FRAME_WIDTH_1;
+        triangleCoords[4] = topY;
 
-        triangleCoords[6] = leftX - ViewConstants.FRAME_WIDTH_2;
-        triangleCoords[7] = bottomY;
+        triangleCoords[6] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[7] = topY;
 
-        triangleCoords[9] = 0;
-        triangleCoords[10] = topY - ViewConstants.FRAME_WIDTH_1;
+        triangleCoords[9] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[10] = topY;
 
-        triangleCoords[12] = leftX - ViewConstants.FRAME_WIDTH_2;
-        triangleCoords[13] = bottomY;
+        triangleCoords[12] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[13] = topY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[15] = 0;
-        triangleCoords[16] = bottomY;
+        triangleCoords[15] = leftX - ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[16] = topY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[18] = rightX + FRAME_WIDTH_2;
-        triangleCoords[19] = topY - FRAME_WIDTH_1;
+//        //------------------- RIGHT
+        triangleCoords[18] = rightX;
+        triangleCoords[19] = topY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[21] = width;
-        triangleCoords[22] = topY - FRAME_WIDTH_1;
+        triangleCoords[21] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[22] = topY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[24] = width;
-        triangleCoords[25] = bottomY;
+        triangleCoords[24] = rightX;
+        triangleCoords[25] = bottomY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[27] = rightX + FRAME_WIDTH_2;
-        triangleCoords[28] = topY - FRAME_WIDTH_1;
+        triangleCoords[27] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[28] = topY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[30] = width;
-        triangleCoords[31] = bottomY;
+        triangleCoords[30] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[31] = bottomY - ViewConstants.FRAME_WIDTH_1;
 
-        triangleCoords[33] = rightX + FRAME_WIDTH_2;
-        triangleCoords[34] = bottomY;
+        triangleCoords[33] = rightX;
+        triangleCoords[34] = bottomY - ViewConstants.FRAME_WIDTH_1;
+//
+//        // ---------------------- BOTTOM
+        triangleCoords[36] = leftX - ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[37] = bottomY - ViewConstants.FRAME_WIDTH_1;
 
+        triangleCoords[39] = leftX - ViewConstants.FRAME_WIDTH_2;;
+        triangleCoords[40] = bottomY;
+
+        triangleCoords[42] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[43] = bottomY;
+
+        triangleCoords[45] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[46] = bottomY;
+
+        triangleCoords[48] = rightX + ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[49] = bottomY - ViewConstants.FRAME_WIDTH_1;
+
+        triangleCoords[51] = leftX;
+        triangleCoords[52] = bottomY - ViewConstants.FRAME_WIDTH_1;
+
+        //-------------------------- RIGHT
+        triangleCoords[54] = leftX - ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[55] = topY - ViewConstants.FRAME_WIDTH_1;
+
+        triangleCoords[57] = leftX;
+        triangleCoords[58] = topY - ViewConstants.FRAME_WIDTH_1;
+
+        triangleCoords[60] = leftX - ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[61] = bottomY - ViewConstants.FRAME_WIDTH_1;
+
+        triangleCoords[63] = leftX;
+        triangleCoords[64] = topY - ViewConstants.FRAME_WIDTH_1;
+
+        triangleCoords[66] = leftX;
+        triangleCoords[67] = bottomY - ViewConstants.FRAME_WIDTH_1;
+
+        triangleCoords[69] = leftX - ViewConstants.FRAME_WIDTH_2;
+        triangleCoords[70] = bottomY - ViewConstants.FRAME_WIDTH_1;
 
         vertexBuffer.put(triangleCoords);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
-
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
@@ -149,16 +190,18 @@ public class ScrollRibbonComponent {
                 vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
-        int mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
+        GLES20.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_FRAME_COLOR, 0);
 
         // get handle to shape's transformation matrix
-        int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
 
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+        // Pass the projection and view transformation to the shader
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
+        // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 
         // Disable vertex array

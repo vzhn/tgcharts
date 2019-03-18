@@ -3,6 +3,9 @@ package me.vzhilin.charts;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import me.vzhilin.charts.graphics.ScrollChartComponent;
+import me.vzhilin.charts.graphics.ScrollComponent;
+import me.vzhilin.charts.graphics.ScrollRibbonComponent;
 
 import javax.microedition.khronos.opengles.GL10;
 

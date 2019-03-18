@@ -1,8 +1,10 @@
-package me.vzhilin.charts;
+package me.vzhilin.charts.graphics;
 
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import me.vzhilin.charts.MyGLRenderer;
+import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
 import java.nio.ByteBuffer;
@@ -11,7 +13,7 @@ import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.Iterator;
 
-import static me.vzhilin.charts.ScrollComponent.COORDS_PER_VERTEX;
+import static me.vzhilin.charts.graphics.ScrollComponent.COORDS_PER_VERTEX;
 
 final class ScrollChartColumn {
     private final int mProgram;
