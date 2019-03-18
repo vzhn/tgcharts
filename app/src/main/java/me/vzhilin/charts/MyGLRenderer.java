@@ -9,11 +9,13 @@ import me.vzhilin.charts.graphics.ScrollComponent;
 import me.vzhilin.charts.graphics.ScrollRibbonComponent;
 
 import javax.microedition.khronos.opengles.GL10;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Model model;
 
-    private GridComponent mGridComponent;
+//    private GridComponent mGridComponent;
     private ScrollChartComponent scrollChartComponent;
     private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
@@ -23,7 +25,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
-    ;
 
     public MyGLRenderer(Model model) {
         this.model = model;
@@ -51,7 +52,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
-        mGridComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+        for (GridComponent gc: model.getGridComponents()) {
+            gc.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            gc.tick();
+        }
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
@@ -67,10 +71,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         // initialize a triangle
-        mGridComponent = new GridComponent(model);
         mScrollComponent = new ScrollComponent(model);
         scrollChartComponent = new ScrollChartComponent(model);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
+
+        model.getGridComponents().add(new GridComponent(model));
+        model.getGridComponents().add(new GridComponent(model));
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

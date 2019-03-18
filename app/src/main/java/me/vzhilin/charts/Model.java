@@ -2,13 +2,12 @@ package me.vzhilin.charts;
 
 import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
+import me.vzhilin.charts.graphics.GridComponent;
 import me.vzhilin.charts.transitions.LinearTransition;
 import me.vzhilin.charts.transitions.SinTransition;
 import me.vzhilin.charts.transitions.Transition;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Model {
     private final Chart chart;
@@ -20,6 +19,7 @@ public class Model {
     private int height;
 
     private List<Transition> animationList = new ArrayList();
+    private List<GridComponent> gridComponents = new ArrayList<>();
     private double maxFactor;
     private double smoothMaxFactor = -1;
 
@@ -96,6 +96,12 @@ public class Model {
                 }
             });
 
+
+
+            gridComponents.get(0).show((float) maxFactor, (float) max);
+            gridComponents.get(1).hide((float) maxFactor, (float) max);
+//            gc.startTransition((float) maxFactor, (float) max, 20);
+
             maxFactor = max;
         }
     }
@@ -158,6 +164,8 @@ public class Model {
                         return tick;
                     }
                 });
+
+
             }
         }
     }
@@ -178,5 +186,9 @@ public class Model {
 
     public double getMaxValue() {
         return maxFactor;
+    }
+
+    public Collection<GridComponent> getGridComponents() {
+        return gridComponents;
     }
 }

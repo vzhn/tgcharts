@@ -5,13 +5,13 @@ import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
 import me.vzhilin.charts.ViewConstants;
+import me.vzhilin.charts.transitions.SinTransition;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class GridComponent {
-
     private final Model model;
 
     private final String vertexShaderCode =
@@ -54,6 +54,10 @@ public class GridComponent {
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
 
+    private SinTransition transition;
+    private float value;
+
+    private State state = State.HIDDEN;
 
     public GridComponent(Model model) {
         this.model = model;
@@ -154,11 +158,42 @@ public class GridComponent {
         // Pass the projection and view transformation to the shader
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
-
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+    }
+
+    public void show(float start, float end) {
+        this.transition = new SinTransition(start, end, 20);
+
+        state = State.FADE_OUT;
+    }
+
+    public void hide(float start, float end) {
+        this.transition = new SinTransition(start, end, 20);
+
+        state = State.FADE_IN;
+    }
+
+    public void tick() {
+//        if (transition.tick()) {
+//            value += transition.getDelta();
+//        } else {
+//            if (state == State.FADE_OUT) {
+//                state = State.HIDDEN;
+//            } else
+//            if (state == State.FADE_IN) {
+//                state = State.VISIBLE;
+//            }
+//        }
+    }
+
+    enum State {
+        VISIBLE,
+        FADE_IN,
+        FADE_OUT,
+        HIDDEN
     }
 }
