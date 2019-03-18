@@ -89,10 +89,10 @@ public class Model {
             }
         }
 
-        refreshYScaleFactors();
+        refreshScrollScaleFactors();
     }
 
-    private void refreshYScaleFactors() {
+    private void refreshScrollScaleFactors() {
         double max = 0;
         for (Column yColumn: chart.getYColumns()) {
             if (yColumn.isVisible()) {

@@ -1,5 +1,6 @@
 package me.vzhilin.charts.data;
 
+import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,6 +17,9 @@ public class Column {
 
     private float scrollYScaleFactor = 1.0f;
     private float animatedScrollYScaleFactor = 1.0f;
+    private FloatBuffer vertexBuffer;
+    private int vertexStride;
+    private int vertexCount;
 
     public Column(String label, List<Double> data) {
         this.label = label;
@@ -83,5 +87,23 @@ public class Column {
 
     public void incAnimatedScrollScaleFactor(float delta) {
         this.animatedScrollYScaleFactor += delta;
+    }
+
+    public void setVertexBuffer(FloatBuffer vertexBuffer, int vertexStride, int vertexCount) {
+        this.vertexBuffer = vertexBuffer;
+        this.vertexStride = vertexStride;
+        this.vertexCount = vertexCount;
+    }
+
+    public FloatBuffer getVertexBuffer() {
+        return vertexBuffer;
+    }
+
+    public int getVertexStride() {
+        return vertexStride;
+    }
+
+    public int getVertexCount() {
+        return vertexCount;
     }
 }
