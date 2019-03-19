@@ -3,10 +3,7 @@ package me.vzhilin.charts;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import me.vzhilin.charts.graphics.GridComponent;
-import me.vzhilin.charts.graphics.ScrollChartComponent;
-import me.vzhilin.charts.graphics.ScrollComponent;
-import me.vzhilin.charts.graphics.ScrollRibbonComponent;
+import me.vzhilin.charts.graphics.*;
 
 import javax.microedition.khronos.opengles.GL10;
 import java.util.ArrayList;
@@ -19,12 +16,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private ScrollChartComponent scrollChartComponent;
     private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
+    private TextComponent textComponent;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
+
 
     public MyGLRenderer(Model model) {
         this.model = model;
@@ -59,6 +58,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+        textComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
         model.tick();
     }
@@ -74,6 +74,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mScrollComponent = new ScrollComponent(model);
         scrollChartComponent = new ScrollChartComponent(model);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
+        textComponent = new TextComponent(model);
 
         model.getGridComponents().add(new GridComponent(model));
         model.getGridComponents().add(new GridComponent(model));
