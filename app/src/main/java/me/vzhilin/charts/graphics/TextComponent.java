@@ -87,18 +87,32 @@ public class TextComponent {
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
 
+//    static float squareVertices[] = {
+//            -1.0f, +1.0f, 0f,
+//            -1.0f, -1.0f, 0f,
+//            +1.0f, +1.0f, 0f,
+//            +1.0f,  -1.0f, 0f,
+//    };
+//
+//    static float textureVertices[] = {
+//             0.0f, +1.0f, 0f,
+//             0.0f,  0.0f, 0f,
+//            +1.0f, +1.0f, 0f,
+//            +1.0f,  0.0f, 0f,
+//    };
+
     static float squareVertices[] = {
-            -1.0f, +1.0f, 0f,
             -1.0f, -1.0f, 0f,
-            +1.0f, +1.0f, 0f,
-            +1.0f,  -1.0f, 0f,
+            1.0f, -1.0f, 0f,
+            -1.0f,  1.0f, 0f,
+            1.0f,  1.0f, 0f,
     };
 
     static float textureVertices[] = {
-            -0.0f, +1.0f, 0f,
-            -0.0f, -0.0f, 0f,
-            +1.0f, +1.0f, 0f,
-            +1.0f,  -0.0f, 0f,
+            0.0f, 1.0f, 0f,
+            +1.0f, 1.0f, 0f,
+            0.0f, 0.0f, 0f,
+            +1.0f, 0.0f, 0f,
     };
 
     public TextComponent(Model model) {
@@ -210,10 +224,10 @@ public class TextComponent {
 
     private int[] loadBitmaps() {
         // Create an empty, mutable bitmap
-        Bitmap bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+        Bitmap bitmap = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_4444);
 // get a canvas to paint over the bitmap
         Canvas canvas = new Canvas(bitmap);
-        bitmap.eraseColor(Color.RED);
+        bitmap.eraseColor(Color.TRANSPARENT);
 
 // get a background image from resources
 // note the image format must match the bitmap format
@@ -223,17 +237,11 @@ public class TextComponent {
 
 // Draw the text
         Paint textPaint = new Paint();
-//        textPaint.setTextSize(32);
-//        textPaint.setAntiAlias(true);
-        textPaint.setARGB(0xff, 0x00, 0xFF, 0x00);
-        textPaint.setStyle(Paint.Style.STROKE);
+        textPaint.setTextSize(64);
+        textPaint.setAntiAlias(true);
+        textPaint.setARGB(0xff, 0, 0, 0);
 // draw the text centered
-//        canvas.drawText("Hello World", 16,112, textPaint);
-        canvas.drawLine(0, 0, 255, 255, textPaint);
-        canvas.drawLine(0, 128, 255, 128, textPaint);
-        canvas.drawLine(0, 255, 255, 0, textPaint);
-        canvas.drawLine(128, 0, 128, 255, textPaint);
-        canvas.drawLine(0, 128, 255, 128, textPaint);
+        canvas.drawText("Hello World", 16,112, textPaint);
 
         int[] textures = new int[1];
 
