@@ -220,6 +220,7 @@ public class TextComponent {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
     }
 
     private int[] loadBitmaps() {
@@ -241,7 +242,7 @@ public class TextComponent {
         textPaint.setAntiAlias(true);
         textPaint.setARGB(0xff, 0, 0, 0);
 // draw the text centered
-        canvas.drawText("Hello World", 16,112, textPaint);
+        canvas.drawText("1234567890", 16,112, textPaint);
 
         int[] textures = new int[1];
 
