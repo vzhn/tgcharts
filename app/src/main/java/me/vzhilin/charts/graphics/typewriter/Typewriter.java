@@ -34,7 +34,7 @@ public class Typewriter {
         String alfabet =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
             "abcdefghijklmnopqrstuvwxyz" +
-            "01234567890";
+            "01234567890 ";
 
 
         float textWidth = textPaint.measureText(alfabet);
@@ -43,7 +43,6 @@ public class Typewriter {
         for (int i = 0; i < alfabet.length(); i++) {
             char ch = alfabet.charAt(i);
             float charWidth = textPaint.measureText(String.valueOf(ch));
-            float aspect = charWidth / textHeight;
             characters.put(ch, new TextureCharacter(ws / textWidth, 0, (ws + charWidth) / textWidth, 1f,
                     charWidth, textHeight));
 

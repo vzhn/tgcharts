@@ -12,7 +12,6 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 
 public class TextComponent {
-
     private static final int FRAME_WIDTH_2 = 20;
     private static final int FRAME_WIDTH_1 = 5;
     private final Model model;
@@ -139,19 +138,24 @@ public class TextComponent {
     public void draw(int width, int height, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
-
-        drawCharacter('R', mMVPMatrix);
+        drawString(100, 100, "Hello", mMVPMatrix);
     }
 
-    private void drawCharacter(char ch, float[] mMVPMatrix) {
+    private void drawString(int x, int y, String s, float[] mMVPMatrix) {
+        int offset = 0;
+        for (int i = 0; i < s.length(); i++) {
+            Typewriter.TextureCharacter character = tw.get(s.charAt(i));
+            drawCharacter(character, x + offset, y, mMVPMatrix);
+
+            offset += character.width;
+        }
+    }
+
+    private void drawCharacter(Typewriter.TextureCharacter character, int x, int y, float[] mMVPMatrix) {
         // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         int mInputTextureCoordinate = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
 
-//        int mVideoFrame = GLES20.glGetAttribLocation(mProgram, "vPosition");
-
-
-        Typewriter.TextureCharacter character = tw.get(ch);
         textureVertices[0] = character.x1;
         textureVertices[1] = character.y2;
 
@@ -186,26 +190,12 @@ public class TextComponent {
                 GLES20.GL_FLOAT, false,
                 vertexStride, textureBuffer);
 
-        // get handle to fragment shader's vColor member
-        int mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-
-        // Set color for drawing the triangle
-//        GLES20.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
-
         // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         int mTexture = GLES20.glGetUniformLocation(mProgram, "videoFrame");
 
-//        float[] identity = new float[] {
-//            1.0f, 0.0f, 0.0f, 0.0f,
-//            0.0f, 1.0f, 0.0f, 0.0f,
-//            0.0f, 0.0f, 1.0f, 0.0f,
-//            0.0f, 0.0f, 0.0f, 1.0f,
-//        };
-
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
-//        Matrix.setIdentityM(identity, 0);
-        Matrix.translateM(identity, 0, 0, tw.getHeight(),0);
+        Matrix.translateM(identity, 0, x, y,0);
         Matrix.scaleM(identity, 0,character.width, -character.height, 1);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
@@ -218,10 +208,6 @@ public class TextComponent {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
-    }
-
-    public void draw0(int width, int height, float[] mMVPMatrix) {
-
     }
 }
 
