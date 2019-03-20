@@ -206,7 +206,7 @@ public class TextComponent {
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
 //        Matrix.setIdentityM(identity, 0);
         Matrix.translateM(identity, 0, 0, tw.getHeight(),0);
-        Matrix.scaleM(identity, 0,tw.getHeight() * character.aspect, -tw.getHeight(), 1);
+        Matrix.scaleM(identity, 0,character.width, -character.height, 1);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);

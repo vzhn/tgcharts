@@ -44,7 +44,8 @@ public class Typewriter {
             char ch = alfabet.charAt(i);
             float charWidth = textPaint.measureText(String.valueOf(ch));
             float aspect = charWidth / textHeight;
-            characters.put(ch, new TextureCharacter(ws / textWidth, 0, (ws + charWidth) / textWidth, 1f, aspect));
+            characters.put(ch, new TextureCharacter(ws / textWidth, 0, (ws + charWidth) / textWidth, 1f,
+                    charWidth, textHeight));
 
             ws += charWidth;
         }
@@ -81,15 +82,18 @@ public class Typewriter {
         public final float y1;
         public final float x2;
         public final float y2;
-        public final float aspect;
 
-        public TextureCharacter(float x1, float y1, float x2, float y2, float aspect) {
+        public final float width;
+        public final float height;
+
+        public TextureCharacter(float x1, float y1, float x2, float y2, float width, float height) {
             this.x1 = x1;
             this.y1 = y1;
             this.x2 = x2;
             this.y2 = y2;
 
-            this.aspect = aspect;
+            this.width = width;
+            this.height = height;
         }
     }
 }
