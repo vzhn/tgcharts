@@ -1,20 +1,15 @@
 package me.vzhilin.charts.graphics;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.opengl.GLES10;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
-import me.vzhilin.charts.ViewConstants;
+import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 public class TextComponent {
 
@@ -36,7 +31,7 @@ public class TextComponent {
         "  gl_Position = uMVPMatrix * vPosition;" +
         "  textureCoordinate = inputTextureCoordinate.xy;" +
         "}";
-    private final int textureId;
+    private final Typewriter tw;
 
 //    private final int textureId;
 
@@ -87,24 +82,10 @@ public class TextComponent {
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
 
-//    static float squareVertices[] = {
-//            -1.0f, +1.0f, 0f,
-//            -1.0f, -1.0f, 0f,
-//            +1.0f, +1.0f, 0f,
-//            +1.0f,  -1.0f, 0f,
-//    };
-//
-//    static float textureVertices[] = {
-//             0.0f, +1.0f, 0f,
-//             0.0f,  0.0f, 0f,
-//            +1.0f, +1.0f, 0f,
-//            +1.0f,  0.0f, 0f,
-//    };
-
     static float squareVertices[] = {
-            -1.0f, -1.0f, 0f,
-            1.0f, -1.0f, 0f,
-            -1.0f,  1.0f, 0f,
+            0f, 0f, 0f,
+            1.0f, 0f, 0f,
+            0f,  1.0f, 0f,
             1.0f,  1.0f, 0f,
     };
 
@@ -117,6 +98,8 @@ public class TextComponent {
 
     public TextComponent(Model model) {
         this.model = model;
+
+        tw = new Typewriter();
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer vertexBB = ByteBuffer.allocateDirect(
@@ -151,22 +134,35 @@ public class TextComponent {
 
         // creates OpenGL ES program executables
         GLES20.glLinkProgram(mProgram);
-
-        textureId = loadBitmaps()[0];
     }
 
     public void draw(int width, int height, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
+        drawCharacter('R', mMVPMatrix);
+    }
+
+    private void drawCharacter(char ch, float[] mMVPMatrix) {
         // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-
         int mInputTextureCoordinate = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
 
-
-
 //        int mVideoFrame = GLES20.glGetAttribLocation(mProgram, "vPosition");
+
+
+        Typewriter.TextureCharacter character = tw.get(ch);
+        textureVertices[0] = character.x1;
+        textureVertices[1] = character.y2;
+
+        textureVertices[3] = character.x2;
+        textureVertices[4] = character.y2;
+
+        textureVertices[6] = character.x1;
+        textureVertices[7] = character.y1;
+
+        textureVertices[9] = character.x2;
+        textureVertices[10] = character.y1;
 
 
         // Enable a handle to the triangle vertices
@@ -200,20 +196,21 @@ public class TextComponent {
         int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         int mTexture = GLES20.glGetUniformLocation(mProgram, "videoFrame");
 
-        float[] identity = new float[] {
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f,
-        };
-        Matrix.setIdentityM(identity, 0);
+//        float[] identity = new float[] {
+//            1.0f, 0.0f, 0.0f, 0.0f,
+//            0.0f, 1.0f, 0.0f, 0.0f,
+//            0.0f, 0.0f, 1.0f, 0.0f,
+//            0.0f, 0.0f, 0.0f, 1.0f,
+//        };
+
+        float[] identity = Arrays.copyOf(mMVPMatrix, 16);
+//        Matrix.setIdentityM(identity, 0);
+        Matrix.translateM(identity, 0, 0, tw.getHeight(),0);
+        Matrix.scaleM(identity, 0,tw.getHeight() * character.aspect, -tw.getHeight(), 1);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-//         Set filtering
-//        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-//        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tw.getTextureId());
         GLES20.glUniform1i(mTexture, 0);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertexCount);
@@ -221,50 +218,6 @@ public class TextComponent {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
-    }
-
-    private int[] loadBitmaps() {
-        // Create an empty, mutable bitmap
-        Bitmap bitmap = Bitmap.createBitmap(1080, 1080, Bitmap.Config.ARGB_4444);
-// get a canvas to paint over the bitmap
-        Canvas canvas = new Canvas(bitmap);
-        bitmap.eraseColor(Color.TRANSPARENT);
-
-// get a background image from resources
-// note the image format must match the bitmap format
-//        Drawable background = context.getResources().getDrawable(R.drawable.background);
-//        background.setBounds(0, 0, 256, 256);
-//        background.draw(canvas); // draw the background to our bitmap
-
-// Draw the text
-        Paint textPaint = new Paint();
-        textPaint.setTextSize(64);
-        textPaint.setAntiAlias(true);
-        textPaint.setARGB(0xff, 0, 0, 0);
-// draw the text centered
-        canvas.drawText("1234567890", 16,112, textPaint);
-
-        int[] textures = new int[1];
-
-//Generate one texture pointer...
-        GLES20.glGenTextures(1, textures, 0);
-//...and bind it to our array
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
-
-//Create Nearest Filtered Texture
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-
-//Different possible texture parameters, e.g. GL10.GL_CLAMP_TO_EDGE
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
-
-//Use the Android GLUtils to specify a two-dimensional texture image from our bitmap
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-
-//Clean up
-        bitmap.recycle();
-        return textures;
     }
 
     public void draw0(int width, int height, float[] mMVPMatrix) {
