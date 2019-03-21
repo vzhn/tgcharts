@@ -4,7 +4,6 @@ import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
-import java.nio.FloatBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,28 +11,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class DateRibbonComponent {
+    private static final int WITH_LIMIT = 300;
     private final Model model;
 
-    private final int vertexCount = squareVertices.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private final TextComponent textComponent;
-
-    private FloatBuffer vertexBuffer;
-
-    // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
-
-//    static float triangleCoords[] = new float[3 * 12];
-
-    static float squareVertices[] = {
-            0f, 0f, 0f,
-            1.0f, 0f, 0f,
-            0f,  1.0f, 0f,
-
-            1.0f, 0f, 0f,
-            1.0f,  1.0f, 0f,
-            0f,  1.0f, 0f,
-    };
 
     public DateRibbonComponent(TextComponent textComponent, Model model) {
         this.textComponent = textComponent;
@@ -53,7 +34,7 @@ public class DateRibbonComponent {
 
         double xFactor = width / xDelta;
 
-        int k = (int) Math.max(1, Math.log(300 / (xColumn.getDivision() * xFactor)) / Math.log(2));
+        int k = (int) Math.max(1, Math.log(WITH_LIMIT / (xColumn.getDivision() * xFactor)) / Math.log(2));
 
         List<StringComponent> components = new ArrayList<>();
         List<Double> dateSlice = xColumn.sample(k, model.getScrollLeft(), model.getScrollRight());
