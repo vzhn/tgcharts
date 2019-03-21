@@ -61,6 +61,7 @@ public class GridComponent {
     private float value;
 
     private State state = State.HIDDEN;
+    private double maxValue;
 
     public GridComponent(Model model) {
         this.model = model;
@@ -97,6 +98,9 @@ public class GridComponent {
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
+        if (state == State.HIDDEN) {
+            return;
+        }
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
@@ -109,7 +113,7 @@ public class GridComponent {
         vertexBuffer.clear();
         // add the coordinates to the FloatBuffer
 
-        float i1 = (float) model.getMaxValue() / 6f;
+        float i1 = (float) maxValue / 6f;
         for (int i = 0; i < 10; i++) {
             triangleCoords[6 * i + 0] = -1f;
 
@@ -177,37 +181,46 @@ public class GridComponent {
         List<StringComponent> strings = new ArrayList<>();
         float yPos = 0;
         for (int i = 0; i < 6; i++) {
-            int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / model.getMaxValue()));
-            strings.add(new StringComponent(5, y, String.valueOf(i * model.getMaxValue() / 6f)));
+            int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
+            strings.add(new StringComponent(5, y, String.valueOf(i * maxValue / 6f)));
             yPos += step;
         }
-
         textComponent.drawString(strings, mvpMatrix);
     }
 
     public void show(float start, float end) {
-        this.transition = new SinTransition(start, end, 20);
-
-        state = State.FADE_OUT;
-    }
-
-    public void hide(float start, float end) {
+        value = start;
         this.transition = new SinTransition(start, end, 20);
 
         state = State.FADE_IN;
     }
 
+    public void hide(float start, float end) {
+        value = end;
+        this.transition = new SinTransition(start, end, 20);
+
+        state = State.FADE_OUT;
+    }
+
     public void tick() {
-//        if (transition.tick()) {
-//            value += transition.getDelta();
-//        } else {
-//            if (state == State.FADE_OUT) {
-//                state = State.HIDDEN;
-//            } else
-//            if (state == State.FADE_IN) {
-//                state = State.VISIBLE;
-//            }
-//        }
+        if (state == State.HIDDEN || state == State.VISIBLE) {
+            return;
+        }
+
+        if (transition.tick()) {
+            value += transition.getDelta();
+        } else {
+            if (state == State.FADE_OUT) {
+                state = State.HIDDEN;
+            } else
+            if (state == State.FADE_IN) {
+                state = State.VISIBLE;
+            }
+        }
+    }
+
+    public void setMaxFactor(double max) {
+        this.maxValue = max;
     }
 
     enum State {

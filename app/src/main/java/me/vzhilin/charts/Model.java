@@ -97,9 +97,18 @@ public class Model {
             });
 
 
+            GridComponent fadeInComponent = gridComponents.get(0);
+            fadeInComponent.setMaxFactor(max);
 
-            gridComponents.get(0).show((float) maxFactor, (float) max);
-            gridComponents.get(1).hide((float) maxFactor, (float) max);
+            GridComponent fadeOutComponent = gridComponents.get(1);
+            fadeOutComponent.setMaxFactor(maxFactor);
+
+            fadeInComponent.show((float) maxFactor, (float) max);
+            fadeOutComponent.hide((float) maxFactor, (float) max);
+
+
+
+//            gridComponents.get(1).hide((float) maxFactor, (float) max);
 //            gc.startTransition((float) maxFactor, (float) max, 20);
 
             maxFactor = max;
