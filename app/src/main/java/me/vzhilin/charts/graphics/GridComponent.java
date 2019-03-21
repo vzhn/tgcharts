@@ -111,7 +111,7 @@ public class GridComponent {
         // add the coordinates to the FloatBuffer
 
         float i1 = (float) maxValue / 6f;
-        for (int i = 1; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             triangleCoords[6 * i + 0] = -1f;
 
             triangleCoords[6 * i + 1] = i1 * i;
@@ -147,13 +147,13 @@ public class GridComponent {
         };
         Matrix.setIdentityM(identity, 0);
 
-        float scrollFactor = (float) ViewConstants.SCROLL_HEIGHT / height;
+        float scrollFactor = (float) ViewConstants.CHART_OFFSET / height;
 
         float absoluteMax = (float) model.getSmoothMaxFactor();
 //        double maxFactor = yColumn.getMaxValue() / absoluteMax;
 
         float yScaleFactor = 2f / absoluteMax;
-        yScaleFactor *= (1f - (float) ViewConstants.SCROLL_HEIGHT / height);
+        yScaleFactor *= (1f - (float) ViewConstants.CHART_OFFSET / height);
 //        yScaleFactor *= maxFactor;
 
         Matrix.scaleM(identity, 0, 1f, yScaleFactor, 1f);
@@ -173,12 +173,12 @@ public class GridComponent {
     }
 
     private void drawText(int height, float[] mvpMatrix) {
-        float step = (height - ViewConstants.SCROLL_HEIGHT) / 6;
+        float step = (height - ViewConstants.CHART_OFFSET) / 6;
 
         List<StringComponent> strings = new ArrayList<>();
-        float yPos = step;
-        for (int i = 1; i < 6; i++) {
-            int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
+        float yPos = 0;
+        for (int i = 0; i < 6; i++) {
+            int y = (int) (height - ViewConstants.CHART_OFFSET - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
             String text = String.format("%.0f", i * maxValue / 6f);
             strings.add(new StringComponent(5, y, text, opacity * 0.5f));
             yPos += step;

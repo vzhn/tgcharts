@@ -96,13 +96,13 @@ public class ChartComponent {
         };
         Matrix.setIdentityM(identity, 0);
 
-        float scrollFactor = (float) ViewConstants.SCROLL_HEIGHT / height;
+        float scrollFactor = (float) ViewConstants.CHART_OFFSET / height;
 
         double absoluteMax = model.getSmoothMaxFactor();
         double maxFactor = yColumn.getMaxValue() / absoluteMax;
 
         float yScaleFactor = 2f;
-        yScaleFactor *= (1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height);
+        yScaleFactor *= (1f - 1 * (float) ViewConstants.CHART_OFFSET / height);
         yScaleFactor *= maxFactor;
 
         float xScaleFactor = 1f / (float) (model.getScrollRight() - model.getScrollLeft());
