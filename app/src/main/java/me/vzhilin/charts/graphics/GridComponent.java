@@ -34,9 +34,9 @@ public class GridComponent {
 
     private final String fragmentShaderCode =
             "precision mediump float;" +
-                    "uniform vec4 vColor;" +
+                    "uniform float vColor;" +
                     "void main() {" +
-                    "  gl_FragColor = vColor;" +
+                    "  gl_FragColor.a = vColor;" +
                     "}";
 
     private final int mProgram;
@@ -114,7 +114,7 @@ public class GridComponent {
         // add the coordinates to the FloatBuffer
 
         float i1 = (float) maxValue / 6f;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i < 10; i++) {
             triangleCoords[6 * i + 0] = -1f;
 
             triangleCoords[6 * i + 1] = i1 * i;
@@ -137,7 +137,7 @@ public class GridComponent {
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES20.glUniform1f(mColorHandle, opacity);
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -179,10 +179,10 @@ public class GridComponent {
         float step = (height - ViewConstants.SCROLL_HEIGHT) / 6;
 
         List<StringComponent> strings = new ArrayList<>();
-        float yPos = 0;
-        for (int i = 0; i < 6; i++) {
+        float yPos = step;
+        for (int i = 1; i < 6; i++) {
             int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
-            strings.add(new StringComponent(5, y, String.valueOf(i * maxValue / 6f), opacity));
+            strings.add(new StringComponent(5, y, String.format("%.0f",i * maxValue / 6f), opacity));
             yPos += step;
         }
         textComponent.drawString(strings, mvpMatrix);
