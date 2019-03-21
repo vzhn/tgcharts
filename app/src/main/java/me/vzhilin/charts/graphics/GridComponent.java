@@ -25,6 +25,7 @@ public class GridComponent {
                     // for the matrix multiplication product to be correct.
                     "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
+    private final TextComponent textComponent;
 
     // Use to access and set the view transformation
     private int mMVPMatrixHandle;
@@ -61,6 +62,7 @@ public class GridComponent {
 
     public GridComponent(Model model) {
         this.model = model;
+        this.textComponent = new TextComponent(model);
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -163,6 +165,18 @@ public class GridComponent {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+
+        drawText(height, mvpMatrix);
+    }
+
+    private void drawText(int height, float[] mvpMatrix) {
+        float step = (height - ViewConstants.SCROLL_HEIGHT) / 6;
+
+        float yPos = ViewConstants.SCROLL_HEIGHT;
+        for (int i = 0; i < 6; i++) {
+            textComponent.drawString(100, height - (int) yPos, String.valueOf(i * model.getMaxValue() / 6f), mvpMatrix);
+            yPos += step;
+        }
     }
 
     public void show(float start, float end) {

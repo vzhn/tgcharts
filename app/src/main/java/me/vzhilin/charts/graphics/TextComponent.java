@@ -137,11 +137,12 @@ public class TextComponent {
 
     public void draw(int width, int height, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
         drawString(100, 100, "Hello", mMVPMatrix);
     }
 
-    private void drawString(int x, int y, String s, float[] mMVPMatrix) {
+    public void drawString(int x, int y, String s, float[] mMVPMatrix) {
+        GLES20.glUseProgram(mProgram);
+
         int offset = 0;
         for (int i = 0; i < s.length(); i++) {
             Typewriter.TextureCharacter character = tw.get(s.charAt(i));

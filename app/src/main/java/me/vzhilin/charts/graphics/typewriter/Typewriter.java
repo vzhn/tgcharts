@@ -34,7 +34,7 @@ public class Typewriter {
         String alfabet =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
             "abcdefghijklmnopqrstuvwxyz" +
-            "01234567890 ";
+            "01234567890. ";
 
 
         float textWidth = textPaint.measureText(alfabet);

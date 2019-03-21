@@ -6,8 +6,6 @@ import android.opengl.Matrix;
 import me.vzhilin.charts.graphics.*;
 
 import javax.microedition.khronos.opengles.GL10;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Model model;
