@@ -138,7 +138,6 @@ public class TextComponent {
 
     public void draw(int width, int height, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
-        drawString(Collections.singletonList(new StringComponent(100, 100, "Hello world")), mMVPMatrix);
     }
 
     public void drawString(List<StringComponent> strings, float[] mMVPMatrix) {
@@ -257,8 +256,6 @@ public class TextComponent {
         int mTexture = GLES20.glGetUniformLocation(mProgram, "videoFrame");
 
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
-//        Matrix.translateM(identity, 0, x, y,0);
-//        Matrix.scaleM(identity, 0, 100, -100, 1);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);

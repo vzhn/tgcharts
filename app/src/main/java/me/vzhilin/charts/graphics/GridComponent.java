@@ -175,9 +175,10 @@ public class GridComponent {
         float step = (height - ViewConstants.SCROLL_HEIGHT) / 6;
 
         List<StringComponent> strings = new ArrayList<>();
-        float yPos = ViewConstants.SCROLL_HEIGHT;
+        float yPos = 0;
         for (int i = 0; i < 6; i++) {
-            strings.add(new StringComponent(100, height - (int) yPos, String.valueOf(i * model.getMaxValue() / 6f)));
+            int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / model.getMaxValue()));
+            strings.add(new StringComponent(5, y, String.valueOf(i * model.getMaxValue() / 6f)));
             yPos += step;
         }
 
