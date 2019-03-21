@@ -60,9 +60,9 @@ public class GridComponent {
     private State state = State.HIDDEN;
     private double maxValue;
 
-    public GridComponent(Model model) {
+    public GridComponent(TextComponent textComponent, Model model) {
         this.model = model;
-        this.textComponent = new TextComponent(model);
+        this.textComponent = textComponent;
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(

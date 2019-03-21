@@ -119,6 +119,6 @@ public class ChartComponent {
         GLES20.glLineWidth(1f);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+//        GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 }

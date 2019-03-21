@@ -1,16 +1,14 @@
 package me.vzhilin.charts.data;
 
 import java.nio.FloatBuffer;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Column {
     private final String label;
     private final List<Double> data;
     private final double minValue;
     private final double maxValue;
+    private final double division;
 
     private float opacity = 0f;
     private boolean visible;
@@ -27,6 +25,8 @@ public class Column {
 
         this.maxValue = Collections.max(data);
         this.minValue = Collections.min(data);
+
+        this.division = data.get(1) - data.get(0);
     }
 
     public String getLabel() {
@@ -107,6 +107,10 @@ public class Column {
         return vertexCount;
     }
 
+    public double getDivision() {
+        return division;
+    }
+
     public double getMaxValue(double left, double right) {
         int ix1 = (int) Math.floor(left * (data.size() - 1));
         int ix2 = (int) Math.ceil(right * (data.size() - 1));
@@ -117,5 +121,57 @@ public class Column {
         }
 
         return v;
+    }
+
+    public List<Double> slice(double left, double right) {
+        List<Double> rs = new ArrayList<>();
+
+        int ix1 = (int) Math.floor(left * (data.size() - 1));
+        int ix2 = (int) Math.ceil(right * (data.size() - 1));
+
+        for (int i = ix1; i < ix2; i++) {
+            rs.add(data.get(i));
+        }
+
+        return rs;
+    }
+
+    public List<Double> sample(int k) {
+        List<Double> rs = new ArrayList<>();
+
+        int inc = (int) Math.pow(2, k);
+        for (int i = 0; i < data.size(); i += inc) {
+            rs.add(data.get(i));
+        }
+
+        return rs;
+    }
+
+    public List<Double> sample(int k, double left, double right) {
+        List<Double> rs = new ArrayList<>();
+
+        int inc = (1 << k);
+
+        int start = (int) (Math.floor(left * (data.size() - 1) / inc) * inc);
+        int end   = (int) ((int) Math.ceil((data.size() - 1)) * right);
+
+        for (int i = start; i < end; i += inc) {
+            rs.add(data.get(i));
+        }
+
+        return rs;
+    }
+
+    public List<Double> sampleHalf(int k, double left, double right) {
+        List<Double> rs = new ArrayList<>();
+        int inc = 1 << (k + 1);
+
+        int start = (int) ((1 << k) + Math.floor(left * (data.size() - 1) / inc) * inc);
+        int end   = (int) (Math.ceil((data.size() - 1)) * right);
+        for (int i = start; i < end; i += inc) {
+            rs.add(data.get(i));
+        }
+
+        return rs;
     }
 }
