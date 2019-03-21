@@ -67,7 +67,7 @@ public class TextComponent {
 
     private final int mProgram;
 
-    private final int vertexCount = squareVertices.length / COORDS_PER_VERTEX;
+//    private final int vertexCount = ;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     private FloatBuffer vertexBuffer;
@@ -119,12 +119,6 @@ public class TextComponent {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        ByteBuffer textureBB = ByteBuffer.allocateDirect(textureVertices.length * 4);
-        textureBB.order(ByteOrder.nativeOrder());
-        textureBuffer = textureBB.asFloatBuffer();
-        textureBuffer.put(textureVertices);
-        textureBuffer.position(0);
-
         int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
@@ -143,44 +137,87 @@ public class TextComponent {
 
     public void draw(int width, int height, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
-        drawString(100, 100, "Hello", mMVPMatrix);
+        drawString(100, 100, "Hello world", mMVPMatrix);
     }
 
     public void drawString(int x, int y, String s, float[] mMVPMatrix) {
         GLES20.glUseProgram(mProgram);
 
-        int offset = 0;
-        for (int i = 0; i < s.length(); i++) {
-            Typewriter.TextureCharacter character = tw.get(s.charAt(i));
-            drawCharacter(character, x + offset, y, mMVPMatrix);
+        prepareBuffers(s.length());
+        fillBuffers(x, y, s);
+        drawBuffer(x, y, mMVPMatrix);
 
-            offset += character.width;
-        }
     }
 
-    private void drawCharacter(Typewriter.TextureCharacter character, int x, int y, float[] mMVPMatrix) {
+    private void prepareBuffers(int length) {
+        squareVertices = new float[18 * length];
+        textureVertices = new float[18 * length];
+    }
+
+    private void fillBuffers(int x, int y, String s) {
+        float offset = 0;
+        for (int i = 0; i < s.length(); i++) {
+            Typewriter.TextureCharacter ch = tw.get(s.charAt(i));
+            float width = ch.width;
+
+            float x1 = x + offset, y1 = y, x2 = x + offset + width, y2 = y + tw.getHeight();
+
+            squareVertices[i * 18 + 0] = x1;
+            squareVertices[i * 18 + 1] = y1;
+
+            squareVertices[i * 18 + 3] = x2;
+            squareVertices[i * 18 + 4] = y1;
+
+            squareVertices[i * 18 + 6] = x1;
+            squareVertices[i * 18 + 7] = y2;
+
+            squareVertices[i * 18 + 9] = x2;
+            squareVertices[i * 18 + 10] = y1;
+
+            squareVertices[i * 18 + 12] = x2;
+            squareVertices[i * 18 + 13] = y2;
+
+            squareVertices[i * 18 + 15] = x1;
+            squareVertices[i * 18 + 16] = y2;
+
+            textureVertices[i * 18 + 0] = ch.x1;
+            textureVertices[i * 18 + 1] = ch.y1;
+
+            textureVertices[i * 18 + 3] = ch.x2;
+            textureVertices[i * 18 + 4] = ch.y1;
+
+            textureVertices[i * 18 + 6] = ch.x1;
+            textureVertices[i * 18 + 7] = ch.y2;
+
+            textureVertices[i * 18 + 9] = ch.x2;
+            textureVertices[i * 18 + 10] = ch.y1;
+
+            textureVertices[i * 18 + 12] = ch.x2;
+            textureVertices[i * 18 + 13] = ch.y2;
+
+            textureVertices[i * 18 + 15] = ch.x1;
+            textureVertices[i * 18 + 16] = ch.y2;
+
+            offset += width;
+        }
+
+        ByteBuffer vertexBB = ByteBuffer.allocateDirect(squareVertices.length * 4);
+        vertexBB.order(ByteOrder.nativeOrder());
+        vertexBuffer = vertexBB.asFloatBuffer();
+        vertexBuffer.put(squareVertices);
+        vertexBuffer.position(0);
+
+        ByteBuffer textureBB = ByteBuffer.allocateDirect(textureVertices.length * 4);
+        textureBB.order(ByteOrder.nativeOrder());
+        textureBuffer = textureBB.asFloatBuffer();
+        textureBuffer.put(textureVertices);
+        textureBuffer.position(0);
+    }
+
+    private void drawBuffer(int x, int y, float[] mMVPMatrix) {
         // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         int mInputTextureCoordinate = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
-
-        textureVertices[0] = character.x1;
-        textureVertices[1] = character.y2;
-
-        textureVertices[3] = character.x2;
-        textureVertices[4] = character.y2;
-
-        textureVertices[6] = character.x1;
-        textureVertices[7] = character.y1;
-
-        textureVertices[9] = character.x2;
-        textureVertices[10] = character.y2;
-
-        textureVertices[12] = character.x2;
-        textureVertices[13] = character.y1;
-
-        textureVertices[15] = character.x1;
-        textureVertices[16] = character.y1;
-
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -209,14 +246,14 @@ public class TextComponent {
 
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
         Matrix.translateM(identity, 0, x, y,0);
-        Matrix.scaleM(identity, 0,character.width, -character.height, 1);
+//        Matrix.scaleM(identity, 0, 100, -100, 1);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tw.getTextureId());
         GLES20.glUniform1i(mTexture, 0);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, squareVertices.length / COORDS_PER_VERTEX);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
