@@ -1,7 +1,6 @@
 package me.vzhilin.charts.graphics;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
@@ -10,6 +9,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class TextComponent {
     private static final int FRAME_WIDTH_2 = 20;
@@ -137,68 +138,79 @@ public class TextComponent {
 
     public void draw(int width, int height, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
-        drawString(100, 100, "Hello world", mMVPMatrix);
+        drawString(Collections.singletonList(new StringComponent(100, 100, "Hello world")), mMVPMatrix);
     }
 
-    public void drawString(int x, int y, String s, float[] mMVPMatrix) {
+    public void drawString(List<StringComponent> strings, float[] mMVPMatrix) {
         GLES20.glUseProgram(mProgram);
 
-        prepareBuffers(s.length());
-        fillBuffers(x, y, s);
-        drawBuffer(x, y, mMVPMatrix);
+        prepareBuffers(strings);
+        fillBuffers(strings);
+        drawBuffer(mMVPMatrix);
 
     }
 
-    private void prepareBuffers(int length) {
-        squareVertices = new float[18 * length];
-        textureVertices = new float[18 * length];
+    private void prepareBuffers(List<StringComponent> stirngs) {
+        int totalCharacters = 0;
+        for (StringComponent sc: stirngs) {
+            totalCharacters += sc.s.length();
+        }
+
+        squareVertices = new float[18 * totalCharacters];
+        textureVertices = new float[18 * totalCharacters];
     }
 
-    private void fillBuffers(int x, int y, String s) {
-        float offset = 0;
-        for (int i = 0; i < s.length(); i++) {
-            Typewriter.TextureCharacter ch = tw.get(s.charAt(i));
-            float width = ch.width;
+    private void fillBuffers(List<StringComponent> stirngs) {
+        int i = 0;
 
-            float x1 = x + offset, y1 = y, x2 = x + offset + width, y2 = y + tw.getHeight();
+        for (StringComponent sc: stirngs) {
+            float offset = sc.x;
 
-            squareVertices[i * 18 + 0] = x1;
-            squareVertices[i * 18 + 1] = y1;
+            for (int j = 0; j < sc.s.length(); j++) {
+                Typewriter.TextureCharacter ch = tw.get(sc.s.charAt(j));
+                float width = ch.width;
 
-            squareVertices[i * 18 + 3] = x2;
-            squareVertices[i * 18 + 4] = y1;
+                float x1 = offset, y1 = sc.y - tw.getHeight(), x2 = offset + width, y2 = sc.y;
 
-            squareVertices[i * 18 + 6] = x1;
-            squareVertices[i * 18 + 7] = y2;
+                squareVertices[i * 18 + 0] = x1;
+                squareVertices[i * 18 + 1] = y1;
 
-            squareVertices[i * 18 + 9] = x2;
-            squareVertices[i * 18 + 10] = y1;
+                squareVertices[i * 18 + 3] = x2;
+                squareVertices[i * 18 + 4] = y1;
 
-            squareVertices[i * 18 + 12] = x2;
-            squareVertices[i * 18 + 13] = y2;
+                squareVertices[i * 18 + 6] = x1;
+                squareVertices[i * 18 + 7] = y2;
 
-            squareVertices[i * 18 + 15] = x1;
-            squareVertices[i * 18 + 16] = y2;
+                squareVertices[i * 18 + 9] = x2;
+                squareVertices[i * 18 + 10] = y1;
 
-            textureVertices[i * 18 + 0] = ch.x1;
-            textureVertices[i * 18 + 1] = ch.y1;
+                squareVertices[i * 18 + 12] = x2;
+                squareVertices[i * 18 + 13] = y2;
 
-            textureVertices[i * 18 + 3] = ch.x2;
-            textureVertices[i * 18 + 4] = ch.y1;
+                squareVertices[i * 18 + 15] = x1;
+                squareVertices[i * 18 + 16] = y2;
 
-            textureVertices[i * 18 + 6] = ch.x1;
-            textureVertices[i * 18 + 7] = ch.y2;
+                textureVertices[i * 18 + 0] = ch.x1;
+                textureVertices[i * 18 + 1] = ch.y1;
 
-            textureVertices[i * 18 + 9] = ch.x2;
-            textureVertices[i * 18 + 10] = ch.y1;
+                textureVertices[i * 18 + 3] = ch.x2;
+                textureVertices[i * 18 + 4] = ch.y1;
 
-            textureVertices[i * 18 + 12] = ch.x2;
-            textureVertices[i * 18 + 13] = ch.y2;
+                textureVertices[i * 18 + 6] = ch.x1;
+                textureVertices[i * 18 + 7] = ch.y2;
 
-            textureVertices[i * 18 + 15] = ch.x1;
-            textureVertices[i * 18 + 16] = ch.y2;
+                textureVertices[i * 18 + 9] = ch.x2;
+                textureVertices[i * 18 + 10] = ch.y1;
 
-            offset += width;
+                textureVertices[i * 18 + 12] = ch.x2;
+                textureVertices[i * 18 + 13] = ch.y2;
+
+                textureVertices[i * 18 + 15] = ch.x1;
+                textureVertices[i * 18 + 16] = ch.y2;
+
+                offset += width;
+                ++i;
+            }
         }
 
         ByteBuffer vertexBB = ByteBuffer.allocateDirect(squareVertices.length * 4);
@@ -214,7 +226,7 @@ public class TextComponent {
         textureBuffer.position(0);
     }
 
-    private void drawBuffer(int x, int y, float[] mMVPMatrix) {
+    private void drawBuffer(float[] mMVPMatrix) {
         // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         int mInputTextureCoordinate = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
@@ -245,7 +257,7 @@ public class TextComponent {
         int mTexture = GLES20.glGetUniformLocation(mProgram, "videoFrame");
 
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
-        Matrix.translateM(identity, 0, x, y,0);
+//        Matrix.translateM(identity, 0, x, y,0);
 //        Matrix.scaleM(identity, 0, 100, -100, 1);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
@@ -259,5 +271,6 @@ public class TextComponent {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
     }
+
 }
 

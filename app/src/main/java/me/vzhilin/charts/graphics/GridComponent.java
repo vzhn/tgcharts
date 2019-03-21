@@ -10,6 +10,8 @@ import me.vzhilin.charts.transitions.SinTransition;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GridComponent {
     private final Model model;
@@ -166,17 +168,20 @@ public class GridComponent {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
 
-//        drawText(height, mvpMatrix);
+        drawText(height, mvpMatrix);
     }
 
     private void drawText(int height, float[] mvpMatrix) {
         float step = (height - ViewConstants.SCROLL_HEIGHT) / 6;
 
+        List<StringComponent> strings = new ArrayList<>();
         float yPos = ViewConstants.SCROLL_HEIGHT;
         for (int i = 0; i < 6; i++) {
-            textComponent.drawString(100, height - (int) yPos, String.valueOf(i * model.getMaxValue() / 6f), mvpMatrix);
+            strings.add(new StringComponent(100, height - (int) yPos, String.valueOf(i * model.getMaxValue() / 6f)));
             yPos += step;
         }
+
+        textComponent.drawString(strings, mvpMatrix);
     }
 
     public void show(float start, float end) {
