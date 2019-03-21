@@ -58,7 +58,7 @@ public class GridComponent {
     float color[] = { 0, 0, 0, 1.0f };
 
     private SinTransition transition;
-    private float value;
+    private float opacity;
 
     private State state = State.HIDDEN;
     private double maxValue;
@@ -156,7 +156,7 @@ public class GridComponent {
 //        double maxFactor = yColumn.getMaxValue() / absoluteMax;
 
         float yScaleFactor = 2f / absoluteMax;
-        yScaleFactor *= (1f - 1 * (float) ViewConstants.SCROLL_HEIGHT / height);
+        yScaleFactor *= (1f - (float) ViewConstants.SCROLL_HEIGHT / height);
 //        yScaleFactor *= maxFactor;
 
         Matrix.scaleM(identity, 0, 1f, yScaleFactor, 1f);
@@ -182,22 +182,22 @@ public class GridComponent {
         float yPos = 0;
         for (int i = 0; i < 6; i++) {
             int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
-            strings.add(new StringComponent(5, y, String.valueOf(i * maxValue / 6f)));
+            strings.add(new StringComponent(5, y, String.valueOf(i * maxValue / 6f), opacity));
             yPos += step;
         }
         textComponent.drawString(strings, mvpMatrix);
     }
 
-    public void show(float start, float end) {
-        value = start;
-        this.transition = new SinTransition(start, end, 20);
+    public void show() {
+        opacity = 0.0f;
+        this.transition = new SinTransition(0, 1, 20);
 
         state = State.FADE_IN;
     }
 
-    public void hide(float start, float end) {
-        value = end;
-        this.transition = new SinTransition(start, end, 20);
+    public void hide() {
+        opacity = 1.0f;
+        this.transition = new SinTransition(1, 0, 20);
 
         state = State.FADE_OUT;
     }
@@ -208,7 +208,7 @@ public class GridComponent {
         }
 
         if (transition.tick()) {
-            value += transition.getDelta();
+            opacity += transition.getDelta();
         } else {
             if (state == State.FADE_OUT) {
                 state = State.HIDDEN;

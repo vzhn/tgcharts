@@ -103,8 +103,8 @@ public class Model {
             GridComponent fadeOutComponent = gridComponents.get(1);
             fadeOutComponent.setMaxFactor(maxFactor);
 
-            fadeInComponent.show((float) maxFactor, (float) max);
-            fadeOutComponent.hide((float) maxFactor, (float) max);
+            fadeInComponent.show();
+            fadeOutComponent.hide();
 
 
 

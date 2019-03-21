@@ -23,15 +23,22 @@ public class TextComponent {
         "uniform mat4 uMVPMatrix;" +
         "attribute vec4 vPosition;" +
         "attribute vec4 inputTextureCoordinate;" +
+        "attribute float opacity;" +
         "varying vec2 textureCoordinate;" +
+        "varying float vOpacity;" +
         "void main() {" +
         // the matrix must be included as a modifier of gl_Position
         // Note that the uMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
         "  gl_Position = uMVPMatrix * vPosition;" +
+        "  vOpacity = opacity;" +
         "  textureCoordinate = inputTextureCoordinate.xy;" +
         "}";
     private final Typewriter tw;
+
+    private final int mPositionHandle;
+    private final int mOpacity;
+    private final int mInputTextureCoordinate;
 
 //    private final int textureId;
 
@@ -60,10 +67,13 @@ public class TextComponent {
     private final String fragmentShaderCode =
             "precision mediump float;"+
             "varying vec2 textureCoordinate;" +
+            "varying float vOpacity;" +
             "uniform sampler2D videoFrame;" +
             "uniform vec4 vColor;" +
             "void main() {" +
-            "  gl_FragColor = texture2D(videoFrame, textureCoordinate);" +
+            "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
+            "  color.a *= vOpacity;" +
+            "  gl_FragColor = color;" +
             "}";
 
     private final int mProgram;
@@ -73,6 +83,7 @@ public class TextComponent {
 
     private FloatBuffer vertexBuffer;
     private FloatBuffer textureBuffer;
+    private FloatBuffer floatBuffer;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
@@ -102,6 +113,8 @@ public class TextComponent {
             +1.0f, 0.0f, 0f,
     };
 
+    static float colorVertices[];
+
     public TextComponent(Model model) {
         this.model = model;
 
@@ -125,6 +138,14 @@ public class TextComponent {
 
         // create empty OpenGL ES Program
         mProgram = GLES20.glCreateProgram();
+
+        mPositionHandle = 1;
+        mOpacity = 2;
+        mInputTextureCoordinate = 3;
+
+        GLES20.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
+        GLES20.glBindAttribLocation(mProgram, mOpacity, "opacity");
+        GLES20.glBindAttribLocation(mProgram, mInputTextureCoordinate, "inputTextureCoordinate");
 
         // add the vertex shader to program
         GLES20.glAttachShader(mProgram, vertexShader);
@@ -157,6 +178,7 @@ public class TextComponent {
 
         squareVertices = new float[18 * totalCharacters];
         textureVertices = new float[18 * totalCharacters];
+        colorVertices = new float[6 * totalCharacters];
     }
 
     private void fillBuffers(List<StringComponent> stirngs) {
@@ -207,6 +229,12 @@ public class TextComponent {
                 textureVertices[i * 18 + 15] = ch.x1;
                 textureVertices[i * 18 + 16] = ch.y2;
 
+                colorVertices[i * 6 + 0] = sc.opacity;
+                colorVertices[i * 6 + 1] = sc.opacity;
+                colorVertices[i * 6 + 2] = sc.opacity;
+                colorVertices[i * 6 + 3] = sc.opacity;
+                colorVertices[i * 6 + 4] = sc.opacity;
+                colorVertices[i * 6 + 5] = sc.opacity;
                 offset += width;
                 ++i;
             }
@@ -223,15 +251,19 @@ public class TextComponent {
         textureBuffer = textureBB.asFloatBuffer();
         textureBuffer.put(textureVertices);
         textureBuffer.position(0);
+
+        ByteBuffer floatBB = ByteBuffer.allocateDirect(colorVertices.length * 4);
+        floatBB.order(ByteOrder.nativeOrder());
+        floatBuffer = floatBB.asFloatBuffer();
+        floatBuffer.put(colorVertices);
+        floatBuffer.position(0);
     }
 
     private void drawBuffer(float[] mMVPMatrix) {
         // get handle to vertex shader's vPosition member
-        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-        int mInputTextureCoordinate = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
-
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(mOpacity);
 
         vertexBuffer.clear();
         vertexBuffer.put(squareVertices);
@@ -251,6 +283,11 @@ public class TextComponent {
                 GLES20.GL_FLOAT, false,
                 vertexStride, textureBuffer);
 
+        floatBuffer.clear();
+        floatBuffer.put(colorVertices);
+        floatBuffer.position(0);
+        GLES20.glVertexAttribPointer(mOpacity, 1, GLES20.GL_FLOAT, false, 4, floatBuffer);
+
         // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         int mTexture = GLES20.glGetUniformLocation(mProgram, "videoFrame");
@@ -267,6 +304,7 @@ public class TextComponent {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
+        GLES20.glDisableVertexAttribArray(mOpacity);
     }
 
 }

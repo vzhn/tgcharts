@@ -96,6 +96,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glShaderSource(shader, shaderCode);
         GLES20.glCompileShader(shader);
 
+        int[] compiled = new int[1];
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0);
+        if (compiled[0] == 0) {
+            GLES20.glDeleteShader(shader);
+            throw new RuntimeException("Could not compile program: "
+                    + GLES20.glGetShaderInfoLog(shader) + " | " + shaderCode);
+        }
+
         return shader;
     }
 }

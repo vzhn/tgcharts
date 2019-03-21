@@ -49,7 +49,7 @@ public class Typewriter {
             ws += charWidth;
         }
 
-        Bitmap bitmap = Bitmap.createBitmap((int) textWidth, (int) textHeight, Bitmap.Config.ARGB_4444);
+        Bitmap bitmap = Bitmap.createBitmap((int) textWidth, (int) textHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawText(alfabet, 0,textHeight - fm.descent, textPaint);
         return generateTextures(bitmap);
