@@ -54,9 +54,6 @@ public class GridComponent {
 
     static float triangleCoords[] = new float[3 * 24];
 
-    // Set color with red, green, blue and alpha (opacity) values
-    float color[] = { 0, 0, 0, 1.0f };
-
     private SinTransition transition;
     private float opacity;
 
@@ -182,7 +179,8 @@ public class GridComponent {
         float yPos = step;
         for (int i = 1; i < 6; i++) {
             int y = (int) (height - ViewConstants.SCROLL_HEIGHT - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
-            strings.add(new StringComponent(5, y, String.format("%.0f",i * maxValue / 6f), opacity));
+            String text = String.format("%.0f", i * maxValue / 6f);
+            strings.add(new StringComponent(5, y, text, opacity * 0.5f));
             yPos += step;
         }
         textComponent.drawString(strings, mvpMatrix);
