@@ -166,7 +166,7 @@ public class GridComponent {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
 
-        drawText(height, mvpMatrix);
+//        drawText(height, mvpMatrix);
     }
 
     private void drawText(int height, float[] mvpMatrix) {

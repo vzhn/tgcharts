@@ -85,11 +85,17 @@ public class TextComponent {
             0f, 0f, 0f,
             1.0f, 0f, 0f,
             0f,  1.0f, 0f,
+
+            1.0f, 0f, 0f,
             1.0f,  1.0f, 0f,
+            0f,  1.0f, 0f,
     };
 
     static float textureVertices[] = {
             0.0f, 1.0f, 0f,
+            +1.0f, 1.0f, 0f,
+            0.0f, 0.0f, 0f,
+
             +1.0f, 1.0f, 0f,
             0.0f, 0.0f, 0f,
             +1.0f, 0.0f, 0f,
@@ -167,7 +173,13 @@ public class TextComponent {
         textureVertices[7] = character.y1;
 
         textureVertices[9] = character.x2;
-        textureVertices[10] = character.y1;
+        textureVertices[10] = character.y2;
+
+        textureVertices[12] = character.x2;
+        textureVertices[13] = character.y1;
+
+        textureVertices[15] = character.x1;
+        textureVertices[16] = character.y1;
 
 
         // Enable a handle to the triangle vertices
@@ -204,7 +216,7 @@ public class TextComponent {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tw.getTextureId());
         GLES20.glUniform1i(mTexture, 0);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
