@@ -16,13 +16,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
     private DateRibbonComponent mDateComponent;
+    private PopupComponent mPopupComponent;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
-
 
     public MyGLRenderer(Model model) {
         this.model = model;
@@ -60,7 +60,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-
+        mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
         model.tick();
         mDateComponent.tick();
@@ -73,6 +73,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES31.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         GLES31.glEnable(GLES31.GL_BLEND);
+
+//        GLES31.glEnable(GLES31.GL_LINE_SMOOTH);
         GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
 
         Typewriter tw = new Typewriter();
@@ -82,6 +84,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mDateComponent = new DateRibbonComponent(textComponent, model);
         scrollChartComponent = new ScrollChartComponent(model, textComponent);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
+        mPopupComponent = new PopupComponent(model, tw);
 
         model.getGridComponents().add(new GridComponent(textComponent, model));
         model.getGridComponents().add(new GridComponent(textComponent, model));

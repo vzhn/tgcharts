@@ -116,7 +116,7 @@ public class Column {
         int ix2 = (int) Math.ceil(right * (data.size() - 1));
 
         double v = 0;
-        for (int i = ix1; i < ix2; i++) {
+        for (int i = Math.max(0, ix1); i < Math.min(data.size(), ix2); i++) {
             v = Math.max(v, data.get(i));
         }
 
@@ -155,7 +155,7 @@ public class Column {
         int start = (int) (Math.floor(left * (data.size() - 1) / inc) * inc);
         int end   = (int) ((int) Math.ceil((data.size() - 1)) * right);
 
-        for (int i = start; i < end; i += inc) {
+        for (int i = Math.max(0, start); i < end; i += inc) {
             rs.add(data.get(i));
         }
 
@@ -168,7 +168,7 @@ public class Column {
 
         int start = (int) ((1 << k) + Math.floor(left * (data.size() - 1) / inc) * inc);
         int end   = (int) (Math.ceil((data.size() - 1)) * right);
-        for (int i = start; i < end; i += inc) {
+        for (int i = Math.max(0, start); i < end; i += inc) {
             rs.add(data.get(i));
         }
 

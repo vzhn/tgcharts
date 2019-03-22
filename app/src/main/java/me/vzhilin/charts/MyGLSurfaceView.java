@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.support.v4.widget.CompoundButtonCompat;
 import android.util.AttributeSet;
@@ -36,6 +37,8 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(3);
+//        GLES31.glHint(GLES31.GL_NICEST);
+
         renderer = new MyGLRenderer(model);
 
         // Set the Renderer for drawing on the GLSurfaceView
