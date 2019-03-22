@@ -1,6 +1,6 @@
 package me.vzhilin.charts.graphics;
 
-import android.opengl.GLES20;
+import android.opengl.GLES31;
 import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
@@ -78,20 +78,20 @@ public class GridComponent {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
         // create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
+        mProgram = GLES31.glCreateProgram();
 
         // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, vertexShader);
+        GLES31.glAttachShader(mProgram, vertexShader);
 
         // add the fragment shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader);
+        GLES31.glAttachShader(mProgram, fragmentShader);
 
         // creates OpenGL ES program executables
-        GLES20.glLinkProgram(mProgram);
+        GLES31.glLinkProgram(mProgram);
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
@@ -99,13 +99,13 @@ public class GridComponent {
             return;
         }
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
+        GLES31.glUseProgram(mProgram);
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
 
         vertexBuffer.clear();
         // add the coordinates to the FloatBuffer
@@ -126,18 +126,18 @@ public class GridComponent {
         vertexBuffer.position(0);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
+        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                GLES31.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+        mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform1f(mColorHandle, opacity);
+        GLES31.glUniform1f(mColorHandle, opacity);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         float[] identity = new float[] {
                 1.0f, 0.0f, 0.0f, 0.0f,
@@ -161,13 +161,13 @@ public class GridComponent {
         Matrix.translateM(identity, 0, 0, 2 * scrollFactor / yScaleFactor, 0);
 
         // Pass the projection and view transformation to the shader
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
+        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, vertexCount);
+        GLES31.glDrawArrays(GLES31.GL_LINES, 0, vertexCount);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES31.glDisableVertexAttribArray(mPositionHandle);
 
         drawText(height, mvpMatrix);
     }

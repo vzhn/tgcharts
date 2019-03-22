@@ -1,9 +1,10 @@
 package me.vzhilin.charts;
 
-import android.opengl.GLES20;
+import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import me.vzhilin.charts.graphics.*;
+import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -31,7 +32,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         long ts = System.currentTimeMillis();
 
         // Redraw background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES31.glClear(GLES31.GL_COLOR_BUFFER_BIT);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, +6, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
@@ -68,15 +69,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, javax.microedition.khronos.egl.EGLConfig config) {
         // Set the background frame color
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES31.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        GLES31.glEnable(GLES31.GL_BLEND);
+        GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
 
-        TextComponent textComponent = new TextComponent(model);
+        Typewriter tw = new Typewriter();
+        TextComponent textComponent = new TextComponent(tw, model);
         // initialize a triangle
         mScrollComponent = new ScrollComponent(model);
         mDateComponent = new DateRibbonComponent(textComponent, model);
-        scrollChartComponent = new ScrollChartComponent(model);
+        scrollChartComponent = new ScrollChartComponent(model, textComponent);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
 
         model.getGridComponents().add(new GridComponent(textComponent, model));
@@ -84,7 +86,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
+        GLES31.glViewport(0, 0, width, height);
         Matrix.orthoM(mProjectionMatrix, 0, 0, +width, height, 0, 3, 7);
 
         model.setWidth(width);
@@ -93,20 +95,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static int loadShader(int type, String shaderCode){
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
+        // create a vertex shader type (GLES31.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES31.GL_FRAGMENT_SHADER)
+        int shader = GLES31.glCreateShader(type);
 
         // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
+        GLES31.glShaderSource(shader, shaderCode);
+        GLES31.glCompileShader(shader);
 
         int[] compiled = new int[1];
-        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0);
+        GLES31.glGetShaderiv(shader, GLES31.GL_COMPILE_STATUS, compiled, 0);
         if (compiled[0] == 0) {
-            GLES20.glDeleteShader(shader);
+            GLES31.glDeleteShader(shader);
             throw new RuntimeException("Could not compile program: "
-                    + GLES20.glGetShaderInfoLog(shader) + " | " + shaderCode);
+                    + GLES31.glGetShaderInfoLog(shader) + " | " + shaderCode);
         }
 
         return shader;

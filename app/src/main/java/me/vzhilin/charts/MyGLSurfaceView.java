@@ -33,7 +33,7 @@ class MyGLSurfaceView extends GLSurfaceView {
         model.setScroll(0.5, 0.6);
 
         // Create an OpenGL ES 2.0 context
-        setEGLContextClientVersion(2);
+        setEGLContextClientVersion(3);
         renderer = new MyGLRenderer(model);
 
         // Set the Renderer for drawing on the GLSurfaceView

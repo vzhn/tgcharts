@@ -1,7 +1,7 @@
 package me.vzhilin.charts.graphics;
 
 import android.graphics.Color;
-import android.opengl.GLES20;
+import android.opengl.GLES31;
 import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
@@ -21,7 +21,8 @@ public class ChartComponent {
                     // the matrix must be included as a modifier of gl_Position
                     // Note that the uMVPMatrix factor *must be first* in order
                     // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "  gl_Position = uMVPMatrix * vPosition; " +
+                    "  gl_PointSize = 10.0;" +
                     "}";
 
     private final String fragmentShaderCode =
@@ -46,47 +47,47 @@ public class ChartComponent {
         color[1] = Color.green(c) / 255f;
         color[2] = Color.blue(c) / 255f;
 
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
         // create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
+        mProgram = GLES31.glCreateProgram();
 
         // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, vertexShader);
+        GLES31.glAttachShader(mProgram, vertexShader);
 
         // add the fragment shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader);
+        GLES31.glAttachShader(mProgram, fragmentShader);
 
         // creates OpenGL ES program executables
-        GLES20.glLinkProgram(mProgram);
+        GLES31.glLinkProgram(mProgram);
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
+        GLES31.glUseProgram(mProgram);
 
         // get handle to vertex shader's vPosition member
-        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
+        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                GLES31.GL_FLOAT, false,
                 yColumn.getVertexStride(), yColumn.getVertexBuffer());
 
         // get handle to fragment shader's vColor member
-        int mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+        int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
 
         color[3] = yColumn.getOpacity();
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES31.glUniform4fv(mColorHandle, 1, color, 0);
 
         // get handle to shape's transformation matrix
-        int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         float[] identity = new float[] {
                 1.0f, 0.0f, 0.0f, 0.0f,
@@ -112,13 +113,15 @@ public class ChartComponent {
         Matrix.translateM(identity, 0, 0, 2 * scrollFactor / yScaleFactor, 0);
 
         // Pass the projection and view transformation to the shader
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
+        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
-        GLES20.glLineWidth(6f);
-        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, yColumn.getVertexCount());
-        GLES20.glLineWidth(1f);
+        GLES31.glLineWidth(ViewConstants.LINE_WIDTH);
+        GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexCount());
+//        GLES31.glDrawArrays(GLES31.GL_POINTS, 0, yColumn.getVertexCount());
+//        GLES31.glDrawArrays(GLES31.GL_POINTS);
+        GLES31.glLineWidth(1f);
 
         // Disable vertex array
-//        GLES20.glDisableVertexAttribArray(mPositionHandle);
+//        GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 }

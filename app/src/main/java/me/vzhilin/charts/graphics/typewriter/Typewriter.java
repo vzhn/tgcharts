@@ -1,9 +1,10 @@
 package me.vzhilin.charts.graphics.typewriter;
 
 import android.graphics.*;
-import android.opengl.GLES20;
+import android.opengl.GLES31;
 import android.opengl.GLUtils;
 import android.text.TextPaint;
+import me.vzhilin.charts.ViewConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +12,10 @@ import java.util.Map;
 public class Typewriter {
     private final int textureId;
     private final Map<Character, TextureCharacter> characters = new HashMap<>();
-    private final float textHeight;
+    private final float textureHeight;
     private final TextPaint textPaint;
     private final Paint.FontMetrics fm;
+    private TextureCharacter circleTexture;
 
     public Typewriter() {
         textPaint = new TextPaint();
@@ -21,7 +23,7 @@ public class Typewriter {
         textPaint.setAntiAlias(true);
         textPaint.setARGB(0xff, 0, 0, 0);
         fm = textPaint.getFontMetrics();
-        textHeight = fm.descent - fm.top;
+        textureHeight = fm.descent - fm.top;
 
         textureId = initTextures();
     }
@@ -38,21 +40,32 @@ public class Typewriter {
 
 
         float textWidth = textPaint.measureText(alfabet);
+        float textureWidth = textWidth + 2 * ViewConstants.LINE_WIDTH;
 
         float ws = 0;
         for (int i = 0; i < alfabet.length(); i++) {
             char ch = alfabet.charAt(i);
             float charWidth = textPaint.measureText(String.valueOf(ch));
-            characters.put(ch, new TextureCharacter(ws / textWidth, 0, (ws + charWidth) / textWidth, 1f,
-                    charWidth, textHeight));
+            characters.put(ch, new TextureCharacter(ws / textureWidth, 0, (ws + charWidth) / textureWidth, 1f,
+                    charWidth, textureHeight));
 
             ws += charWidth;
         }
 
-        Bitmap bitmap = Bitmap.createBitmap((int) textWidth, (int) textHeight, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap((int) textureWidth, (int) textureHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawText(alfabet, 0,textHeight - fm.descent, textPaint);
+        canvas.drawText(alfabet, 0, textureHeight - fm.descent, textPaint);
+
+        drawCircle(canvas, textWidth, textureWidth);
         return generateTextures(bitmap);
+    }
+
+    private void drawCircle(Canvas canvas, float offset, float textureWidth) {
+        float r = ViewConstants.LINE_WIDTH;
+        float d = 2 * r;
+
+        canvas.drawCircle(offset + r, r, r, textPaint);
+        circleTexture = new TextureCharacter(offset / textureWidth, 0, (offset + d) / textureWidth, d / textureHeight, d, d);
     }
 
     public TextureCharacter get(char ch) {
@@ -61,19 +74,23 @@ public class Typewriter {
 
     private int generateTextures(Bitmap bitmap) {
         int[] textures = new int[1];
-        GLES20.glGenTextures(1, textures, 0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+        GLES31.glGenTextures(1, textures, 0);
+        GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, textures[0]);
+        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_MIN_FILTER, GLES31.GL_NEAREST);
+        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_MAG_FILTER, GLES31.GL_LINEAR);
+        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_WRAP_S, GLES31.GL_REPEAT);
+        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_WRAP_T, GLES31.GL_REPEAT);
+        GLUtils.texImage2D(GLES31.GL_TEXTURE_2D, 0, bitmap, 0);
         bitmap.recycle();
         return textures[0];
     }
 
     public float getHeight() {
-        return textHeight;
+        return textureHeight;
+    }
+
+    public TextureCharacter getCircleTexture() {
+        return circleTexture;
     }
 
     public final static class TextureCharacter {

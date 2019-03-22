@@ -1,6 +1,6 @@
 package me.vzhilin.charts.graphics;
 
-import android.opengl.GLES20;
+import android.opengl.GLES31;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
@@ -115,10 +115,9 @@ public class TextComponent {
 
     static float colorVertices[];
 
-    public TextComponent(Model model) {
+    public TextComponent(Typewriter tw, Model model) {
         this.model = model;
-
-        tw = new Typewriter();
+        this.tw = tw;
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer vertexBB = ByteBuffer.allocateDirect(
@@ -133,28 +132,28 @@ public class TextComponent {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
         // create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
+        mProgram = GLES31.glCreateProgram();
 
         mPositionHandle = 1;
         mOpacity = 2;
         mInputTextureCoordinate = 3;
 
-        GLES20.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
-        GLES20.glBindAttribLocation(mProgram, mOpacity, "opacity");
-        GLES20.glBindAttribLocation(mProgram, mInputTextureCoordinate, "inputTextureCoordinate");
+        GLES31.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
+        GLES31.glBindAttribLocation(mProgram, mOpacity, "opacity");
+        GLES31.glBindAttribLocation(mProgram, mInputTextureCoordinate, "inputTextureCoordinate");
 
         // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, vertexShader);
+        GLES31.glAttachShader(mProgram, vertexShader);
 
         // add the fragment shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader);
+        GLES31.glAttachShader(mProgram, fragmentShader);
 
         // creates OpenGL ES program executables
-        GLES20.glLinkProgram(mProgram);
+        GLES31.glLinkProgram(mProgram);
     }
 
     public void draw(int width, int height, float[] mMVPMatrix) {
@@ -162,7 +161,7 @@ public class TextComponent {
     }
 
     public void drawString(List<StringComponent> strings, float[] mMVPMatrix) {
-        GLES20.glUseProgram(mProgram);
+        GLES31.glUseProgram(mProgram);
 
         prepareBuffers(strings);
         fillBuffers(strings);
@@ -262,50 +261,54 @@ public class TextComponent {
     private void drawBuffer(float[] mMVPMatrix) {
         // get handle to vertex shader's vPosition member
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glEnableVertexAttribArray(mOpacity);
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glEnableVertexAttribArray(mOpacity);
+        GLES31.glEnableVertexAttribArray(mInputTextureCoordinate);
 
         vertexBuffer.clear();
         vertexBuffer.put(squareVertices);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
+        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                GLES31.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
         textureBuffer.clear();
         textureBuffer.put(textureVertices);
-        GLES20.glEnableVertexAttribArray(mInputTextureCoordinate);
+
         textureBuffer.position(0);
 
-        GLES20.glVertexAttribPointer(mInputTextureCoordinate, 3,
-                GLES20.GL_FLOAT, false,
+        GLES31.glVertexAttribPointer(mInputTextureCoordinate, 3,
+                GLES31.GL_FLOAT, false,
                 vertexStride, textureBuffer);
 
         floatBuffer.clear();
         floatBuffer.put(colorVertices);
         floatBuffer.position(0);
-        GLES20.glVertexAttribPointer(mOpacity, 1, GLES20.GL_FLOAT, false, 4, floatBuffer);
+        GLES31.glVertexAttribPointer(mOpacity, 1, GLES31.GL_FLOAT, false, 4, floatBuffer);
 
         // get handle to shape's transformation matrix
-        int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-        int mTexture = GLES20.glGetUniformLocation(mProgram, "videoFrame");
+        int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
+        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tw.getTextureId());
-        GLES20.glUniform1i(mTexture, 0);
+        int mTexture = GLES31.glGetUniformLocation(mProgram, "videoFrame");
+        GLES31.glActiveTexture(GLES31.GL_TEXTURE0);
+        GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, tw.getTextureId());
+        GLES31.glUniform1i(mTexture, 0);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, squareVertices.length / COORDS_PER_VERTEX);
+        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, squareVertices.length / COORDS_PER_VERTEX);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
-        GLES20.glDisableVertexAttribArray(mInputTextureCoordinate);
-        GLES20.glDisableVertexAttribArray(mOpacity);
+        GLES31.glDisableVertexAttribArray(mPositionHandle);
+        GLES31.glDisableVertexAttribArray(mInputTextureCoordinate);
+        GLES31.glDisableVertexAttribArray(mOpacity);
     }
 
+    public Typewriter getTypewriter() {
+        return tw;
+    }
 }
 
