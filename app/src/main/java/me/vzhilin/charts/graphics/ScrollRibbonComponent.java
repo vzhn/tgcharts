@@ -119,7 +119,7 @@ public class ScrollRibbonComponent {
         triangleCoords[15] = 0;
         triangleCoords[16] = bottomY;
 
-        triangleCoords[18] = rightX + FRAME_WIDTH_2;
+        triangleCoords[18] = rightX;
         triangleCoords[19] = topY - FRAME_WIDTH_1;
 
         triangleCoords[21] = width;
@@ -128,13 +128,13 @@ public class ScrollRibbonComponent {
         triangleCoords[24] = width;
         triangleCoords[25] = bottomY;
 
-        triangleCoords[27] = rightX + FRAME_WIDTH_2;
+        triangleCoords[27] = rightX;
         triangleCoords[28] = topY - FRAME_WIDTH_1;
 
         triangleCoords[30] = width;
         triangleCoords[31] = bottomY;
 
-        triangleCoords[33] = rightX + FRAME_WIDTH_2;
+        triangleCoords[33] = rightX;
         triangleCoords[34] = bottomY;
 
 

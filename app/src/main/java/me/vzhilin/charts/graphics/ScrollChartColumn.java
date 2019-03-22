@@ -85,7 +85,6 @@ final class ScrollChartColumn {
         int vertexCount = xColumn.size();
         int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
         FloatBuffer vertexBuffer = buildBytebuffer(xColumn).asFloatBuffer();
-        FloatBuffer triangleBuffer = buildBytebuffer(xColumn).asFloatBuffer();
 
         while (itX.hasNext()) {
             float x = (float) ((itX.next().floatValue() - minX) * xFactor) * 2f - 1f;
@@ -143,11 +142,11 @@ final class ScrollChartColumn {
             0.0f, 0.0f, 0.0f, 1.0f,
         };
         Matrix.setIdentityM(identity, 0);
-        float scaleFactor = (float) 2 *  ViewConstants.SCROLL_HEIGHT / height * yColumn.getAnimatedScrollYScaleFactor();
+        float scaleFactor = 0.8f * (float) 2 *  ViewConstants.SCROLL_HEIGHT / height * yColumn.getAnimatedScrollYScaleFactor();
 
         Matrix.scaleM(identity, 0, 1f, scaleFactor, 1f);
 
-        Matrix.translateM(identity, 0, 0, - 1f / scaleFactor, 0);
+        Matrix.translateM(identity, 0, 0, (- 1f + (0.2f * ViewConstants.SCROLL_HEIGHT / height)) / scaleFactor  , 0);
 
         // Pass the projection and view transformation to the shader
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);

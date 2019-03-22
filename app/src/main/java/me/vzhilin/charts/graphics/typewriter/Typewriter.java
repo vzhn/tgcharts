@@ -19,7 +19,7 @@ public class Typewriter {
 
     public Typewriter() {
         textPaint = new TextPaint();
-        textPaint.setTextSize(38);
+        textPaint.setTextSize(ViewConstants.FONT_SIZE);
         textPaint.setAntiAlias(true);
         textPaint.setARGB(0xff, 0, 0, 0);
         fm = textPaint.getFontMetrics();
@@ -51,6 +51,8 @@ public class Typewriter {
 
             ws += charWidth;
         }
+
+        textPaint.setColor(ViewConstants.VIEW_GRAY);
 
         Bitmap bitmap = Bitmap.createBitmap((int) textureWidth, (int) textureHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);

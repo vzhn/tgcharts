@@ -2,8 +2,10 @@ package me.vzhilin.charts;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.opengl.GLSurfaceView;
+import android.support.v4.widget.CompoundButtonCompat;
 import android.util.AttributeSet;
 import android.util.JsonReader;
 import android.view.MotionEvent;
@@ -50,9 +52,14 @@ class MyGLSurfaceView extends GLSurfaceView {
         Chart chart = model.getChart();
         for (final Column yColumn: chart.getYColumns()) {
             CheckBox checkBox = new CheckBox(getContext());
+
+            int states[][] = {{android.R.attr.state_checked}, {}};
+            int colors[] = {chart.getColor(yColumn.getLabel()), ViewConstants.VIEW_GRAY};
+            CompoundButtonCompat.setButtonTintList(checkBox, new ColorStateList(states, colors));
+
             final String label = yColumn.getLabel();
             checkBox.setText(label);
-            checkBox.setTextColor(chart.getColor(label));
+
             mailLayout.addView(checkBox);
 
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

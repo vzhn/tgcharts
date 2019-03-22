@@ -51,17 +51,20 @@ public class DateRibbonComponent {
         }
 
         List<StringComponent> components = new ArrayList<>();
+        int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT - textComponent.getTypewriter().getHeight());
+
+
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
             double xPos = (date - min) * xFactor;
             String dateText = format.format(new Date((long) date));
-            components.add(new StringComponent((int) xPos, height - ViewConstants.SCROLL_HEIGHT, dateText, 1.0f));
+            components.add(new StringComponent((int) xPos, yPos, dateText, 1.0f));
         }
 
         if (state == RibbonState.ZOOM_IN || state == RibbonState.ZOOM_OUT) {
             for (double date: xColumn.sampleHalf(effectiveK - 1, model.getScrollLeft(), model.getScrollRight())) {
                 double xPos = (date - min) * xFactor;
                 String dateText = format.format(new Date((long) date));
-                components.add(new StringComponent((int) xPos, height - ViewConstants.SCROLL_HEIGHT, dateText, (float) alpha * 0.5f));
+                components.add(new StringComponent((int) xPos, yPos, dateText, (float) alpha));
             }
         }
 

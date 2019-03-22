@@ -36,6 +36,7 @@ public class GridComponent {
             "precision mediump float;" +
                     "uniform float vColor;" +
                     "void main() {" +
+                    "  gl_FragColor.rgb = vec3(241.0 / 255.0, 241.0 / 255.0, 241.0 / 255.0);" +
                     "  gl_FragColor.a = vColor;" +
                     "}";
 
@@ -113,9 +114,7 @@ public class GridComponent {
         float i1 = (float) maxValue / 6f;
         for (int i = 0; i < 10; i++) {
             triangleCoords[6 * i + 0] = -1f;
-
             triangleCoords[6 * i + 1] = i1 * i;
-
             triangleCoords[6 * i + 3] = +1f;
             triangleCoords[6 * i + 4] = i1 * i;
         }
@@ -163,6 +162,7 @@ public class GridComponent {
         // Pass the projection and view transformation to the shader
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
+        GLES31.glLineWidth(4f);
         // Draw the triangle
         GLES31.glDrawArrays(GLES31.GL_LINES, 0, vertexCount);
 
@@ -178,9 +178,9 @@ public class GridComponent {
         List<StringComponent> strings = new ArrayList<>();
         float yPos = 0;
         for (int i = 0; i < 6; i++) {
-            int y = (int) (height - ViewConstants.CHART_OFFSET - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
+            int y = (int) (-10 + height - ViewConstants.CHART_OFFSET - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
             String text = String.format("%.0f", i * maxValue / 6f);
-            strings.add(new StringComponent(5, y, text, opacity * 0.5f));
+            strings.add(new StringComponent(5, y, text, opacity));
             yPos += step;
         }
         textComponent.drawString(strings, mvpMatrix);
