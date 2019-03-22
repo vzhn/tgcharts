@@ -2,6 +2,7 @@ package me.vzhilin.charts;
 
 import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
+import me.vzhilin.charts.graphics.DateRibbonComponent;
 import me.vzhilin.charts.graphics.GridComponent;
 import me.vzhilin.charts.transitions.LinearTransition;
 import me.vzhilin.charts.transitions.SinTransition;
@@ -18,10 +19,14 @@ public class Model {
     private int width;
     private int height;
 
-    private List<Transition> animationList = new ArrayList();
-    private List<GridComponent> gridComponents = new ArrayList<>();
     private double maxFactor;
     private double smoothMaxFactor = -1;
+
+    private List<Transition> animationList = new ArrayList<>();
+    private List<GridComponent> gridComponents = new ArrayList<>();
+
+    private DateRibbonComponent dateRibbonComponent;
+    private int dateRibbonKFactor = 1;
 
     public Model(Chart chart) {
         this.chart = chart;
@@ -106,12 +111,28 @@ public class Model {
             fadeInComponent.show();
             fadeOutComponent.hide();
 
-
-
-//            gridComponents.get(1).hide((float) maxFactor, (float) max);
-//            gc.startTransition((float) maxFactor, (float) max, 20);
-
             maxFactor = max;
+        }
+
+        refreshK();
+    }
+
+    private void refreshK() {
+        if (width == 0) {
+            return;
+        }
+
+        Column xColumn = chart.getXColumn();
+        double xDelta = xColumn.getMaxValue() -  xColumn.getMinValue();
+        xDelta *= (getScrollRight() - getScrollLeft());
+
+        double xFactor = width / xDelta;
+
+        int oldValue = dateRibbonKFactor;
+        dateRibbonKFactor = (int) Math.max(1, Math.log(ViewConstants.WIDTH_LIMIT / (xColumn.getDivision() * xFactor)) / Math.log(2));
+
+        if (dateRibbonComponent != null && dateRibbonKFactor != oldValue) {
+            dateRibbonComponent.onFactorUpdated(oldValue, dateRibbonKFactor);
         }
     }
 
@@ -199,5 +220,13 @@ public class Model {
 
     public Collection<GridComponent> getGridComponents() {
         return gridComponents;
+    }
+
+    public int getK() {
+        return dateRibbonKFactor;
+    }
+
+    public void setRibbonComponent(DateRibbonComponent dateRibbonComponent) {
+        this.dateRibbonComponent = dateRibbonComponent;
     }
 }

@@ -50,16 +50,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
-        for (GridComponent gc: model.getGridComponents()) {
-            gc.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-            gc.tick();
-        }
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
+        for (GridComponent gc: model.getGridComponents()) {
+            gc.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            gc.tick();
+        }
         model.tick();
+        mDateComponent.tick();
 
         long delta = System.currentTimeMillis() - ts;
     }

@@ -15,7 +15,7 @@ public class TestSampling {
         }
         Column column = new Column("a", data);
 
-        System.out.println(column.sample(1, 0, 1));
+        System.out.println(column.sampleHalf(1, 0, 1));
         System.out.println(column.sample(2, 0, 1));
     }
 }

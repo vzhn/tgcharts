@@ -30,8 +30,7 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         Data data = readResource(context.getResources());
         model = new Model(data.getChart(0));
-        model.setScrollLeft(0.5);
-        model.setScrollRight(0.6);
+        model.setScroll(0.5, 0.6);
 
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(2);
