@@ -62,8 +62,6 @@ public class DateRibbonComponent {
                 double xPos = (date - min) * xFactor;
                 String dateText = format.format(new Date((long) date));
                 components.add(new StringComponent((int) xPos, height - ViewConstants.SCROLL_HEIGHT, dateText, (float) alpha * 0.5f));
-
-                System.err.println(dateText);
             }
         }
 
