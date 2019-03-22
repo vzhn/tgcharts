@@ -10,8 +10,7 @@ import me.vzhilin.charts.transitions.SinTransition;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 public class GridComponent {
     private final Model model;
@@ -27,7 +26,7 @@ public class GridComponent {
                     // for the matrix multiplication product to be correct.
                     "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
-    private final TextComponent textComponent;
+    private final SpriteRenderer spriteRenderer;
 
     // Use to access and set the view transformation
     private int mMVPMatrixHandle;
@@ -61,9 +60,9 @@ public class GridComponent {
     private State state = State.HIDDEN;
     private double maxValue;
 
-    public GridComponent(TextComponent textComponent, Model model) {
+    public GridComponent(SpriteRenderer spriteRenderer, Model model) {
         this.model = model;
-        this.textComponent = textComponent;
+        this.spriteRenderer = spriteRenderer;
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -175,15 +174,14 @@ public class GridComponent {
     private void drawText(int height, float[] mvpMatrix) {
         float step = (height - ViewConstants.CHART_OFFSET) / 6;
 
-        List<StringComponent> strings = new ArrayList<>();
         float yPos = 0;
         for (int i = 0; i < 6; i++) {
             int y = (int) (-10 + height - ViewConstants.CHART_OFFSET - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
-            String text = String.format("%.0f", i * maxValue / 6f);
-            strings.add(new StringComponent(5, y, text, opacity));
+            spriteRenderer.drawString(String.format("%.0f", i * maxValue / 6f, Locale.US), 5, y,  opacity);
+
             yPos += step;
         }
-        textComponent.drawString(strings, mvpMatrix);
+
     }
 
     public void show() {

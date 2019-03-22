@@ -18,10 +18,10 @@ public class DateRibbonComponent {
     private double alpha = 0;
     private int k = 1;
 
-    private final TextComponent textComponent;
+    private final SpriteRenderer spriteRenderer;
 
-    public DateRibbonComponent(TextComponent textComponent, Model model) {
-        this.textComponent = textComponent;
+    public DateRibbonComponent(SpriteRenderer spriteRenderer, Model model) {
+        this.spriteRenderer = spriteRenderer;
         this.model = model;
 
         model.setRibbonComponent(this);
@@ -50,25 +50,23 @@ public class DateRibbonComponent {
                 break;
         }
 
-        List<StringComponent> components = new ArrayList<>();
-        int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT - textComponent.getTypewriter().getHeight());
+        List<StringSprite> components = new ArrayList<>();
+        int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT - spriteRenderer.getTypewriter().getHeight());
 
 
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
             double xPos = (date - min) * xFactor;
             String dateText = format.format(new Date((long) date));
-            components.add(new StringComponent((int) xPos, yPos, dateText, 1.0f));
+            spriteRenderer.drawString(dateText, (int) xPos, yPos, 1.0f);
         }
 
         if (state == RibbonState.ZOOM_IN || state == RibbonState.ZOOM_OUT) {
             for (double date: xColumn.sampleHalf(effectiveK - 1, model.getScrollLeft(), model.getScrollRight())) {
                 double xPos = (date - min) * xFactor;
                 String dateText = format.format(new Date((long) date));
-                components.add(new StringComponent((int) xPos, yPos, dateText, (float) alpha));
+                spriteRenderer.drawString(dateText, (int) xPos, yPos,  (float) alpha);
             }
         }
-
-        textComponent.drawString(components, mMVPMatrix);
     }
     public void onFactorUpdated(int kOld, int k) {
         switch (state) {

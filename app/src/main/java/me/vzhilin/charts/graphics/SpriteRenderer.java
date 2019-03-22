@@ -8,15 +8,11 @@ import me.vzhilin.charts.graphics.typewriter.Typewriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-public class TextComponent {
-    private static final int FRAME_WIDTH_2 = 20;
-    private static final int FRAME_WIDTH_1 = 5;
-    private final Model model;
-
+public class SpriteRenderer {
     private final String vertexShaderCode =
         // This matrix member variable provides a hook to manipulate
         // the coordinates of the objects that use this vertex shader
@@ -34,47 +30,25 @@ public class TextComponent {
         "  vOpacity = opacity;" +
         "  textureCoordinate = inputTextureCoordinate.xy;" +
         "}";
+
+    private final String fragmentShaderCode =
+        "precision mediump float;"+
+        "varying vec2 textureCoordinate;" +
+        "varying float vOpacity;" +
+        "uniform sampler2D videoFrame;" +
+        "uniform vec4 vColor;" +
+        "void main() {" +
+        "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
+        "  color.a *= vOpacity;" +
+        "  gl_FragColor = color;" +
+        "}";
+
     private final Typewriter tw;
 
     private final int mPositionHandle;
     private final int mOpacity;
     private final int mInputTextureCoordinate;
 
-//    private final int textureId;
-
-//    private final String vertexShaderCode =
-//            // This matrix member variable provides a hook to manipulate
-//            // the coordinates of the objects that use this vertex shader
-//            "uniform mat4 uMVPMatrix;" +
-//            "attribute vec4 vPosition;" +
-//            "void main() {" +
-//            // the matrix must be included as a modifier of gl_Position
-//            // Note that the uMVPMatrix factor *must be first* in order
-//            // for the matrix multiplication product to be correct.
-//            "  gl_Position = uMVPMatrix * vPosition;" +
-//            "}";
-
-    // Use to access and set the view transformation
-    private int mMVPMatrixHandle;
-
-//    private final String fragmentShaderCode =
-//            "precision mediump float;" +
-//                    "uniform vec4 vColor;" +
-//                    "void main() {" +
-//                    "  gl_FragColor = vColor;" +
-//                    "}";
-
-    private final String fragmentShaderCode =
-            "precision mediump float;"+
-            "varying vec2 textureCoordinate;" +
-            "varying float vOpacity;" +
-            "uniform sampler2D videoFrame;" +
-            "uniform vec4 vColor;" +
-            "void main() {" +
-            "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
-            "  color.a *= vOpacity;" +
-            "  gl_FragColor = color;" +
-            "}";
 
     private final int mProgram;
 
@@ -87,6 +61,9 @@ public class TextComponent {
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
+
+    private final List<StringSprite> stringSprites = new ArrayList<StringSprite>();
+    private final List<TextureSprite> sprites = new ArrayList<>();
 
 //    static float triangleCoords[] = new float[3 * 12];
 
@@ -115,8 +92,7 @@ public class TextComponent {
 
     static float colorVertices[];
 
-    public TextComponent(Typewriter tw, Model model) {
-        this.model = model;
+    public SpriteRenderer(Typewriter tw, Model model) {
         this.tw = tw;
 
         // initialize vertex byte buffer for shape coordinates
@@ -157,33 +133,42 @@ public class TextComponent {
     }
 
     public void draw(int width, int height, float[] mMVPMatrix) {
-        // Add program to OpenGL ES environment
-    }
-
-    public void drawString(List<StringComponent> strings, float[] mMVPMatrix) {
         GLES31.glUseProgram(mProgram);
 
-        prepareBuffers(strings);
-        fillBuffers(strings);
+        prepareBuffers();
+        fillBuffers();
         drawBuffer(mMVPMatrix);
 
+        sprites.clear();
+        stringSprites.clear();
     }
 
-    private void prepareBuffers(List<StringComponent> stirngs) {
-        int totalCharacters = 0;
-        for (StringComponent sc: stirngs) {
-            totalCharacters += sc.s.length();
+
+    public void drawSprite(Typewriter.TextureCharacter character, int x, int y) {
+        sprites.add(new TextureSprite(character, x, y));
+    }
+
+    public void drawString(String string, int x, int y, float opacity) {
+        stringSprites.add(new StringSprite(x, y, string, opacity));
+    }
+
+    private void prepareBuffers() {
+        int totalSprites = 0;
+        for (StringSprite sc: stringSprites) {
+            totalSprites += sc.s.length();
         }
 
-        squareVertices = new float[18 * totalCharacters];
-        textureVertices = new float[18 * totalCharacters];
-        colorVertices = new float[6 * totalCharacters];
+        totalSprites += sprites.size();
+
+        squareVertices = new float[18 * totalSprites];
+        textureVertices = new float[18 * totalSprites];
+        colorVertices = new float[6 * totalSprites];
     }
 
-    private void fillBuffers(List<StringComponent> stirngs) {
+    private void fillBuffers() {
         int i = 0;
 
-        for (StringComponent sc: stirngs) {
+        for (StringSprite sc: stringSprites) {
             float offset = sc.x;
 
             for (int j = 0; j < sc.s.length(); j++) {
@@ -237,6 +222,54 @@ public class TextComponent {
                 offset += width;
                 ++i;
             }
+        }
+
+        for (TextureSprite tx: sprites) {
+            Typewriter.TextureCharacter ch = tx.character;
+            float x1 = tx.x, y1 = tx.y, x2 = tx.x + ch.width, y2 = tx.y + ch.width;
+
+            squareVertices[i * 18 + 0] = x1;
+            squareVertices[i * 18 + 1] = y1;
+
+            squareVertices[i * 18 + 3] = x2;
+            squareVertices[i * 18 + 4] = y1;
+
+            squareVertices[i * 18 + 6] = x1;
+            squareVertices[i * 18 + 7] = y2;
+
+            squareVertices[i * 18 + 9] = x2;
+            squareVertices[i * 18 + 10] = y1;
+
+            squareVertices[i * 18 + 12] = x2;
+            squareVertices[i * 18 + 13] = y2;
+
+            squareVertices[i * 18 + 15] = x1;
+            squareVertices[i * 18 + 16] = y2;
+
+            textureVertices[i * 18 + 0] = ch.x1;
+            textureVertices[i * 18 + 1] = ch.y1;
+
+            textureVertices[i * 18 + 3] = ch.x2;
+            textureVertices[i * 18 + 4] = ch.y1;
+
+            textureVertices[i * 18 + 6] = ch.x1;
+            textureVertices[i * 18 + 7] = ch.y2;
+
+            textureVertices[i * 18 + 9] = ch.x2;
+            textureVertices[i * 18 + 10] = ch.y1;
+
+            textureVertices[i * 18 + 12] = ch.x2;
+            textureVertices[i * 18 + 13] = ch.y2;
+
+            textureVertices[i * 18 + 15] = ch.x1;
+            textureVertices[i * 18 + 16] = ch.y2;
+
+            colorVertices[i * 6 + 0] = 1f;
+            colorVertices[i * 6 + 1] = 1f;
+            colorVertices[i * 6 + 2] = 1f;
+            colorVertices[i * 6 + 3] = 1f;
+            colorVertices[i * 6 + 4] = 1f;
+            colorVertices[i * 6 + 5] = 1f;
         }
 
         ByteBuffer vertexBB = ByteBuffer.allocateDirect(squareVertices.length * 4);
@@ -309,6 +342,18 @@ public class TextComponent {
 
     public Typewriter getTypewriter() {
         return tw;
+    }
+
+    private class TextureSprite {
+        private final Typewriter.TextureCharacter character;
+        public final int x;
+        public final int y;
+
+        public TextureSprite(Typewriter.TextureCharacter character, int x, int y) {
+            this.character = character;
+            this.x = y;
+            this.y = y;
+        }
     }
 }
 

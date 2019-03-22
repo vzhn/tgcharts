@@ -23,6 +23,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
+    private SpriteRenderer spriteRenderer;
 
     public MyGLRenderer(Model model) {
         this.model = model;
@@ -56,11 +57,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             gc.tick();
         }
 
+        spriteRenderer.drawSprite(spriteRenderer.getTypewriter().getCircleTexture(), 100, 100);
+
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+        spriteRenderer.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
         model.tick();
         mDateComponent.tick();
@@ -78,16 +82,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
 
         Typewriter tw = new Typewriter();
-        TextComponent textComponent = new TextComponent(tw, model);
+        spriteRenderer = new SpriteRenderer(tw, model);
         // initialize a triangle
         mScrollComponent = new ScrollComponent(model);
-        mDateComponent = new DateRibbonComponent(textComponent, model);
-        scrollChartComponent = new ScrollChartComponent(model, textComponent);
+        mDateComponent = new DateRibbonComponent(spriteRenderer, model);
+        scrollChartComponent = new ScrollChartComponent(model, spriteRenderer);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
         mPopupComponent = new PopupComponent(model, tw);
 
-        model.getGridComponents().add(new GridComponent(textComponent, model));
-        model.getGridComponents().add(new GridComponent(textComponent, model));
+        model.getGridComponents().add(new GridComponent(spriteRenderer, model));
+        model.getGridComponents().add(new GridComponent(spriteRenderer, model));
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

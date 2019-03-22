@@ -5,7 +5,6 @@ import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class ScrollChartComponent {
@@ -13,7 +12,7 @@ public class ScrollChartComponent {
     private final List<ChartLineCapsComponent> chartCapsComponents = new ArrayList<>();
     private List<ScrollChartColumn> subcomponents = new ArrayList<>();
 
-    public ScrollChartComponent(Model model, TextComponent textComponent) {
+    public ScrollChartComponent(Model model, SpriteRenderer spriteRenderer) {
         Chart chart = model.getChart();
 
         Column xColumn = chart.getXColumn();
@@ -21,7 +20,7 @@ public class ScrollChartComponent {
             int color = chart.getColor(yColumn.getLabel());
             subcomponents.add(new ScrollChartColumn(xColumn, yColumn, color));
             chartComponents.add(new ChartComponent(model, xColumn, yColumn, color));
-            chartCapsComponents.add(new ChartLineCapsComponent(textComponent.getTypewriter(), model, xColumn, yColumn, color));
+            chartCapsComponents.add(new ChartLineCapsComponent(spriteRenderer.getTypewriter(), model, xColumn, yColumn, color));
         }
     }
 
