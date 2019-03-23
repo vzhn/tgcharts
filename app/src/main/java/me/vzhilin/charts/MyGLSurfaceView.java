@@ -39,7 +39,7 @@ class MyGLSurfaceView extends GLSurfaceView {
         setEGLContextClientVersion(3);
 //        GLES31.glHint(GLES31.GL_NICEST);
 
-        renderer = new MyGLRenderer(model);
+        renderer = new MyGLRenderer(model, context.getResources());
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);

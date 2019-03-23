@@ -50,9 +50,8 @@ public class DateRibbonComponent {
                 break;
         }
 
-        List<StringSprite> components = new ArrayList<>();
-        int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT - spriteRenderer.getTypewriter().getHeight());
-
+        int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT -
+            spriteRenderer.getTypewriter().getContext(ViewConstants.FONT_SIZE_1).fontHeight);
 
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
             double xPos = (date - min) * xFactor;

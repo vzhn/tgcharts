@@ -3,6 +3,8 @@ package me.vzhilin.charts.graphics;
 import android.opengl.GLES31;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
+import me.vzhilin.charts.ViewConstants;
+import me.vzhilin.charts.graphics.typewriter.FontContext;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.nio.ByteBuffer;
@@ -39,7 +41,9 @@ public class SpriteRenderer {
         "uniform vec4 vColor;" +
         "void main() {" +
         "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
-        "  color.a *= vOpacity;" +
+        "  color.r += 0.5;" +
+        "  color.a += 0.5;" +
+        "  color.a *= vOpacity;" + //FIXME
         "  gl_FragColor = color;" +
         "}";
 
@@ -149,7 +153,7 @@ public class SpriteRenderer {
     }
 
     public void drawString(String string, int x, int y, float opacity) {
-        stringSprites.add(new StringSprite(x, y, string, opacity));
+        stringSprites.add(new StringSprite(x, y, string, opacity, ViewConstants.FONT_SIZE_1));
     }
 
     private void prepareBuffers() {
@@ -171,11 +175,12 @@ public class SpriteRenderer {
         for (StringSprite sc: stringSprites) {
             float offset = sc.x;
 
+            FontContext context = tw.getContext(sc.size);
             for (int j = 0; j < sc.s.length(); j++) {
-                Typewriter.TextureCharacter ch = tw.get(sc.s.charAt(j));
+                Typewriter.TextureCharacter ch = context.get(sc.s.charAt(j));
                 float width = ch.width;
 
-                float x1 = offset, y1 = sc.y - tw.getHeight(), x2 = offset + width, y2 = sc.y;
+                float x1 = offset, y1 = sc.y - ch.height, x2 = offset + width, y2 = sc.y;
 
                 squareVertices[i * 18 + 0] = x1;
                 squareVertices[i * 18 + 1] = y1;

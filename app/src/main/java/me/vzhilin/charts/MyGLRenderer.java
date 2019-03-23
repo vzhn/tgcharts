@@ -1,5 +1,6 @@
 package me.vzhilin.charts;
 
+import android.content.res.Resources;
 import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -10,8 +11,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final Model model;
+    private final Resources resources;
 
-//    private GridComponent mGridComponent;
+    //    private GridComponent mGridComponent;
     private ScrollChartComponent scrollChartComponent;
     private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
@@ -25,8 +27,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mRotationMatrix = new float[16];
     private SpriteRenderer spriteRenderer;
 
-    public MyGLRenderer(Model model) {
+    public MyGLRenderer(Model model, Resources resources) {
         this.model = model;
+        this.resources = resources;
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -57,8 +60,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             gc.tick();
         }
 
-        spriteRenderer.drawSprite(spriteRenderer.getTypewriter().getCircleTexture(), 100, 100);
-
         mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
         scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
@@ -78,17 +79,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES31.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         GLES31.glEnable(GLES31.GL_BLEND);
 
-//        GLES31.glEnable(GLES31.GL_LINE_SMOOTH);
         GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
 
-        Typewriter tw = new Typewriter();
+
+        Typewriter tw = new Typewriter(resources);
         spriteRenderer = new SpriteRenderer(tw, model);
         // initialize a triangle
         mScrollComponent = new ScrollComponent(model);
         mDateComponent = new DateRibbonComponent(spriteRenderer, model);
         scrollChartComponent = new ScrollChartComponent(model, spriteRenderer);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
-        mPopupComponent = new PopupComponent(model, tw);
+        mPopupComponent = new PopupComponent(model, spriteRenderer);
 
         model.getGridComponents().add(new GridComponent(spriteRenderer, model));
         model.getGridComponents().add(new GridComponent(spriteRenderer, model));
@@ -103,12 +104,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public static int loadShader(int type, String shaderCode){
-
-        // create a vertex shader type (GLES31.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES31.GL_FRAGMENT_SHADER)
         int shader = GLES31.glCreateShader(type);
 
-        // add the source code to the shader and compile it
         GLES31.glShaderSource(shader, shaderCode);
         GLES31.glCompileShader(shader);
 

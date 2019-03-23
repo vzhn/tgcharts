@@ -20,7 +20,7 @@ public class ScrollChartComponent {
             int color = chart.getColor(yColumn.getLabel());
             subcomponents.add(new ScrollChartColumn(xColumn, yColumn, color));
             chartComponents.add(new ChartComponent(model, xColumn, yColumn, color));
-            chartCapsComponents.add(new ChartLineCapsComponent(spriteRenderer.getTypewriter(), model, xColumn, yColumn, color));
+//            chartCapsComponents.add(new ChartLineCapsComponent(spriteRenderer.getTypewriter(), model, xColumn, yColumn, color));
         }
     }
 

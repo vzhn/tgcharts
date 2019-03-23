@@ -1,30 +1,48 @@
 package me.vzhilin.charts.graphics.typewriter;
 
-import android.graphics.*;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.opengl.GLES31;
 import android.opengl.GLUtils;
-import android.text.TextPaint;
+import me.vzhilin.charts.R;
 import me.vzhilin.charts.ViewConstants;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Typewriter {
+    private final Map<Float, FontContext> fontContexts;
+
+    String alfabet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+        "abcdefghijklmnopqrstuvwxyz" +
+        "01234567890.,+-= ";
+
     private final int textureId;
-    private final Map<Character, TextureCharacter> characters = new HashMap<>();
-    private final float textureHeight;
-    private final TextPaint textPaint;
-    private final Paint.FontMetrics fm;
+    private float textureHeight;
+    private final Resources resources;
+    private final float textureWidth;
+
+
     private TextureCharacter circleTexture;
+    private TextureCharacter cornersTexture;
 
-    public Typewriter() {
-        textPaint = new TextPaint();
-        textPaint.setTextSize(ViewConstants.FONT_SIZE);
-        textPaint.setAntiAlias(true);
-        textPaint.setARGB(0xff, 0, 0, 0);
-        fm = textPaint.getFontMetrics();
-        textureHeight = fm.descent - fm.top;
+    public Typewriter(Resources resources) {
+        this.resources = resources;
 
+        fontContexts = new HashMap<>();
+        fontContexts.put(ViewConstants.FONT_SIZE_1, new FontContext(ViewConstants.FONT_SIZE_1, alfabet));
+        fontContexts.put(ViewConstants.FONT_SIZE_2, new FontContext(ViewConstants.FONT_SIZE_2, alfabet));
+
+        float maxWidth = 0;
+        for (FontContext ctx: fontContexts.values()) {
+            textureHeight += ctx.fontHeight;
+            maxWidth = Math.max(maxWidth, ctx.fontWidth);
+        }
+
+        textureWidth = maxWidth;
         textureId = initTextures();
     }
 
@@ -33,45 +51,65 @@ public class Typewriter {
     }
 
     private int initTextures() {
-        String alfabet =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-            "abcdefghijklmnopqrstuvwxyz" +
-            "01234567890.+-= ";
-
-
-        float textWidth = textPaint.measureText(alfabet);
-        float textureWidth = textWidth + 2 * ViewConstants.LINE_WIDTH;
-
-        float ws = 0;
-        for (int i = 0; i < alfabet.length(); i++) {
-            char ch = alfabet.charAt(i);
-            float charWidth = textPaint.measureText(String.valueOf(ch));
-            characters.put(ch, new TextureCharacter(ws / textureWidth, 0, (ws + charWidth) / textureWidth, 1f,
-                    charWidth, textureHeight));
-
-            ws += charWidth;
-        }
-
-        textPaint.setColor(ViewConstants.VIEW_GRAY);
-
         Bitmap bitmap = Bitmap.createBitmap((int) textureWidth, (int) textureHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawText(alfabet, 0, textureHeight - fm.descent, textPaint);
 
-        drawCircle(canvas, textWidth, textureWidth);
+
+        float yOffset = 0;
+        for (FontContext ctx: fontContexts.values()) {
+            float xOffset = 0;
+            canvas.drawText(alfabet, 0, yOffset, ctx.textPaint);
+
+            for (int i = 0; i < alfabet.length(); i++) {
+                char ch = alfabet.charAt(i);
+                float charWidth = ctx.measureText(String.valueOf(ch));
+                float x1 = xOffset / textureWidth;
+                float y1 = yOffset / textureHeight;
+                float x2 = (xOffset + charWidth) / textureWidth;
+                float y2 = (yOffset + ctx.fontHeight) / textureHeight;
+                xOffset += charWidth;
+
+                TextureCharacter tc =  new TextureCharacter(x1, y1, x2, y2, charWidth, ctx.fontHeight);
+                ctx.put(ch, tc);
+            }
+
+            yOffset += ctx.fontHeight;
+        }
+
+
+//        xOffset += drawCircle(canvas, xOffset, textureWidth);
+//        xOffset += drawCorners(canvas, xOffset, textureWidth);
         return generateTextures(bitmap);
     }
 
-    private void drawCircle(Canvas canvas, float offset, float textureWidth) {
-        float r = ViewConstants.LINE_WIDTH;
-        float d = 2 * r;
+    private int drawCorners(Canvas canvas, float ws, float textureWidth) {
+        Bitmap bm = BitmapFactory.decodeResource(resources, R.drawable.corner);
+        canvas.drawBitmap(bm, ws, 0f, null);
+        int w = bm.getWidth();
+        int h = bm.getHeight();
+        bm.recycle();
 
-        canvas.drawCircle(offset + r, r, r, textPaint);
-        circleTexture = new TextureCharacter(offset / textureWidth, 0, (offset + d) / textureWidth, d / textureHeight, d, d);
+        cornersTexture = new TextureCharacter(ws / textureWidth,0, (ws + w) / textureWidth, h / textureHeight,
+                (float) w, (float) h);
+
+        return w;
     }
 
-    public TextureCharacter get(char ch) {
-        return characters.get(ch);
+//    private float drawCircle(Canvas canvas, float offset, float textureWidth) {
+//        float r = ViewConstants.LINE_WIDTH;
+//        float d = 2 * r;
+//
+//        canvas.drawCircle(offset + r, r, r, textPaint);
+//        circleTexture = new TextureCharacter(offset / textureWidth, 0, (offset + d) / textureWidth, d / textureHeight, d, d);
+//        return d;
+//    }
+
+//    public TextureCharacter get(char ch) {
+//        return characters.get(ch);
+//    }
+
+    public FontContext getContext(float size) {
+        return fontContexts.get(size);
     }
 
     private int generateTextures(Bitmap bitmap) {
@@ -95,6 +133,10 @@ public class Typewriter {
         return circleTexture;
     }
 
+    public TextureCharacter getCornersTexture() {
+        return cornersTexture;
+    }
+
     public final static class TextureCharacter {
         public final float x1;
         public final float y1;
@@ -114,4 +156,5 @@ public class Typewriter {
             this.height = height;
         }
     }
+
 }
