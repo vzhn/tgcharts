@@ -4,6 +4,7 @@ import android.opengl.GLES31;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
 import me.vzhilin.charts.ViewConstants;
+import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.FontContext;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
@@ -99,6 +100,12 @@ public class SpriteRenderer {
     public SpriteRenderer(Typewriter tw, Model model) {
         this.tw = tw;
 
+        for (Column column: model.getChart().getYColumns()) {
+            int columnColor = model.getChart().getColor(column.getLabel());
+
+            column.setMarkerSpriteId(tw.newMarker(columnColor));
+        }
+
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer vertexBB = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
@@ -147,8 +154,8 @@ public class SpriteRenderer {
         stringSprites.clear();
     }
 
-    public void drawSprite(int id, float x, float y) {
-        sprites.add(new TextureSprite(tw.getSprite(id), x, y));
+    public void drawSprite(int id, float x, float y, float opacity) {
+        sprites.add(new TextureSprite(tw.getSprite(id), x, y, opacity));
     }
 
     public void drawString(String string, int x, int y, float opacity) {
@@ -272,12 +279,12 @@ public class SpriteRenderer {
             textureVertices[i * 18 + 15] = ch.x1;
             textureVertices[i * 18 + 16] = ch.y2;
 
-            colorVertices[i * 6 + 0] = 1f;
-            colorVertices[i * 6 + 1] = 1f;
-            colorVertices[i * 6 + 2] = 1f;
-            colorVertices[i * 6 + 3] = 1f;
-            colorVertices[i * 6 + 4] = 1f;
-            colorVertices[i * 6 + 5] = 1f;
+            colorVertices[i * 6 + 0] = tx.opacity;
+            colorVertices[i * 6 + 1] = tx.opacity;
+            colorVertices[i * 6 + 2] = tx.opacity;
+            colorVertices[i * 6 + 3] = tx.opacity;
+            colorVertices[i * 6 + 4] = tx.opacity;
+            colorVertices[i * 6 + 5] = tx.opacity;
             ++i;
         }
 
@@ -357,11 +364,13 @@ public class SpriteRenderer {
         private final Typewriter.TextureCharacter character;
         public final float x;
         public final float y;
+        private final float opacity;
 
-        public TextureSprite(Typewriter.TextureCharacter character, float x, float y) {
+        public TextureSprite(Typewriter.TextureCharacter character, float x, float y, float opacity) {
             this.character = character;
             this.x = x;
             this.y = y;
+            this.opacity = opacity;
         }
     }
 }

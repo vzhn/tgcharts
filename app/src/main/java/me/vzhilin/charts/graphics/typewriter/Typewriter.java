@@ -23,19 +23,24 @@ public class Typewriter {
         "abcdefghijklmnopqrstuvwxyz" +
         "01234567890.,+-= ";
 
-    private final int textureId;
     private float textureHeight;
     private final Resources resources;
-    private final float textureWidth;
+
+    private int textureId;
+    private float textureWidth;
 
     private TextureCharacter circleTexture;
     private TextureCharacter cornersTexture;
+    private int markerFillerId;
 
     public Typewriter(Resources resources) {
         this.resources = resources;
 
         fontContexts = new HashMap<>();
 
+    }
+
+    public void init() {
         addNormalFont();
         addBigFont();
         addBoldFont();
@@ -59,22 +64,16 @@ public class Typewriter {
     }
 
     private void addSprites() {
-        int d = (int) ViewConstants.MARKER_EXTERNAL_RADIUS * 2;
+        int d = (int) ViewConstants.MARKER_INNER_RADIUS * 2;
         Bitmap bm = Bitmap.createBitmap(d, d, Bitmap.Config.ARGB_8888);
 
         Canvas cv = new Canvas(bm);
         Paint paint = new Paint();
-        paint.setColor(Color.TRANSPARENT);
-        cv.drawRect(0, 0, d, d, paint);
-
-        paint.setColor(Color.RED);
-        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_EXTERNAL_RADIUS, paint);
-
         paint.setColor(Color.WHITE);
         cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_INNER_RADIUS, paint);
-
-//        Bitmap bm = BitmapFactory.decodeResource(resources, R.drawable.corner);
         bitmapSprites.add(new BitmapSprite(bm));
+
+        this.markerFillerId = bitmapSprites.size() - 1;
     }
 
     private void addNormalFont() {
@@ -164,19 +163,6 @@ public class Typewriter {
         return w;
     }
 
-//    private float drawCircle(Canvas canvas, float offset, float textureWidth) {
-//        float r = ViewConstants.LINE_WIDTH;
-//        float d = 2 * r;
-//
-//        canvas.drawCircle(offset + r, r, r, textPaint);
-//        circleTexture = new TextureCharacter(offset / textureWidth, 0, (offset + d) / textureWidth, d / textureHeight, d, d);
-//        return d;
-//    }
-
-//    public TextureCharacter get(char ch) {
-//        return characters.get(ch);
-//    }
-
     public FontContext getContext(FontType size) {
         return fontContexts.get(size);
     }
@@ -208,6 +194,28 @@ public class Typewriter {
 
     public TextureCharacter getSprite(int id) {
         return textures.get(id);
+    }
+
+    public int newMarker(int columnColor) {
+        int d = (int) ViewConstants.MARKER_EXTERNAL_RADIUS * 2;
+        Bitmap bm = Bitmap.createBitmap(d, d, Bitmap.Config.ARGB_8888);
+
+        Canvas cv = new Canvas(bm);
+        Paint paint = new Paint();
+
+        paint.setColor(columnColor);
+        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_EXTERNAL_RADIUS, paint);
+
+        paint.setColor(Color.WHITE);
+        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_INNER_RADIUS, paint);
+
+//        Bitmap bm = BitmapFactory.decodeResource(resources, R.drawable.corner);
+        bitmapSprites.add(new BitmapSprite(bm));
+        return bitmapSprites.size() - 1;
+    }
+
+    public int getMarkerFillerId() {
+        return markerFillerId;
     }
 
     public enum FontType {

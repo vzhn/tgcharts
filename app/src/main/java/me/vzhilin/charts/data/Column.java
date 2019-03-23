@@ -18,6 +18,7 @@ public class Column {
     private FloatBuffer vertexBuffer;
     private int vertexStride;
     private int vertexCount;
+    private int markerSpriteId;
 
     public Column(String label, List<Double> data) {
         this.label = label;
@@ -191,5 +192,13 @@ public class Column {
         }
 
         return rs;
+    }
+
+    public void setMarkerSpriteId(int markerSpriteId) {
+        this.markerSpriteId = markerSpriteId;
+    }
+
+    public int getMarkerSpriteId() {
+        return markerSpriteId;
     }
 }

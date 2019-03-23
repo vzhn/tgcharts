@@ -81,7 +81,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
 
-
         Typewriter tw = new Typewriter(resources);
         spriteRenderer = new SpriteRenderer(tw, model);
         // initialize a triangle
@@ -93,6 +92,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         model.getGridComponents().add(new GridComponent(spriteRenderer, model));
         model.getGridComponents().add(new GridComponent(spriteRenderer, model));
+
+        tw.init();
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
