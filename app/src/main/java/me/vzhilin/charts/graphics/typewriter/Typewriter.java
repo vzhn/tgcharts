@@ -1,21 +1,22 @@
 package me.vzhilin.charts.graphics.typewriter;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
+import android.graphics.*;
 import android.opengl.GLES31;
 import android.opengl.GLUtils;
 import android.text.TextPaint;
 import me.vzhilin.charts.R;
 import me.vzhilin.charts.ViewConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Typewriter {
     private final Map<FontType, FontContext> fontContexts;
+    private final List<BitmapSprite> bitmapSprites = new ArrayList<>();
+    private final List<TextureCharacter> textures = new ArrayList<>();
 
     String alfabet =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -39,14 +40,41 @@ public class Typewriter {
         addBigFont();
         addBoldFont();
 
+        addSprites();
+
         float maxWidth = 0;
         for (FontContext ctx: fontContexts.values()) {
             textureHeight += ctx.fontHeight;
             maxWidth = Math.max(maxWidth, ctx.fontWidth);
         }
 
+        float bmHeight = 0;
+        for (BitmapSprite s: bitmapSprites) {
+            bmHeight = Math.max(bmHeight, s.w);
+        }
+        textureHeight += bmHeight;
+
         textureWidth = maxWidth;
         textureId = initTextures();
+    }
+
+    private void addSprites() {
+        int d = (int) ViewConstants.MARKER_EXTERNAL_RADIUS * 2;
+        Bitmap bm = Bitmap.createBitmap(d, d, Bitmap.Config.ARGB_8888);
+
+        Canvas cv = new Canvas(bm);
+        Paint paint = new Paint();
+        paint.setColor(Color.TRANSPARENT);
+        cv.drawRect(0, 0, d, d, paint);
+
+        paint.setColor(Color.RED);
+        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_EXTERNAL_RADIUS, paint);
+
+        paint.setColor(Color.WHITE);
+        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_INNER_RADIUS, paint);
+
+//        Bitmap bm = BitmapFactory.decodeResource(resources, R.drawable.corner);
+        bitmapSprites.add(new BitmapSprite(bm));
     }
 
     private void addNormalFont() {
@@ -104,9 +132,22 @@ public class Typewriter {
             yOffset += ctx.fontHeight;
         }
 
+        float xOffset = 0;
+        for (BitmapSprite bm: bitmapSprites) {
+//            canvas.drawBitmap(bm, y);
+            canvas.drawBitmap(bm.bm, xOffset, yOffset, null);
 
-//        xOffset += drawCircle(canvas, xOffset, textureWidth);
-//        xOffset += drawCorners(canvas, xOffset, textureWidth);
+            float charWidth = bm.w;
+            float x1 = xOffset / textureWidth;
+            float y1 = yOffset / textureHeight;
+            float x2 = (xOffset + charWidth) / textureWidth;
+            float y2 = (yOffset + bm.h) / textureHeight;
+            xOffset += charWidth;
+
+            TextureCharacter tc = new TextureCharacter(x1, y1, x2, y2, charWidth, bm.h);
+            textures.add(tc);
+        }
+
         return generateTextures(bitmap);
     }
 
@@ -165,10 +206,26 @@ public class Typewriter {
         return cornersTexture;
     }
 
+    public TextureCharacter getSprite(int id) {
+        return textures.get(id);
+    }
+
     public enum FontType {
         NORMAL_FONT,
         BOLD_FONT,
         BIG_FONT
+    }
+
+    public final static class BitmapSprite {
+        public final float w;
+        public final float h;
+        private final Bitmap bm;
+
+        public BitmapSprite(Bitmap bm) {
+            this.w = bm.getWidth();
+            this.h = bm.getHeight();
+            this.bm = bm;
+        }
     }
 
     public final static class TextureCharacter {

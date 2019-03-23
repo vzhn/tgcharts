@@ -36,8 +36,6 @@ public class TouchListener {
             int dateIndex = xColumn.nearestIndex(offsetX);
             double date = xColumn.getValue(dateIndex);
 
-            System.err.println(new Date((long) date));;
-
             model.setTooltipPosition(dateIndex, date);
 
             e.getX();

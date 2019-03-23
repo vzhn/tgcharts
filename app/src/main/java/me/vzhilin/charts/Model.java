@@ -246,7 +246,7 @@ public class Model {
 
     public double getY(double value) {
         int chartHeight = height - ViewConstants.CHART_OFFSET;
-        return chartHeight - (value / maxFactor * chartHeight);
+        return chartHeight - (value / smoothMaxFactor * chartHeight);
     }
 
     public double getX(double date) {

@@ -147,9 +147,8 @@ public class SpriteRenderer {
         stringSprites.clear();
     }
 
-
-    public void drawSprite(Typewriter.TextureCharacter character, int x, int y) {
-        sprites.add(new TextureSprite(character, x, y));
+    public void drawSprite(int id, float x, float y) {
+        sprites.add(new TextureSprite(tw.getSprite(id), x, y));
     }
 
     public void drawString(String string, int x, int y, float opacity) {
@@ -279,6 +278,7 @@ public class SpriteRenderer {
             colorVertices[i * 6 + 3] = 1f;
             colorVertices[i * 6 + 4] = 1f;
             colorVertices[i * 6 + 5] = 1f;
+            ++i;
         }
 
         ByteBuffer vertexBB = ByteBuffer.allocateDirect(squareVertices.length * 4);
@@ -355,12 +355,12 @@ public class SpriteRenderer {
 
     private class TextureSprite {
         private final Typewriter.TextureCharacter character;
-        public final int x;
-        public final int y;
+        public final float x;
+        public final float y;
 
-        public TextureSprite(Typewriter.TextureCharacter character, int x, int y) {
+        public TextureSprite(Typewriter.TextureCharacter character, float x, float y) {
             this.character = character;
-            this.x = y;
+            this.x = x;
             this.y = y;
         }
     }

@@ -180,36 +180,42 @@ public class PopupComponent {
 
         marker.clear();
         for (Column column: model.getChart().getYColumns()) {
+            if (!column.isVisible()) {
+                continue;
+            }
             float my = (float) model.getY(column.getValue(index));
             float mx = (float) model.getX(date);
 
 
-            int a = 50;
-            marker.putVertex(mx - a, my - a);
-            marker.putVertex(mx - a, my + a);
-            marker.putVertex(mx + a, my + a);
+//            int a = 50;
+//            marker.putVertex(mx - a, my - a);
+//            marker.putVertex(mx - a, my + a);
+//            marker.putVertex(mx + a, my + a);
 //            marker.putVertex(mx + a, my - a);
 //            marker.putVertex(, model.getHeight() - ViewConstants.CHART_OFFSET);
 //            marker.putVertex(100, 100);
 //            marker.putVertex( 100, 0);
+
+            tw.drawSprite(0, mx - ViewConstants.MARKER_EXTERNAL_RADIUS,
+                my - ViewConstants.MARKER_EXTERNAL_RADIUS);
         }
 
         marker.position(0);
 
 
-        int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
-        int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
-        int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
-
-        GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
-        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-
-        marker.bindPointer(mPositionHandle);
-        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, marker.getVertexCount());
-
-        // Disable vertex array
-        GLES31.glDisableVertexAttribArray(mPositionHandle);
+//        int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
+//        int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
+//        int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
+//
+//        GLES31.glEnableVertexAttribArray(mPositionHandle);
+//        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
+//        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+//
+////        marker.bindPointer(mPositionHandle);
+////        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, marker.getVertexCount());
+//
+//        // Disable vertex array
+//        GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 
     private final static class Sample {
