@@ -2,6 +2,8 @@ package me.vzhilin.charts;
 
 import android.view.MotionEvent;
 
+import java.util.Date;
+
 public class TouchListener {
     private final Model model;
 
@@ -16,6 +18,41 @@ public class TouchListener {
 
     public void onTouchEvent(MotionEvent e) {
 //        Scroll scroll = view.getScroll();
+        touchScroll(e);
+        touchChart(e);
+    }
+
+    private void touchChart(MotionEvent e) {
+        if (e.getY() < model.getHeight() - ViewConstants.CHART_OFFSET) {
+            float mouseX = e.getX();
+
+            int width = model.getWidth();
+            double scrollLeft = model.getScrollLeft();
+            double scrollRight = model.getScrollRight();
+
+            double offsetX = scrollLeft + (scrollRight - scrollLeft) * mouseX / width;
+            double date = model.getChart().getXColumn().nearestValue(offsetX);
+
+            System.err.println(new Date((long) date));;
+
+            model.setTooltipPosition(date);
+
+            e.getX();
+        }
+        if (e.getAction() == MotionEvent.ACTION_DOWN) {
+
+        } else
+        if (e.getAction() == MotionEvent.ACTION_UP) {
+
+        } else
+        if (e.getAction() == MotionEvent.ACTION_MOVE) {
+
+        }
+    }
+
+
+
+    private void touchScroll(MotionEvent e) {
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
             int width = model.getWidth();
 

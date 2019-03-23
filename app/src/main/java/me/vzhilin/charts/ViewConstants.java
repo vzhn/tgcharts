@@ -2,7 +2,14 @@ package me.vzhilin.charts;
 
 import android.graphics.Color;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class ViewConstants {
+    public static final DateFormat FORMATTER_WITH_DATE = new SimpleDateFormat("EEE, MMM  d", Locale.US);;
+    public static final DateFormat FORMATTER = new SimpleDateFormat("MMM  d", Locale.US);;
+
     public static final int VIEW_GRAY = Color.parseColor("#96A2AA");
     public static final int VIEW_GRAY_GRID = Color.parseColor("#F1F1F2");
 

@@ -123,6 +123,19 @@ public class Column {
         return v;
     }
 
+    public double nearestValue(double offset) {
+        int index = (int) Math.round(offset * (data.size() - 1));
+        if (index < 0) {
+            index = 0;
+        }
+
+        if (index >= data.size()) {
+            index = data.size() - 1;
+        }
+
+        return data.get(index);
+    }
+
     public List<Double> slice(double left, double right) {
         List<Double> rs = new ArrayList<>();
 

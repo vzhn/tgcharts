@@ -28,6 +28,8 @@ public class Model {
     private DateRibbonComponent dateRibbonComponent;
     private int dateRibbonKFactor = 1;
 
+    private double tooltipPosition;
+
     public Model(Chart chart) {
         this.chart = chart;
     }
@@ -129,7 +131,7 @@ public class Model {
         double xFactor = width / xDelta;
 
         int oldValue = dateRibbonKFactor;
-        dateRibbonKFactor = (int) Math.max(1, Math.log(ViewConstants.WIDTH_LIMIT / (xColumn.getDivision() * xFactor)) / Math.log(2));
+        dateRibbonKFactor = (int) Math.max(0, Math.log(ViewConstants.WIDTH_LIMIT / (xColumn.getDivision() * xFactor)) / Math.log(2));
 
         if (dateRibbonComponent != null && dateRibbonKFactor != oldValue) {
             dateRibbonComponent.onFactorUpdated(oldValue, dateRibbonKFactor);
@@ -226,6 +228,14 @@ public class Model {
 
     public void setRibbonComponent(DateRibbonComponent dateRibbonComponent) {
         this.dateRibbonComponent = dateRibbonComponent;
+    }
+
+    public void setTooltipPosition(double date) {
+        this.tooltipPosition = date;
+    }
+
+    public double getPopupPosition() {
+        return tooltipPosition;
     }
 
     private final static class PopupState {

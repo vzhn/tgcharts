@@ -11,7 +11,6 @@ import java.util.Locale;
 
 public class DateRibbonComponent {
     private final Model model;
-    private final SimpleDateFormat format = new SimpleDateFormat("MMM  d", Locale.US);
 
     private RibbonState state = RibbonState.INIT;
     private double alpha = 0;
@@ -54,14 +53,14 @@ public class DateRibbonComponent {
 
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
             double xPos = (date - min) * xFactor;
-            String dateText = format.format(new Date((long) date));
+            String dateText = ViewConstants.FORMATTER.format(new Date((long) date));
             spriteRenderer.drawString(dateText, (int) xPos, yPos, 1.0f);
         }
 
         if (state == RibbonState.ZOOM_IN || state == RibbonState.ZOOM_OUT) {
             for (double date: xColumn.sampleHalf(effectiveK - 1, model.getScrollLeft(), model.getScrollRight())) {
                 double xPos = (date - min) * xFactor;
-                String dateText = format.format(new Date((long) date));
+                String dateText = ViewConstants.FORMATTER.format(new Date((long) date));
                 spriteRenderer.drawString(dateText, (int) xPos, yPos,  (float) alpha);
             }
         }

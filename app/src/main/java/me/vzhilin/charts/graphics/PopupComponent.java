@@ -4,7 +4,6 @@ import android.opengl.GLES31;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
 import me.vzhilin.charts.ViewConstants;
-import me.vzhilin.charts.graphics.typewriter.FontContext;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.nio.ByteBuffer;
@@ -85,6 +84,7 @@ public class PopupComponent {
     }
 
     public void draw(int width, int height, float[] mMVPMatrix) {
+
         List<Sample> samples = new ArrayList<>();
         samples.add(new Sample("Joined", String.format("%.0f", 122f, Locale.US)));
         samples.add(new Sample("Left", String.format("%.0f", 75f, Locale.US)));
@@ -116,7 +116,7 @@ public class PopupComponent {
     }
 
     private void drawText(List<Sample> samples, int popupX, int popupY, int popupWidth, int popupHeight, float[] mMVPMatrix) {
-        String date = "Sat, Feb 24";
+        String date = ViewConstants.FORMATTER_WITH_DATE.format(model.getPopupPosition());
 
         Typewriter tpw = tw.getTypewriter();
         float boldHeight = tpw.getContext(Typewriter.FontType.BOLD_FONT).fontHeight;
@@ -125,7 +125,7 @@ public class PopupComponent {
 
         popupY += boldHeight;
 
-        tw.drawString(date, popupX + 20, popupY, 1.0f, Typewriter.FontType.BOLD_FONT);
+        tw.drawString(date, popupX, popupY, 1.0f, Typewriter.FontType.BOLD_FONT);
 
         int sampleX = popupX + 0;
         int sampleY = popupY;
