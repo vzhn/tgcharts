@@ -41,8 +41,8 @@ public class SpriteRenderer {
         "uniform vec4 vColor;" +
         "void main() {" +
         "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
-        "  color.r += 0.5;" +
-        "  color.a += 0.5;" +
+//        "  color.r += 0.5;" +
+//        "  color.a += 0.5;" +
         "  color.a *= vOpacity;" + //FIXME
         "  gl_FragColor = color;" +
         "}";
@@ -153,7 +153,11 @@ public class SpriteRenderer {
     }
 
     public void drawString(String string, int x, int y, float opacity) {
-        stringSprites.add(new StringSprite(x, y, string, opacity, ViewConstants.FONT_SIZE_1));
+        stringSprites.add(new StringSprite(x, y, string, opacity, Typewriter.FontType.NORMAL_FONT));
+    }
+
+    public void drawString(String string, int x, int y, float opacity, Typewriter.FontType type) {
+        stringSprites.add(new StringSprite(x, y, string, opacity, type));
     }
 
     private void prepareBuffers() {

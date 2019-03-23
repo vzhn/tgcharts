@@ -4,8 +4,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.opengl.GLES31;
 import android.opengl.GLUtils;
+import android.text.TextPaint;
 import me.vzhilin.charts.R;
 import me.vzhilin.charts.ViewConstants;
 
@@ -13,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Typewriter {
-    private final Map<Float, FontContext> fontContexts;
+    private final Map<FontType, FontContext> fontContexts;
 
     String alfabet =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -25,7 +27,6 @@ public class Typewriter {
     private final Resources resources;
     private final float textureWidth;
 
-
     private TextureCharacter circleTexture;
     private TextureCharacter cornersTexture;
 
@@ -33,8 +34,10 @@ public class Typewriter {
         this.resources = resources;
 
         fontContexts = new HashMap<>();
-        fontContexts.put(ViewConstants.FONT_SIZE_1, new FontContext(ViewConstants.FONT_SIZE_1, alfabet));
-        fontContexts.put(ViewConstants.FONT_SIZE_2, new FontContext(ViewConstants.FONT_SIZE_2, alfabet));
+
+        addNormalFont();
+        addBigFont();
+        addBoldFont();
 
         float maxWidth = 0;
         for (FontContext ctx: fontContexts.values()) {
@@ -46,6 +49,32 @@ public class Typewriter {
         textureId = initTextures();
     }
 
+    private void addNormalFont() {
+        TextPaint normalTextPaint = new TextPaint();
+        normalTextPaint.setAntiAlias(true);
+        normalTextPaint.setARGB(0xff, 0, 0, 0);
+        normalTextPaint.setTextSize(ViewConstants.FONT_SIZE_1);
+        fontContexts.put(FontType.NORMAL_FONT, new FontContext(normalTextPaint, alfabet));
+    }
+
+    private void addBigFont() {
+        TextPaint normalTextPaint = new TextPaint();
+        normalTextPaint.setAntiAlias(true);
+        normalTextPaint.setARGB(0xff, 0, 0, 0);
+        normalTextPaint.setTextSize(ViewConstants.FONT_SIZE_2);
+        fontContexts.put(FontType.BIG_FONT, new FontContext(normalTextPaint, alfabet));
+    }
+
+    private void addBoldFont() {
+        TextPaint normalTextPaint = new TextPaint();
+        normalTextPaint.setAntiAlias(true);
+        normalTextPaint.setARGB(0xff, 0, 0, 0);
+        normalTextPaint.setTextSize(ViewConstants.FONT_SIZE_1);
+        normalTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
+        fontContexts.put(FontType.BOLD_FONT, new FontContext(normalTextPaint, alfabet));
+    }
+
     public int getTextureId() {
         return textureId;
     }
@@ -54,11 +83,10 @@ public class Typewriter {
         Bitmap bitmap = Bitmap.createBitmap((int) textureWidth, (int) textureHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
-
         float yOffset = 0;
         for (FontContext ctx: fontContexts.values()) {
             float xOffset = 0;
-            canvas.drawText(alfabet, 0, yOffset, ctx.textPaint);
+            canvas.drawText(alfabet, 0, yOffset + ctx.fontHeight - 1, ctx.textPaint);
 
             for (int i = 0; i < alfabet.length(); i++) {
                 char ch = alfabet.charAt(i);
@@ -108,7 +136,7 @@ public class Typewriter {
 //        return characters.get(ch);
 //    }
 
-    public FontContext getContext(float size) {
+    public FontContext getContext(FontType size) {
         return fontContexts.get(size);
     }
 
@@ -137,6 +165,12 @@ public class Typewriter {
         return cornersTexture;
     }
 
+    public enum FontType {
+        NORMAL_FONT,
+        BOLD_FONT,
+        BIG_FONT
+    }
+
     public final static class TextureCharacter {
         public final float x1;
         public final float y1;
@@ -156,5 +190,4 @@ public class Typewriter {
             this.height = height;
         }
     }
-
 }

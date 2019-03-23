@@ -3,11 +3,10 @@ package me.vzhilin.charts.graphics;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
+import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class DateRibbonComponent {
@@ -51,7 +50,7 @@ public class DateRibbonComponent {
         }
 
         int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT -
-            spriteRenderer.getTypewriter().getContext(ViewConstants.FONT_SIZE_1).fontHeight);
+            spriteRenderer.getTypewriter().getContext(Typewriter.FontType.NORMAL_FONT).fontHeight);
 
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
             double xPos = (date - min) * xFactor;
