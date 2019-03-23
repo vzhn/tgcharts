@@ -1,10 +1,9 @@
 package me.vzhilin.charts.graphics;
 
+import android.graphics.Rect;
 import android.opengl.GLES31;
 import android.view.View;
-import me.vzhilin.charts.Model;
-import me.vzhilin.charts.MyGLRenderer;
-import me.vzhilin.charts.ViewConstants;
+import me.vzhilin.charts.*;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
@@ -68,76 +67,53 @@ public class PopupComponent {
     }
 
     public void draw(int width, int height, float[] mMVPMatrix) {
-        List<Sample> samples = new ArrayList<>();
-        samples.add(new Sample("Joined", String.format("%.0f", 122f, Locale.US)));
-        samples.add(new Sample("Left", String.format("%.0f", 75f, Locale.US)));
-        samples.add(new Sample("Extra", String.format("%.0f", 123456f, Locale.US)));
-        samples.add(new Sample("A", String.format("%.0f", 55f, Locale.US)));
-        samples.add(new Sample("B", String.format("%.0f", 6f, Locale.US)));
+        PopupState popupState = model.getPopupState();
+        if (popupState.isVisible()) {
+            PopupState state = popupState;
+            Rect popupDimensions = state.getDimensions();
 
-        float boldHeight = tw.getTypewriter().getContext(Typewriter.FontType.BOLD_FONT).fontHeight;
-
-        int w = 0;
-        int h = 0;
-        h += boldHeight;
-        for (Sample s: samples) {
-            w += s.getWidth(tw.getTypewriter());
+            drawBorder(popupDimensions, mMVPMatrix);
+            drawText(popupDimensions, state.getSamples(), mMVPMatrix);
+            drawGeometry(popupDimensions, mMVPMatrix);
+            drawMarkers(popupDimensions, mMVPMatrix);
         }
-
-        h += samples.get(0).getHeight(tw.getTypewriter());
-
-        w += (samples.size() - 1) * 20;
-
-        int popupX = (int) model.getX(model.getPopupDate());
-        int popupY = 200;
-        int popupWidth = w;
-        int popupHeight = h;
-
-        drawBorder(popupX, popupY, popupWidth, popupHeight, mMVPMatrix);
-        drawText(samples, popupX, popupY, popupWidth, popupHeight, mMVPMatrix);
-        drawGeometry(mMVPMatrix);
-        drawMarkers(mMVPMatrix);
-//        for
     }
 
-    private void drawGeometry() {
-        model.getX(model.getPopupDate());
-    }
 
-    private void drawText(List<Sample> samples, int popupX, int popupY, int popupWidth, int popupHeight, float[] mMVPMatrix) {
-        String date = ViewConstants.FORMATTER_WITH_DATE.format(model.getPopupDate());
+    private void drawText(Rect r, List<Sample> samples, float[] mMVPMatrix) {
+        String date = ViewConstants.FORMATTER_WITH_DATE.format(model.getPopupState().getDate());
 
         Typewriter tpw = tw.getTypewriter();
         float boldHeight = tpw.getContext(Typewriter.FontType.BOLD_FONT).fontHeight;
         float bigHeight = tpw.getContext(Typewriter.FontType.BIG_FONT).fontHeight;
         float normalHeight = tpw.getContext(Typewriter.FontType.NORMAL_FONT).fontHeight;
 
-        popupY += boldHeight;
+        int popupY = (int) (r.top + boldHeight);
 
-        tw.drawString(date, popupX, popupY, 1.0f, Typewriter.FontType.BOLD_FONT);
+        tw.drawString(date, r.left, popupY, 1.0f, Typewriter.FontType.BOLD_FONT);
 
-        int sampleX = popupX + 0;
+        int sampleX = r.left;
         int sampleY = popupY;
         for (Sample s: samples) {
-            tw.drawString(s.value, sampleX, (int) (sampleY + bigHeight), 1.0f, Typewriter.FontType.BIG_FONT);
-            tw.drawString(s.label, sampleX, (int) (sampleY + bigHeight + normalHeight), 1.0f, Typewriter.FontType.NORMAL_FONT);
+            tw.drawString(s.getStringValue(), sampleX, (int) (sampleY + bigHeight), 1.0f, Typewriter.FontType.BIG_FONT);
+            tw.drawString(s.getLabel(), sampleX, (int) (sampleY + bigHeight + normalHeight), 1.0f, Typewriter.FontType.NORMAL_FONT);
 
             sampleX += s.getWidth(tpw);
             sampleX += 20;
         }
     }
 
-    private void drawBorder(int popupX, int popupY, int popupWidth, int popupHeight, float[] mMVPMatrix) {
+    private void drawBorder(Rect r, float[] mMVPMatrix) {
         // Add program to OpenGL ES environment
         GLES31.glUseProgram(mProgram);
 
         popupBackground.clear();
-        popupBackground.putVertex(popupX, popupY);
-        popupBackground.putVertex(popupX, popupY + popupHeight);
-        popupBackground.putVertex(popupX + popupWidth, popupY);
-        popupBackground.putVertex( popupX + popupWidth, popupY + popupHeight);
-        popupBackground.putVertex(popupX, popupY + popupHeight);
-        popupBackground.putVertex(popupX + popupWidth, popupY);
+        popupBackground.putVertex(r.left, r.top);
+        popupBackground.putVertex(r.left, r.bottom);
+        popupBackground.putVertex(r.right, r.top);
+        popupBackground.putVertex( r.right, r.bottom);
+        popupBackground.putVertex(r.left, r.bottom);
+        popupBackground.putVertex(r.right, r.top);
         popupBackground.position(0);
 
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
@@ -155,10 +131,10 @@ public class PopupComponent {
         GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    private void drawGeometry(float[] mMVPMatrix) {
+    private void drawGeometry(Rect r, float[] mMVPMatrix) {
         verticalLine.clear();
-        int lineX = (int) model.getX(model.getPopupDate());
-        verticalLine.putVertex(lineX, 0);
+        int lineX = (int) model.getX(model.getPopupState().getDate());
+        verticalLine.putVertex(lineX, r.bottom);
         verticalLine.putVertex(lineX, model.getHeight() - ViewConstants.CHART_OFFSET);
         verticalLine.position(0);
 
@@ -171,12 +147,13 @@ public class PopupComponent {
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
 
         verticalLine.bindPointer(mPositionHandle);
-        GLES31.glDrawArrays(GLES31.GL_LINES, 0, popupBackground.getVertexCount());
+        GLES31.glDrawArrays(GLES31.GL_LINES, 0, verticalLine.getVertexCount());
+        GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    private void drawMarkers(float[] mMVPMatrix) {
-        double date = model.getPopupDate();
-        int index = model.getPopupDateIndex();
+    private void drawMarkers(Rect r, float[] mMVPMatrix) {
+        double date = model.getPopupState().getDate();
+        int index = model.getPopupState().getIndex();
 
         marker.clear();
         for (Column column: model.getChart().getYColumns()) {
@@ -193,37 +170,5 @@ public class PopupComponent {
         }
 
         marker.position(0);
-    }
-
-    private final static class Sample {
-        private final String label;
-        private final String value;
-
-        public Sample(String label, String value) {
-            this.label = label;
-            this.value = value;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public double getWidth(Typewriter tw) {
-            double labelWidth = tw.getContext(Typewriter.FontType.NORMAL_FONT).stringWidth(label);
-            double valueWidth = tw.getContext(Typewriter.FontType.BIG_FONT).stringWidth(value);
-
-            return Math.max(labelWidth, valueWidth);
-        }
-
-        public double getHeight(Typewriter tw) {
-            double labelHeight = tw.getContext(Typewriter.FontType.NORMAL_FONT).fontHeight;
-            double valueHeight = tw.getContext(Typewriter.FontType.BIG_FONT).fontHeight;
-
-            return labelHeight + valueHeight;
-        }
     }
 }

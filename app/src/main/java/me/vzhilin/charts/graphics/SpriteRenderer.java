@@ -97,8 +97,8 @@ public class SpriteRenderer {
 
     static float colorVertices[];
 
-    public SpriteRenderer(Typewriter tw, Model model) {
-        this.tw = tw;
+    public SpriteRenderer(Model model) {
+        this.tw = model.getTypewriter();
 
         for (Column column: model.getChart().getYColumns()) {
             int columnColor = model.getChart().getColor(column.getLabel());

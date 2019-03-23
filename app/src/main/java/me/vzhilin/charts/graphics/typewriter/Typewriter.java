@@ -37,7 +37,6 @@ public class Typewriter {
         this.resources = resources;
 
         fontContexts = new HashMap<>();
-
     }
 
     public void init() {

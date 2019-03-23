@@ -18,6 +18,7 @@ import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.data.Data;
 import me.vzhilin.charts.data.DataParser;
+import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,15 +32,18 @@ class MyGLSurfaceView extends GLSurfaceView {
     public MyGLSurfaceView(Context context, AttributeSet attrs){
         super(context, attrs);
 
-        Data data = readResource(context.getResources());
-        model = new Model(data.getChart(0));
+        Resources resources = context.getResources();
+        Typewriter tw = new Typewriter(resources);
+
+        Data data = readResource(resources);
+        model = new Model(data.getChart(0), tw);
         model.setScroll(0.5, 0.6);
 
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(3);
 //        GLES31.glHint(GLES31.GL_NICEST);
 
-        renderer = new MyGLRenderer(model, context.getResources());
+        renderer = new MyGLRenderer(model, resources);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);

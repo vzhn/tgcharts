@@ -37,8 +37,7 @@ public class TouchListener {
             double date = xColumn.getValue(dateIndex);
 
             model.setTooltipPosition(dateIndex, date);
-
-            e.getX();
+            model.refresh();
         }
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
 

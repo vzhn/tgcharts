@@ -4,6 +4,7 @@ import me.vzhilin.charts.data.Chart;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.DateRibbonComponent;
 import me.vzhilin.charts.graphics.GridComponent;
+import me.vzhilin.charts.graphics.typewriter.Typewriter;
 import me.vzhilin.charts.transitions.LinearTransition;
 import me.vzhilin.charts.transitions.SinTransition;
 import me.vzhilin.charts.transitions.Transition;
@@ -12,6 +13,7 @@ import java.util.*;
 
 public class Model {
     private final Chart chart;
+    private final Typewriter tw;
 
     private double scrollLeft;
     private double scrollRight;
@@ -28,11 +30,16 @@ public class Model {
     private DateRibbonComponent dateRibbonComponent;
     private int dateRibbonKFactor = 1;
 
-    private double tooltipPosition;
-    private int tooltipDateIndex;
+//    private double tooltipPosition;
+//    private int tooltipDateIndex;
 
-    public Model(Chart chart) {
+    private final PopupState popupState;
+
+
+    public Model(Chart chart, Typewriter tw) {
         this.chart = chart;
+        this.tw = tw;
+        this.popupState = new PopupState(this);
     }
 
     public double getScrollLeft() {
@@ -62,13 +69,13 @@ public class Model {
     public void setScrollLeft(double scrollLeft) {
         this.scrollLeft = scrollLeft;
 
-        refreshMaxFactor();
+        onScroolUpdated();
     }
 
     public void setScrollRight(double scrollRight) {
         this.scrollRight = scrollRight;
 
-        refreshMaxFactor();
+        onScroolUpdated();
     }
 
     public void setScroll(double scrollLeft, double scrollRight) {
@@ -76,8 +83,18 @@ public class Model {
             this.scrollLeft = scrollLeft;
             this.scrollRight = scrollRight;
 
-            refreshMaxFactor();
+            onScroolUpdated();
         }
+    }
+
+    private void onScroolUpdated() {
+        popupState.refresh();
+        refreshMaxFactor();
+    }
+
+    public void refresh() {
+        popupState.refresh();
+        refreshMaxFactor();
     }
 
     private void refreshMaxFactor() {
@@ -89,6 +106,12 @@ public class Model {
         }
 
         max = Math.ceil(max / 50) * 50;
+
+        popupState.refresh();
+        while (popupState.isVisible() && getY(max, popupState.maxMarkedValue()) < popupState.getDimensions().bottom) {
+            max *= 1.2;
+            popupState.refresh();
+        }
 
         if (max != maxFactor) {
             if (smoothMaxFactor == -1) {
@@ -172,6 +195,7 @@ public class Model {
         }
 
         refreshScrollScaleFactors();
+        popupState.refresh();
     }
 
     private void refreshScrollScaleFactors() {
@@ -232,21 +256,16 @@ public class Model {
     }
 
     public void setTooltipPosition(int index, double date) {
-        this.tooltipDateIndex = index;
-        this.tooltipPosition = date;
+        popupState.setPosition(index, date);
     }
 
-    public double getPopupDate() {
-        return tooltipPosition;
-    }
-
-    public int getPopupDateIndex() {
-        return tooltipDateIndex;
+    public double getY(double maxFactor, double value) {
+        int chartHeight = height - ViewConstants.CHART_OFFSET;
+        return chartHeight - (value / maxFactor * chartHeight);
     }
 
     public double getY(double value) {
-        int chartHeight = height - ViewConstants.CHART_OFFSET;
-        return chartHeight - (value / smoothMaxFactor * chartHeight);
+        return getY(smoothMaxFactor, value);
     }
 
     public double getX(double date) {
@@ -259,24 +278,11 @@ public class Model {
         return width *  (date - min) / xDelta;
     }
 
-    private final static class PopupState {
-        private double date;
-        private boolean visible;
+    public PopupState getPopupState() {
+        return popupState;
+    }
 
-        public double getDate() {
-            return date;
-        }
-
-        public void setDate(double date) {
-            this.date = date;
-        }
-
-        public boolean isVisible() {
-            return visible;
-        }
-
-        public void setVisible(boolean visible) {
-            this.visible = visible;
-        }
+    public Typewriter getTypewriter() {
+        return tw;
     }
 }
