@@ -167,7 +167,7 @@ public class Column {
         int inc = 1 << (k + 1);
 
         int start = (int) ((1 << k) + Math.floor(left * (data.size() - 1) / inc) * inc);
-        int end   = (int) (Math.ceil((data.size() - 1)) * right);
+        int end   = (int) (Math.ceil((data.size() - 1) * right));
         for (int i = Math.max(0, start); i < end; i += inc) {
             rs.add(data.get(i));
         }
