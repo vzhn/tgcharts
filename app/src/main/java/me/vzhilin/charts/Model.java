@@ -194,8 +194,6 @@ public class Model {
                         return tick;
                     }
                 });
-
-
             }
         }
     }
@@ -228,5 +226,26 @@ public class Model {
 
     public void setRibbonComponent(DateRibbonComponent dateRibbonComponent) {
         this.dateRibbonComponent = dateRibbonComponent;
+    }
+
+    private final static class PopupState {
+        private double date;
+        private boolean visible;
+
+        public double getDate() {
+            return date;
+        }
+
+        public void setDate(double date) {
+            this.date = date;
+        }
+
+        public boolean isVisible() {
+            return visible;
+        }
+
+        public void setVisible(boolean visible) {
+            this.visible = visible;
+        }
     }
 }

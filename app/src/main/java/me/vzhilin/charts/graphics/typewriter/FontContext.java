@@ -35,4 +35,8 @@ public final class FontContext {
         }
         return characters.get(ch);
     }
+
+    public double stringWidth(String label) {
+        return textPaint.measureText(label);
+    }
 }

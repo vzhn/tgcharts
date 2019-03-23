@@ -26,9 +26,6 @@ public class ScrollRibbonComponent {
                     "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
-    // Use to access and set the view transformation
-    private int mMVPMatrixHandle;
-
     private final String fragmentShaderCode =
             "precision mediump float;" +
                     "uniform vec4 vColor;" +
