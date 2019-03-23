@@ -153,7 +153,7 @@ public class Column {
         int inc = (1 << k);
 
         int start = (int) (Math.floor(left * (data.size() - 1) / inc) * inc);
-        int end   = (int) ((int) Math.ceil((data.size() - 1)) * right);
+        int end   = (int) (Math.ceil((data.size() - 1) * right));
 
         for (int i = Math.max(0, start); i < end; i += inc) {
             rs.add(data.get(i));
