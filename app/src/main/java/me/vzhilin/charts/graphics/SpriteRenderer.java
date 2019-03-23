@@ -1,5 +1,6 @@
 package me.vzhilin.charts.graphics;
 
+import android.graphics.Color;
 import android.opengl.GLES31;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
@@ -17,85 +18,66 @@ import java.util.List;
 
 public class SpriteRenderer {
     private final String vertexShaderCode =
-        // This matrix member variable provides a hook to manipulate
-        // the coordinates of the objects that use this vertex shader
-        "uniform mat4 uMVPMatrix;" +
-        "attribute vec4 vPosition;" +
-        "attribute vec4 inputTextureCoordinate;" +
-        "attribute float opacity;" +
-        "varying vec2 textureCoordinate;" +
-        "varying float vOpacity;" +
-        "void main() {" +
-        // the matrix must be included as a modifier of gl_Position
-        // Note that the uMVPMatrix factor *must be first* in order
-        // for the matrix multiplication product to be correct.
-        "  gl_Position = uMVPMatrix * vPosition;" +
-        "  vOpacity = opacity;" +
-        "  textureCoordinate = inputTextureCoordinate.xy;" +
-        "}";
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    "attribute vec4 inputTextureCoordinate;" +
+                    "attribute float opacity;" +
+                    "attribute vec3 color;" +
+
+                    "varying vec2 textureCoordinate;" +
+                    "varying float vOpacity;" +
+                    "varying vec3 vColor;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "  vOpacity = opacity;" +
+                    "  vColor = color;" +
+                    "  textureCoordinate = inputTextureCoordinate.xy;" +
+                    "}";
 
     private final String fragmentShaderCode =
-        "precision mediump float;"+
-        "varying vec2 textureCoordinate;" +
-        "varying float vOpacity;" +
-        "uniform sampler2D videoFrame;" +
-        "uniform vec4 vColor;" +
-        "void main() {" +
-        "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
+            "precision mediump float;"+
+                    "uniform sampler2D videoFrame;" +
+                    "varying vec3 vColor;" +
+
+                    "varying vec2 textureCoordinate;" +
+                    "varying float vOpacity;" +
+                    "void main() {" +
+                    "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
+                    "  color.rgb = vColor.rgb;" +
 //        "  color.r += 0.5;" +
 //        "  color.a += 0.5;" +
-        "  color.a *= vOpacity;" + //FIXME
-        "  gl_FragColor = color;" +
-        "}";
+                    "  color.a *= vOpacity;" + //FIXME
+                    "  gl_FragColor = color;" +
+                    "}";
 
     private final Typewriter tw;
 
     private final int mPositionHandle;
     private final int mOpacity;
+    private final int mColor;
     private final int mInputTextureCoordinate;
-
-
     private final int mProgram;
 
-//    private final int vertexCount = ;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    private FloatBuffer vertexBuffer;
-    private FloatBuffer textureBuffer;
+    //    private FloatBuffer vertexBuffer;
     private FloatBuffer floatBuffer;
-
-    // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
+    private GlFloatBuffer textureBuffer;
+    private GlFloatBuffer squareBuffer;
+    private GlFloatBuffer colorBuffer;
 
     private final List<StringSprite> stringSprites = new ArrayList<StringSprite>();
     private final List<TextureSprite> sprites = new ArrayList<>();
 
-//    static float triangleCoords[] = new float[3 * 12];
-
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
 
-    static float squareVertices[] = {
-            0f, 0f, 0f,
-            1.0f, 0f, 0f,
-            0f,  1.0f, 0f,
-
-            1.0f, 0f, 0f,
-            1.0f,  1.0f, 0f,
-            0f,  1.0f, 0f,
-    };
-
-    static float textureVertices[] = {
-            0.0f, 1.0f, 0f,
-            +1.0f, 1.0f, 0f,
-            0.0f, 0.0f, 0f,
-
-            +1.0f, 1.0f, 0f,
-            0.0f, 0.0f, 0f,
-            +1.0f, 0.0f, 0f,
-    };
-
     static float colorVertices[];
+
 
     public SpriteRenderer(Model model) {
         this.tw = model.getTypewriter();
@@ -106,19 +88,6 @@ public class SpriteRenderer {
             column.setMarkerSpriteId(tw.newMarker(columnColor));
         }
 
-        // initialize vertex byte buffer for shape coordinates
-        ByteBuffer vertexBB = ByteBuffer.allocateDirect(
-                // (number of coordinate values * 4 bytes per float)
-                squareVertices.length * 4);
-        // use the device hardware's native byte order
-        vertexBB.order(ByteOrder.nativeOrder());
-        // create a floating point buffer from the ByteBuffer
-        vertexBuffer = vertexBB.asFloatBuffer();
-        // add the coordinates to the FloatBuffer
-        vertexBuffer.put(squareVertices);
-        // set the buffer to read the first coordinate
-        vertexBuffer.position(0);
-
         int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
@@ -127,10 +96,12 @@ public class SpriteRenderer {
 
         mPositionHandle = 1;
         mOpacity = 2;
-        mInputTextureCoordinate = 3;
+        mColor = 3;
+        mInputTextureCoordinate = 4;
 
         GLES31.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
         GLES31.glBindAttribLocation(mProgram, mOpacity, "opacity");
+        GLES31.glBindAttribLocation(mProgram, mColor, "color");
         GLES31.glBindAttribLocation(mProgram, mInputTextureCoordinate, "inputTextureCoordinate");
 
         // add the vertex shader to program
@@ -154,8 +125,8 @@ public class SpriteRenderer {
         stringSprites.clear();
     }
 
-    public void drawSprite(int id, float x, float y, float opacity) {
-        sprites.add(new TextureSprite(tw.getSprite(id), x, y, opacity));
+    public void drawSprite(int id, float x, float y, int color, float opacity) {
+        sprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity));
     }
 
     public void drawString(String string, int x, int y, float opacity) {
@@ -174,8 +145,10 @@ public class SpriteRenderer {
 
         totalSprites += sprites.size();
 
-        squareVertices = new float[18 * totalSprites];
-        textureVertices = new float[18 * totalSprites];
+        squareBuffer = new GlFloatBuffer(6 * totalSprites);
+        textureBuffer = new GlFloatBuffer(6 * totalSprites);
+        colorBuffer   = new GlFloatBuffer(6 * totalSprites);
+
         colorVertices = new float[6 * totalSprites];
     }
 
@@ -192,41 +165,23 @@ public class SpriteRenderer {
 
                 float x1 = offset, y1 = sc.y - ch.height, x2 = offset + width, y2 = sc.y;
 
-                squareVertices[i * 18 + 0] = x1;
-                squareVertices[i * 18 + 1] = y1;
+                squareBuffer.putVertex(x1, y1);
+                squareBuffer.putVertex(x2, y1);
+                squareBuffer.putVertex(x1, y2);
+                squareBuffer.putVertex(x2, y1);
+                squareBuffer.putVertex(x2, y2);
+                squareBuffer.putVertex(x1, y2);
 
-                squareVertices[i * 18 + 3] = x2;
-                squareVertices[i * 18 + 4] = y1;
+                textureBuffer.putVertex(ch.x1, ch.y1);
+                textureBuffer.putVertex(ch.x2, ch.y1);
+                textureBuffer.putVertex(ch.x1, ch.y2);
+                textureBuffer.putVertex(ch.x2, ch.y1);
+                textureBuffer.putVertex(ch.x2, ch.y2);
+                textureBuffer.putVertex(ch.x1, ch.y2);
 
-                squareVertices[i * 18 + 6] = x1;
-                squareVertices[i * 18 + 7] = y2;
-
-                squareVertices[i * 18 + 9] = x2;
-                squareVertices[i * 18 + 10] = y1;
-
-                squareVertices[i * 18 + 12] = x2;
-                squareVertices[i * 18 + 13] = y2;
-
-                squareVertices[i * 18 + 15] = x1;
-                squareVertices[i * 18 + 16] = y2;
-
-                textureVertices[i * 18 + 0] = ch.x1;
-                textureVertices[i * 18 + 1] = ch.y1;
-
-                textureVertices[i * 18 + 3] = ch.x2;
-                textureVertices[i * 18 + 4] = ch.y1;
-
-                textureVertices[i * 18 + 6] = ch.x1;
-                textureVertices[i * 18 + 7] = ch.y2;
-
-                textureVertices[i * 18 + 9] = ch.x2;
-                textureVertices[i * 18 + 10] = ch.y1;
-
-                textureVertices[i * 18 + 12] = ch.x2;
-                textureVertices[i * 18 + 13] = ch.y2;
-
-                textureVertices[i * 18 + 15] = ch.x1;
-                textureVertices[i * 18 + 16] = ch.y2;
+                for (int k = 0; k < 6; k++) {
+                    colorBuffer.putVertex(0.0f, 0.0f, 0.0f);
+                }
 
                 colorVertices[i * 6 + 0] = sc.opacity;
                 colorVertices[i * 6 + 1] = sc.opacity;
@@ -243,41 +198,26 @@ public class SpriteRenderer {
             Typewriter.TextureCharacter ch = tx.character;
             float x1 = tx.x, y1 = tx.y, x2 = tx.x + ch.width, y2 = tx.y + ch.width;
 
-            squareVertices[i * 18 + 0] = x1;
-            squareVertices[i * 18 + 1] = y1;
+            squareBuffer.putVertex(x1, y1);
+            squareBuffer.putVertex(x2, y1);
+            squareBuffer.putVertex(x1, y2);
+            squareBuffer.putVertex(x2, y1);
+            squareBuffer.putVertex(x2, y2);
+            squareBuffer.putVertex(x1, y2);
 
-            squareVertices[i * 18 + 3] = x2;
-            squareVertices[i * 18 + 4] = y1;
+            textureBuffer.putVertex(ch.x1, ch.y1);
+            textureBuffer.putVertex(ch.x2, ch.y1);
+            textureBuffer.putVertex(ch.x1, ch.y2);
+            textureBuffer.putVertex(ch.x2, ch.y1);
+            textureBuffer.putVertex(ch.x2, ch.y2);
+            textureBuffer.putVertex(ch.x1, ch.y2);
 
-            squareVertices[i * 18 + 6] = x1;
-            squareVertices[i * 18 + 7] = y2;
-
-            squareVertices[i * 18 + 9] = x2;
-            squareVertices[i * 18 + 10] = y1;
-
-            squareVertices[i * 18 + 12] = x2;
-            squareVertices[i * 18 + 13] = y2;
-
-            squareVertices[i * 18 + 15] = x1;
-            squareVertices[i * 18 + 16] = y2;
-
-            textureVertices[i * 18 + 0] = ch.x1;
-            textureVertices[i * 18 + 1] = ch.y1;
-
-            textureVertices[i * 18 + 3] = ch.x2;
-            textureVertices[i * 18 + 4] = ch.y1;
-
-            textureVertices[i * 18 + 6] = ch.x1;
-            textureVertices[i * 18 + 7] = ch.y2;
-
-            textureVertices[i * 18 + 9] = ch.x2;
-            textureVertices[i * 18 + 10] = ch.y1;
-
-            textureVertices[i * 18 + 12] = ch.x2;
-            textureVertices[i * 18 + 13] = ch.y2;
-
-            textureVertices[i * 18 + 15] = ch.x1;
-            textureVertices[i * 18 + 16] = ch.y2;
+            for (int k = 0; k < 6; k++) {
+                float r = Color.red(tx.color) / 255.0f;
+                float g = Color.green(tx.color) / 255.0f;
+                float b = Color.blue(tx.color) / 255.0f;
+                colorBuffer.putVertex(r, g, b);
+            }
 
             colorVertices[i * 6 + 0] = tx.opacity;
             colorVertices[i * 6 + 1] = tx.opacity;
@@ -287,18 +227,6 @@ public class SpriteRenderer {
             colorVertices[i * 6 + 5] = tx.opacity;
             ++i;
         }
-
-        ByteBuffer vertexBB = ByteBuffer.allocateDirect(squareVertices.length * 4);
-        vertexBB.order(ByteOrder.nativeOrder());
-        vertexBuffer = vertexBB.asFloatBuffer();
-        vertexBuffer.put(squareVertices);
-        vertexBuffer.position(0);
-
-        ByteBuffer textureBB = ByteBuffer.allocateDirect(textureVertices.length * 4);
-        textureBB.order(ByteOrder.nativeOrder());
-        textureBuffer = textureBB.asFloatBuffer();
-        textureBuffer.put(textureVertices);
-        textureBuffer.position(0);
 
         ByteBuffer floatBB = ByteBuffer.allocateDirect(colorVertices.length * 4);
         floatBB.order(ByteOrder.nativeOrder());
@@ -312,29 +240,21 @@ public class SpriteRenderer {
         // Enable a handle to the triangle vertices
         GLES31.glEnableVertexAttribArray(mPositionHandle);
         GLES31.glEnableVertexAttribArray(mOpacity);
+        GLES31.glEnableVertexAttribArray(mColor);
         GLES31.glEnableVertexAttribArray(mInputTextureCoordinate);
 
-        vertexBuffer.clear();
-        vertexBuffer.put(squareVertices);
-        // set the buffer to read the first coordinate
-        vertexBuffer.position(0);
-        // Prepare the triangle coordinate data
-        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES31.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
-
-        textureBuffer.clear();
-        textureBuffer.put(textureVertices);
-
+        squareBuffer.position(0);
         textureBuffer.position(0);
+        colorBuffer.position(0);
 
-        GLES31.glVertexAttribPointer(mInputTextureCoordinate, 3,
-                GLES31.GL_FLOAT, false,
-                vertexStride, textureBuffer);
+        squareBuffer.bindPointer(mPositionHandle);
+        textureBuffer.bindPointer(mInputTextureCoordinate);
+        colorBuffer.bindPointer(mColor);
 
         floatBuffer.clear();
         floatBuffer.put(colorVertices);
         floatBuffer.position(0);
+
         GLES31.glVertexAttribPointer(mOpacity, 1, GLES31.GL_FLOAT, false, 4, floatBuffer);
 
         // get handle to shape's transformation matrix
@@ -348,10 +268,11 @@ public class SpriteRenderer {
         GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, tw.getTextureId());
         GLES31.glUniform1i(mTexture, 0);
 
-        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, squareVertices.length / COORDS_PER_VERTEX);
+        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, squareBuffer.getVertexCount());
 
         // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);
+        GLES31.glDisableVertexAttribArray(mColor);
         GLES31.glDisableVertexAttribArray(mInputTextureCoordinate);
         GLES31.glDisableVertexAttribArray(mOpacity);
     }
@@ -364,9 +285,11 @@ public class SpriteRenderer {
         private final Typewriter.TextureCharacter character;
         public final float x;
         public final float y;
-        private final float opacity;
+        public final float opacity;
+        public final int color;
 
-        public TextureSprite(Typewriter.TextureCharacter character, float x, float y, float opacity) {
+        public TextureSprite(Typewriter.TextureCharacter character, float x, float y, int color, float opacity) {
+            this.color = color;
             this.character = character;
             this.x = x;
             this.y = y;

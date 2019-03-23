@@ -9,6 +9,7 @@ public class Column {
     private final double minValue;
     private final double maxValue;
     private final double division;
+    private int color;
 
     private float opacity = 0f;
     private boolean visible;
@@ -23,7 +24,6 @@ public class Column {
     public Column(String label, List<Double> data) {
         this.label = label;
         this.data = data;
-
         this.maxValue = Collections.max(data);
         this.minValue = Collections.min(data);
 
@@ -200,5 +200,13 @@ public class Column {
 
     public int getMarkerSpriteId() {
         return markerSpriteId;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 }

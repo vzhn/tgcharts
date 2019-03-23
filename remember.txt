@@ -3,3 +3,4 @@ Checklist
 - turn off z-buffer
 - do not render when nothing changes
 - middle positioning x labels
+- scroll borders

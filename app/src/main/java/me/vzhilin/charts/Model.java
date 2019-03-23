@@ -40,6 +40,10 @@ public class Model {
         this.chart = chart;
         this.tw = tw;
         this.popupState = new PopupState(this);
+
+        for (Column c: chart.getYColumns()) {
+            c.setColor(chart.getColor(c.getLabel()));
+        }
     }
 
     public double getScrollLeft() {

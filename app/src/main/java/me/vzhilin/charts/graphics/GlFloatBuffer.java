@@ -15,17 +15,19 @@ public class GlFloatBuffer {
 
     public GlFloatBuffer(int vertexCount) {
         this.vertexCount = vertexCount;
-        int bufferLength = vertexCount * vertexStride;
-
         ByteBuffer bb = ByteBuffer.allocateDirect(vertexCount * vertexStride);
         bb.order(ByteOrder.nativeOrder());
         floatBuffer = bb.asFloatBuffer();
     }
 
     public void putVertex(float x, float y) {
+        putVertex(x, y, 0);
+    }
+
+    public void putVertex(float x, float y, float z) {
         floatBuffer.put(x);
         floatBuffer.put(y);
-        floatBuffer.put(0);
+        floatBuffer.put(z);
     }
 
     public void clear() {
@@ -46,4 +48,6 @@ public class GlFloatBuffer {
     public int getVertexCount() {
         return vertexCount;
     }
+
+
 }

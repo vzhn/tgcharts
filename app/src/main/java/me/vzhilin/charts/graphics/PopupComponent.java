@@ -1,5 +1,6 @@
 package me.vzhilin.charts.graphics;
 
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.opengl.GLES31;
 import android.view.View;
@@ -28,7 +29,7 @@ public class PopupComponent {
         "precision mediump float;" +
         "uniform vec4 vColor;" +
         "void main() {" +
-        "  gl_FragColor = vec4(1.0, 0.5, 0.5, 1.0);" +
+        "  gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);" +
         "}";
 
     private final int mProgram;
@@ -161,11 +162,11 @@ public class PopupComponent {
             float mx = (float) model.getX(date);
 
             tw.drawSprite(column.getMarkerSpriteId(), mx - ViewConstants.MARKER_EXTERNAL_RADIUS,
-                my - ViewConstants.MARKER_EXTERNAL_RADIUS, column.getOpacity());
+                my - ViewConstants.MARKER_EXTERNAL_RADIUS, column.getColor(), column.getOpacity());
 
             if (column.getOpacity() > 0) {
                 tw.drawSprite(tw.getTypewriter().getMarkerFillerId(), mx - ViewConstants.MARKER_INNER_RADIUS,
-                        my - ViewConstants.MARKER_INNER_RADIUS, 1.0f);
+                        my - ViewConstants.MARKER_INNER_RADIUS, Color.WHITE,1.0f);
             }
         }
 
