@@ -29,6 +29,7 @@ public class Model {
     private int dateRibbonKFactor = 1;
 
     private double tooltipPosition;
+    private int tooltipDateIndex;
 
     public Model(Chart chart) {
         this.chart = chart;
@@ -230,12 +231,22 @@ public class Model {
         this.dateRibbonComponent = dateRibbonComponent;
     }
 
-    public void setTooltipPosition(double date) {
+    public void setTooltipPosition(int index, double date) {
+        this.tooltipDateIndex = index;
         this.tooltipPosition = date;
     }
 
     public double getPopupDate() {
         return tooltipPosition;
+    }
+
+    public int getPopupDateIndex() {
+        return tooltipDateIndex;
+    }
+
+    public double getY(double value) {
+        int chartHeight = height - ViewConstants.CHART_OFFSET;
+        return chartHeight - (value / maxFactor * chartHeight);
     }
 
     public double getX(double date) {

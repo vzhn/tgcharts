@@ -1,6 +1,7 @@
 package me.vzhilin.charts;
 
 import android.view.MotionEvent;
+import me.vzhilin.charts.data.Column;
 
 import java.util.Date;
 
@@ -31,11 +32,13 @@ public class TouchListener {
             double scrollRight = model.getScrollRight();
 
             double offsetX = scrollLeft + (scrollRight - scrollLeft) * mouseX / width;
-            double date = model.getChart().getXColumn().nearestValue(offsetX);
+            Column xColumn = model.getChart().getXColumn();
+            int dateIndex = xColumn.nearestIndex(offsetX);
+            double date = xColumn.getValue(dateIndex);
 
             System.err.println(new Date((long) date));;
 
-            model.setTooltipPosition(date);
+            model.setTooltipPosition(dateIndex, date);
 
             e.getX();
         }

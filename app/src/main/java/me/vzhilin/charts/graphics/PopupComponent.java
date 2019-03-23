@@ -1,9 +1,11 @@
 package me.vzhilin.charts.graphics;
 
 import android.opengl.GLES31;
+import android.view.View;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.MyGLRenderer;
 import me.vzhilin.charts.ViewConstants;
+import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.util.ArrayList;
@@ -12,36 +14,41 @@ import java.util.Locale;
 
 public class PopupComponent {
     private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
-            "attribute vec4 vPosition;" +
-            "void main() {" +
-            // the matrix must be included as a modifier of gl_Position
-            // Note that the uMVPMatrix factor *must be first* in order
-            // for the matrix multiplication product to be correct.
-            "  gl_Position = uMVPMatrix * vPosition;" +
-            "}";
+        // This matrix member variable provides a hook to manipulate
+        // the coordinates of the objects that use this vertex shader
+        "uniform mat4 uMVPMatrix;" +
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        // the matrix must be included as a modifier of gl_Position
+        // Note that the uMVPMatrix factor *must be first* in order
+        // for the matrix multiplication product to be correct.
+        "  gl_Position = uMVPMatrix * vPosition;" +
+        "}";
 
     private final String fragmentShaderCode =
-            "precision mediump float;" +
-            "uniform vec4 vColor;" +
-            "void main() {" +
-            "  gl_FragColor = vec4(1.0, 0.5, 0.5, 1.0);" +
-            "}";
+        "precision mediump float;" +
+        "uniform vec4 vColor;" +
+        "void main() {" +
+        "  gl_FragColor = vec4(1.0, 0.5, 0.5, 1.0);" +
+        "}";
 
     private final int mProgram;
 
     private final Model model;
     private final SpriteRenderer tw;
-    private final GlFloatBuffer buffer;
-    private final int vertexCount = 6;
+    private final GlFloatBuffer popupBackground;
+    private final GlFloatBuffer verticalLine;
+    private final GlFloatBuffer marker;
+    private final int popupBackgroundVertexCount = 6;
 
     public PopupComponent(Model model, SpriteRenderer tw) {
         this.model = model;
         this.tw = tw;
 
-        buffer = new GlFloatBuffer(vertexCount);
+        popupBackground = new GlFloatBuffer(popupBackgroundVertexCount);
+        verticalLine = new GlFloatBuffer(2);
+        marker = new GlFloatBuffer(6 * model.getChart().getYColumns().size());
+
         int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
@@ -88,7 +95,8 @@ public class PopupComponent {
 
         drawBorder(popupX, popupY, popupWidth, popupHeight, mMVPMatrix);
         drawText(samples, popupX, popupY, popupWidth, popupHeight, mMVPMatrix);
-        drawGeometry();
+        drawGeometry(mMVPMatrix);
+        drawMarkers(mMVPMatrix);
 //        for
     }
 
@@ -123,35 +131,82 @@ public class PopupComponent {
         // Add program to OpenGL ES environment
         GLES31.glUseProgram(mProgram);
 
-        buffer.clear();
-        buffer.putVertex(popupX, popupY);
-        buffer.putVertex(popupX, popupY + popupHeight);
-        buffer.putVertex(popupX + popupWidth, popupY);
-        buffer.putVertex( popupX + popupWidth, popupY + popupHeight);
-        buffer.putVertex(popupX, popupY + popupHeight);
-        buffer.putVertex(popupX + popupWidth, popupY);
-        buffer.position(0);
+        popupBackground.clear();
+        popupBackground.putVertex(popupX, popupY);
+        popupBackground.putVertex(popupX, popupY + popupHeight);
+        popupBackground.putVertex(popupX + popupWidth, popupY);
+        popupBackground.putVertex( popupX + popupWidth, popupY + popupHeight);
+        popupBackground.putVertex(popupX, popupY + popupHeight);
+        popupBackground.putVertex(popupX + popupWidth, popupY);
+        popupBackground.position(0);
 
-        // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
-
-        // Enable a handle to the triangle vertices
-        GLES31.glEnableVertexAttribArray(mPositionHandle);
-
-        buffer.bindPointer(mPositionHandle);
-
-        // get handle to fragment shader's vColor member
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
-
-        // Set color for drawing the triangle
-        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
-
-        // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
 
-        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, vertexCount);
+        popupBackground.bindPointer(mPositionHandle);
+        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, popupBackground.getVertexCount());
+
+        // Disable vertex array
+        GLES31.glDisableVertexAttribArray(mPositionHandle);
+    }
+
+    private void drawGeometry(float[] mMVPMatrix) {
+        verticalLine.clear();
+        int lineX = (int) model.getX(model.getPopupDate());
+        verticalLine.putVertex(lineX, 0);
+        verticalLine.putVertex(lineX, model.getHeight() - ViewConstants.CHART_OFFSET);
+        verticalLine.position(0);
+
+        int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
+        int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
+        int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
+        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+
+        verticalLine.bindPointer(mPositionHandle);
+        GLES31.glDrawArrays(GLES31.GL_LINES, 0, popupBackground.getVertexCount());
+    }
+
+    private void drawMarkers(float[] mMVPMatrix) {
+        double date = model.getPopupDate();
+        int index = model.getPopupDateIndex();
+
+        marker.clear();
+        for (Column column: model.getChart().getYColumns()) {
+            float my = (float) model.getY(column.getValue(index));
+            float mx = (float) model.getX(date);
+
+
+            int a = 50;
+            marker.putVertex(mx - a, my - a);
+            marker.putVertex(mx - a, my + a);
+            marker.putVertex(mx + a, my + a);
+//            marker.putVertex(mx + a, my - a);
+//            marker.putVertex(, model.getHeight() - ViewConstants.CHART_OFFSET);
+//            marker.putVertex(100, 100);
+//            marker.putVertex( 100, 0);
+        }
+
+        marker.position(0);
+
+
+        int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
+        int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
+        int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
+        GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+
+        marker.bindPointer(mPositionHandle);
+        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, marker.getVertexCount());
 
         // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);

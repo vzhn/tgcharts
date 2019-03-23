@@ -123,7 +123,8 @@ public class Column {
         return v;
     }
 
-    public double nearestValue(double offset) {
+
+    public int nearestIndex(double offset) {
         int index = (int) Math.round(offset * (data.size() - 1));
         if (index < 0) {
             index = 0;
@@ -133,6 +134,10 @@ public class Column {
             index = data.size() - 1;
         }
 
+        return index;
+    }
+
+    public double getValue(int index) {
         return data.get(index);
     }
 
