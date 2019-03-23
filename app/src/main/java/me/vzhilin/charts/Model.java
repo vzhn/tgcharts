@@ -234,8 +234,18 @@ public class Model {
         this.tooltipPosition = date;
     }
 
-    public double getPopupPosition() {
+    public double getPopupDate() {
         return tooltipPosition;
+    }
+
+    public double getX(double date) {
+        Column xColumn = chart.getXColumn();
+
+        double xDelta = xColumn.getMaxValue() - xColumn.getMinValue();
+        double min = xColumn.getMinValue() + xDelta * scrollLeft;
+        xDelta *= (scrollRight - scrollLeft);
+
+        return width *  (date - min) / xDelta;
     }
 
     private final static class PopupState {

@@ -112,11 +112,16 @@ public class PopupComponent {
 
         drawBorder(popupX, popupY, popupWidth, popupHeight, mMVPMatrix);
         drawText(samples, popupX, popupY, popupWidth, popupHeight, mMVPMatrix);
+        drawGeometry();
 //        for
     }
 
+    private void drawGeometry() {
+        model.getX(model.getPopupDate());
+    }
+
     private void drawText(List<Sample> samples, int popupX, int popupY, int popupWidth, int popupHeight, float[] mMVPMatrix) {
-        String date = ViewConstants.FORMATTER_WITH_DATE.format(model.getPopupPosition());
+        String date = ViewConstants.FORMATTER_WITH_DATE.format(model.getPopupDate());
 
         Typewriter tpw = tw.getTypewriter();
         float boldHeight = tpw.getContext(Typewriter.FontType.BOLD_FONT).fontHeight;

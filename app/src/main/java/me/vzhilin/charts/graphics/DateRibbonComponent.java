@@ -28,13 +28,6 @@ public class DateRibbonComponent {
     public void draw(int width, int height, float[] mMVPMatrix) {
         Column xColumn = model.getChart().getXColumn();
 
-        double xDelta = xColumn.getMaxValue() - xColumn.getMinValue();
-        double min = xColumn.getMinValue() + xDelta * model.getScrollLeft();
-
-        xDelta *= (model.getScrollRight() - model.getScrollLeft());
-
-        double xFactor = width / xDelta;
-
         int effectiveK = 1;
         switch (state) {
             case INIT:
@@ -52,14 +45,14 @@ public class DateRibbonComponent {
             spriteRenderer.getTypewriter().getContext(Typewriter.FontType.NORMAL_FONT).fontHeight);
 
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
-            double xPos = (date - min) * xFactor;
+            double xPos = model.getX(date);
             String dateText = ViewConstants.FORMATTER.format(new Date((long) date));
             spriteRenderer.drawString(dateText, (int) xPos, yPos, 1.0f);
         }
 
         if (state == RibbonState.ZOOM_IN || state == RibbonState.ZOOM_OUT) {
             for (double date: xColumn.sampleHalf(effectiveK - 1, model.getScrollLeft(), model.getScrollRight())) {
-                double xPos = (date - min) * xFactor;
+                double xPos = model.getX(date);
                 String dateText = ViewConstants.FORMATTER.format(new Date((long) date));
                 spriteRenderer.drawString(dateText, (int) xPos, yPos,  (float) alpha);
             }
