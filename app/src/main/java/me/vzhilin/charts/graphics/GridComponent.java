@@ -177,7 +177,7 @@ public class GridComponent {
         float yPos = 0;
         for (int i = 0; i < 6; i++) {
             int y = (int) (-10 + height - ViewConstants.CHART_OFFSET - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
-            spriteRenderer.drawString(String.format("%.0f", i * maxValue / 6f, Locale.US), 5, y,  opacity);
+            spriteRenderer.drawString(String.format("%.0f", i * maxValue / 6f, Locale.US), 5, y, ViewConstants.VIEW_GRAY, opacity);
 
             yPos += step;
         }

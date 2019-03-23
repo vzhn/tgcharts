@@ -47,14 +47,14 @@ public class DateRibbonComponent {
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {
             double xPos = model.getX(date);
             String dateText = ViewConstants.FORMATTER.format(new Date((long) date));
-            spriteRenderer.drawString(dateText, (int) xPos, yPos, 1.0f);
+            spriteRenderer.drawString(dateText, (int) xPos, yPos, ViewConstants.VIEW_GRAY, 1.0f);
         }
 
         if (state == RibbonState.ZOOM_IN || state == RibbonState.ZOOM_OUT) {
             for (double date: xColumn.sampleHalf(effectiveK - 1, model.getScrollLeft(), model.getScrollRight())) {
                 double xPos = model.getX(date);
                 String dateText = ViewConstants.FORMATTER.format(new Date((long) date));
-                spriteRenderer.drawString(dateText, (int) xPos, yPos,  (float) alpha);
+                spriteRenderer.drawString(dateText, (int) xPos, yPos, ViewConstants.VIEW_GRAY, (float) alpha);
             }
         }
     }

@@ -129,12 +129,12 @@ public class SpriteRenderer {
         sprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity));
     }
 
-    public void drawString(String string, int x, int y, float opacity) {
-        stringSprites.add(new StringSprite(x, y, string, opacity, Typewriter.FontType.NORMAL_FONT));
+    public void drawString(String string, int x, int y, int color, float opacity) {
+        stringSprites.add(new StringSprite(x, y, string, color, opacity, Typewriter.FontType.NORMAL_FONT));
     }
 
-    public void drawString(String string, int x, int y, float opacity, Typewriter.FontType type) {
-        stringSprites.add(new StringSprite(x, y, string, opacity, type));
+    public void drawString(String string, int x, int y, int color, float opacity, Typewriter.FontType type) {
+        stringSprites.add(new StringSprite(x, y, string, color, opacity, type));
     }
 
     private void prepareBuffers() {
@@ -180,7 +180,10 @@ public class SpriteRenderer {
                 textureBuffer.putVertex(ch.x1, ch.y2);
 
                 for (int k = 0; k < 6; k++) {
-                    colorBuffer.putVertex(0.0f, 0.0f, 0.0f);
+                    float r = Color.red(sc.color) / 255.0f;
+                    float g = Color.green(sc.color) / 255.0f;
+                    float b = Color.blue(sc.color) / 255.0f;
+                    colorBuffer.putVertex(r, g, b);
                 }
 
                 colorVertices[i * 6 + 0] = sc.opacity;

@@ -112,7 +112,7 @@ public class Typewriter {
         float yOffset = 0;
         for (FontContext ctx: fontContexts.values()) {
             float xOffset = 0;
-            canvas.drawText(alfabet, 0, yOffset + ctx.fontHeight - 5, ctx.textPaint);
+            canvas.drawText(alfabet, 0, yOffset + ctx.fontHeight - ctx.descent, ctx.textPaint);
 
             for (int i = 0; i < alfabet.length(); i++) {
                 char ch = alfabet.charAt(i);

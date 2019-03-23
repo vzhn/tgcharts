@@ -91,13 +91,15 @@ public class PopupComponent {
 
         int popupY = (int) (r.top + boldHeight);
 
-        tw.drawString(date, r.left, popupY, 1.0f, Typewriter.FontType.BOLD_FONT);
+        tw.drawString(date, r.left, popupY, Color.BLACK, 1.0f, Typewriter.FontType.BOLD_FONT);
 
         int sampleX = r.left;
         int sampleY = popupY;
         for (Sample s: samples) {
-            tw.drawString(s.getStringValue(), sampleX, (int) (sampleY + bigHeight), 1.0f, Typewriter.FontType.BIG_FONT);
-            tw.drawString(s.getLabel(), sampleX, (int) (sampleY + bigHeight + normalHeight), 1.0f, Typewriter.FontType.NORMAL_FONT);
+            int color = model.getChart().getColor(s.getLabel());
+
+            tw.drawString(s.getStringValue(), sampleX, (int) (sampleY + bigHeight), color, 1.0f, Typewriter.FontType.BIG_FONT);
+            tw.drawString(s.getLabel(), sampleX, (int) (sampleY + bigHeight + normalHeight), Color.BLACK,1.0f, Typewriter.FontType.NORMAL_FONT);
 
             sampleX += s.getWidth(tpw);
             sampleX += 20;

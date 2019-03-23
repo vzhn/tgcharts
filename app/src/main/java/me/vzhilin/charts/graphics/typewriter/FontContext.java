@@ -11,12 +11,14 @@ public final class FontContext {
     public final Paint.FontMetrics fontMetrics1;
     public final float fontHeight;
     public final float fontWidth;
+    public final float descent;
 
     private Map<Character, Typewriter.TextureCharacter> characters = new HashMap<>();
 
     public FontContext(TextPaint textPaint, String alfabet) {
         this.textPaint = textPaint;
         fontMetrics1 = textPaint.getFontMetrics();
+        this.descent = fontMetrics1.descent;
         fontHeight = fontMetrics1.descent - fontMetrics1.top;
         fontWidth = textPaint.measureText(alfabet);
     }
