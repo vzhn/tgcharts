@@ -3,25 +3,17 @@ package me.vzhilin.charts.graphics;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.opengl.GLES31;
-import android.view.View;
 import me.vzhilin.charts.*;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class PopupComponent {
     private final String vertexShaderCode =
-        // This matrix member variable provides a hook to manipulate
-        // the coordinates of the objects that use this vertex shader
         "uniform mat4 uMVPMatrix;" +
         "attribute vec4 vPosition;" +
         "void main() {" +
-        // the matrix must be included as a modifier of gl_Position
-        // Note that the uMVPMatrix factor *must be first* in order
-        // for the matrix multiplication product to be correct.
         "  gl_Position = uMVPMatrix * vPosition;" +
         "}";
 
@@ -52,22 +44,13 @@ public class PopupComponent {
         marker = new GlFloatBuffer(6 * model.getChart().getYColumns().size());
         borderLines = new GlFloatBuffer(8);
 
-        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = ChartRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = ChartRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        // create empty OpenGL ES Program
         mProgram = GLES31.glCreateProgram();
-
-        // add the vertex shader to program
         GLES31.glAttachShader(mProgram, vertexShader);
-
-        // add the fragment shader to program
         GLES31.glAttachShader(mProgram, fragmentShader);
-
-        // creates OpenGL ES program executables
         GLES31.glLinkProgram(mProgram);
-
-//        model.getChart().getXColumn().values().
     }
 
     public void draw(int width, int height, float[] mMVPMatrix) {
@@ -76,13 +59,6 @@ public class PopupComponent {
         if (popupState.isVisible()) {
             PopupState state = popupState;
             Rect r = state.getDimensions();
-
-//            int ofs = 14;
-//            int left = pd.left + ofs;
-//            int top = pd.top + ofs;
-//            int right = pd.right + ofs;
-//            int bottom = pd.bottom + ofs;
-
             borderLines.clear();
             borderLines.putVertex(r.left, r.top);
             borderLines.putVertex(r.left, r.bottom);
@@ -100,18 +76,6 @@ public class PopupComponent {
             drawText(r, state.getSamples(), mMVPMatrix);
             drawGeometry(r, mMVPMatrix);
             drawMarkers(r, mMVPMatrix);
-
-//            Typewriter typewriter = model.getTypewriter();
-//            tw.drawSprite(typewriter.getCornerId(2), pd.left, pd.bottom, Color.BLACK, 1.0f);
-//            tw.drawSprite(typewriter.getCornerId(3), pd.left, pd.top, Color.BLACK, 1.0f);
-//            tw.drawSprite(typewriter.getCornerId(0), pd.right, pd.top, Color.BLACK, 1.0f);
-//            tw.drawSprite(typewriter.getCornerId(1), pd.r ight, pd.bottom, Color.BLACK, 1.0f);
-
-
-//            tw.drawSprite(typewriter.getSideId(0), pd.right, pd.top, Color.WHITE, 1.0f, 30f, 10f);
-//            tw.drawSprite(typewriter.getSideId(3), pd.left, pd.top, Color.WHITE, 1.0f, 100f, 100f);
-//            tw.drawSprite(typewriter.getSideId(0), pd.right, pd.top, Color.WHITE, 1.0f, 100f, 100f);
-//            tw.drawSprite(typewriter.getSideId(1), pd.right, pd.bottom, Color.WHITE, 1.0f, 100f, 100f);
         }
     }
 
@@ -141,7 +105,6 @@ public class PopupComponent {
     }
 
     private void drawBorder(Rect r, float[] mMVPMatrix) {
-        // Add program to OpenGL ES environment
         GLES31.glUseProgram(mProgram);
 
         popupBackground.clear();

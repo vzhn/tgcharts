@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.support.v4.widget.CompoundButtonCompat;
 import android.util.AttributeSet;
 import android.util.JsonReader;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -24,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 class MyGLSurfaceView extends GLSurfaceView {
-    private final MyGLRenderer renderer;
+    private final ChartRenderer renderer;
     private final TouchListener touchListener;
 
     private final Model model;
@@ -43,7 +41,7 @@ class MyGLSurfaceView extends GLSurfaceView {
         setEGLContextClientVersion(3);
 //        GLES31.glHint(GLES31.GL_NICEST);
 
-        renderer = new MyGLRenderer(model, resources);
+        renderer = new ChartRenderer(model, resources);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);

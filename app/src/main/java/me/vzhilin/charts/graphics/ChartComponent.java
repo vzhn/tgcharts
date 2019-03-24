@@ -4,7 +4,7 @@ import android.graphics.Color;
 import android.opengl.GLES31;
 import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
-import me.vzhilin.charts.MyGLRenderer;
+import me.vzhilin.charts.ChartRenderer;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
@@ -13,30 +13,24 @@ import static me.vzhilin.charts.graphics.ScrollComponent.COORDS_PER_VERTEX;
 public class ChartComponent {
     private final int mProgram;
     private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // Note that the uMVPMatrix factor *must be first* in order
-                    // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition; " +
-                    "  gl_PointSize = 10.0;" +
-                    "}";
+        "uniform mat4 uMVPMatrix;" +
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        "  gl_Position = uMVPMatrix * vPosition; " +
+        "  gl_PointSize = 10.0;" +
+        "}";
 
     private final String fragmentShaderCode =
-            "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
+        "precision mediump float;" +
+        "uniform vec4 vColor;" +
+        "void main() {" +
+        "  gl_FragColor = vColor;" +
+        "}";
 
     private final Column yColumn;
 
     private Model model;
 
-    // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
 
     public ChartComponent(Model model, Column xColumn, Column yColumn, int c) {
@@ -47,48 +41,28 @@ public class ChartComponent {
         color[1] = Color.green(c) / 255f;
         color[2] = Color.blue(c) / 255f;
 
-        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = ChartRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = ChartRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        // create empty OpenGL ES Program
         mProgram = GLES31.glCreateProgram();
-
-        // add the vertex shader to program
         GLES31.glAttachShader(mProgram, vertexShader);
-
-        // add the fragment shader to program
         GLES31.glAttachShader(mProgram, fragmentShader);
-
-        // creates OpenGL ES program executables
         GLES31.glLinkProgram(mProgram);
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
-        // Add program to OpenGL ES environment
         GLES31.glUseProgram(mProgram);
-
-        // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
-
-        // Enable a handle to the triangle vertices
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-
-        // Prepare the triangle coordinate data
         GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
                 GLES31.GL_FLOAT, false,
                 yColumn.getVertexStride(), yColumn.getVertexBuffer());
 
-        // get handle to fragment shader's vColor member
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
-
         color[3] = yColumn.getOpacity();
 
-        // Set color for drawing the triangle
         GLES31.glUniform4fv(mColorHandle, 1, color, 0);
-
-        // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
-
         float[] identity = new float[] {
                 1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f, 0.0f,
@@ -112,16 +86,8 @@ public class ChartComponent {
         Matrix.translateM(identity, 0, 0, -1/yScaleFactor, 0);
         Matrix.translateM(identity, 0, 0, 2 * scrollFactor / yScaleFactor, 0);
 
-        // Pass the projection and view transformation to the shader
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
-
         GLES31.glLineWidth(ViewConstants.LINE_WIDTH);
         GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexCount());
-//        GLES31.glDrawArrays(GLES31.GL_POINTS, 0, yColumn.getVertexCount());
-//        GLES31.glDrawArrays(GLES31.GL_POINTS);
-        GLES31.glLineWidth(1f);
-
-        // Disable vertex array
-//        GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 }

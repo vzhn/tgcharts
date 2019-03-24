@@ -3,22 +3,18 @@ package me.vzhilin.charts;
 import android.view.MotionEvent;
 import me.vzhilin.charts.data.Column;
 
-import java.util.Date;
-
 public class TouchListener {
     private final Model model;
 
     private DragState state = DragState.NONE;
     private float evX;
     private float evY;
-//    private MotionEvent ev;
 
     public TouchListener(Model model) {
         this.model = model;
     }
 
     public void onTouchEvent(MotionEvent e) {
-//        Scroll scroll = view.getScroll();
         touchScroll(e);
         touchChart(e);
     }
@@ -39,18 +35,7 @@ public class TouchListener {
             model.setTooltipPosition(dateIndex, date);
             model.refresh();
         }
-        if (e.getAction() == MotionEvent.ACTION_DOWN) {
-
-        } else
-        if (e.getAction() == MotionEvent.ACTION_UP) {
-
-        } else
-        if (e.getAction() == MotionEvent.ACTION_MOVE) {
-
-        }
     }
-
-
 
     private void touchScroll(MotionEvent e) {
         if (e.getAction() == MotionEvent.ACTION_DOWN) {

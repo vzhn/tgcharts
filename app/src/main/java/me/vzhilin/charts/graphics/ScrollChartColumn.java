@@ -3,7 +3,7 @@ package me.vzhilin.charts.graphics;
 import android.graphics.Color;
 import android.opengl.GLES31;
 import android.opengl.Matrix;
-import me.vzhilin.charts.MyGLRenderer;
+import me.vzhilin.charts.ChartRenderer;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
@@ -51,19 +51,12 @@ final class ScrollChartColumn {
 
         initVertexBuffer(xColumn, yColumn);
 
-        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = ChartRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = ChartRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        // create empty OpenGL ES Program
         mProgram = GLES31.glCreateProgram();
-
-        // add the vertex shader to program
         GLES31.glAttachShader(mProgram, vertexShader);
-
-        // add the fragment shader to program
         GLES31.glAttachShader(mProgram, fragmentShader);
-
-        // creates OpenGL ES program executables
         GLES31.glLinkProgram(mProgram);
     }
 
@@ -107,32 +100,17 @@ final class ScrollChartColumn {
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
-//        if (!yColumn.isVisible()) {
-//            return;
-//        }
-        // Add program to OpenGL ES environment
         GLES31.glUseProgram(mProgram);
-
-        // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
-
-        // Enable a handle to the triangle vertices
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-
-        // Prepare the triangle coordinate data
         GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
                 GLES31.GL_FLOAT, false,
                 yColumn.getVertexStride(), yColumn.getVertexBuffer());
 
-        // get handle to fragment shader's vColor member
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
-
         color[3] = yColumn.getOpacity();
 
-        // Set color for drawing the triangle
         GLES31.glUniform4fv(mColorHandle, 1, color, 0);
-
-        // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         float[] identity = new float[] {
@@ -148,14 +126,11 @@ final class ScrollChartColumn {
 
         Matrix.translateM(identity, 0, 0, (- 1f + (0.2f * ViewConstants.SCROLL_HEIGHT / height)) / scaleFactor  , 0);
 
-        // Pass the projection and view transformation to the shader
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         GLES31.glLineWidth(4f);
         GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexCount());
         GLES31.glLineWidth(1f);
-
-        // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 }

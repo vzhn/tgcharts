@@ -171,6 +171,17 @@ public class Column {
         return rs;
     }
 
+
+    private double clamp(double v) {
+        if (v > 1.0) {
+            return 1.0;
+        }
+        if (v < 0) {
+            return 0;
+        }
+        return v;
+    }
+
     public List<Double> sample(int k, double left, double right) {
         left = clamp(left);
         right = clamp(right);
@@ -189,15 +200,6 @@ public class Column {
         return rs;
     }
 
-    private double clamp(double v) {
-        if (v > 1.0) {
-            return 1.0;
-        }
-        if (v < 0) {
-            return 0;
-        }
-        return v;
-    }
 
     public List<Double> sampleHalf(int k, double left, double right) {
         List<Double> rs = new ArrayList<>();

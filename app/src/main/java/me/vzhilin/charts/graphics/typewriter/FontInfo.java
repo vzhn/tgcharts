@@ -6,7 +6,7 @@ import android.text.TextPaint;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class FontContext {
+public final class FontInfo {
     public final TextPaint textPaint;
     public final Paint.FontMetrics fontMetrics1;
     public final float fontHeight;
@@ -15,7 +15,7 @@ public final class FontContext {
 
     private Map<Character, Typewriter.TextureCharacter> characters = new HashMap<>();
 
-    public FontContext(TextPaint textPaint, String alfabet) {
+    public FontInfo(TextPaint textPaint, String alfabet) {
         this.textPaint = textPaint;
         fontMetrics1 = textPaint.getFontMetrics();
         this.descent = fontMetrics1.descent;

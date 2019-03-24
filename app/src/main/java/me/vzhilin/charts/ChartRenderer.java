@@ -5,15 +5,13 @@ import android.opengl.GLES31;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import me.vzhilin.charts.graphics.*;
-import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import javax.microedition.khronos.opengles.GL10;
 
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+public class ChartRenderer implements GLSurfaceView.Renderer {
     private final Model model;
     private final Resources resources;
 
-    //    private GridComponent mGridComponent;
     private ScrollChartComponent scrollChartComponent;
     private ScrollRibbonComponent scrollRibbonComponent;
     private ScrollComponent mScrollComponent;
@@ -27,7 +25,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mRotationMatrix = new float[16];
     private SpriteRenderer spriteRenderer;
 
-    public MyGLRenderer(Model model, Resources resources) {
+    public ChartRenderer(Model model, Resources resources) {
         this.model = model;
         this.resources = resources;
     }
@@ -75,14 +73,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, javax.microedition.khronos.egl.EGLConfig config) {
-        // Set the background frame color
         GLES31.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        GLES31.glEnable(GLES31.GL_BLEND);
 
+        GLES31.glEnable(GLES31.GL_BLEND);
         GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
 
         spriteRenderer = new SpriteRenderer(model);
-        // initialize a triangle
         mScrollComponent = new ScrollComponent(model);
         mDateComponent = new DateRibbonComponent(spriteRenderer, model);
         scrollChartComponent = new ScrollChartComponent(model, spriteRenderer);

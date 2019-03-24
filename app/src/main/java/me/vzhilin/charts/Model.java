@@ -30,9 +30,6 @@ public class Model {
     private DateRibbonComponent dateRibbonComponent;
     private int dateRibbonKFactor = 1;
 
-//    private double tooltipPosition;
-//    private int tooltipDateIndex;
-
     private final PopupState popupState;
 
 
@@ -244,16 +241,8 @@ public class Model {
         return smoothMaxFactor;
     }
 
-    public double getMaxValue() {
-        return maxFactor;
-    }
-
     public Collection<GridComponent> getGridComponents() {
         return gridComponents;
-    }
-
-    public int getK() {
-        return dateRibbonKFactor;
     }
 
     public void setRibbonComponent(DateRibbonComponent dateRibbonComponent) {

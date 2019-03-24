@@ -3,7 +3,7 @@ package me.vzhilin.charts.graphics;
 import android.opengl.GLES31;
 import android.opengl.Matrix;
 import me.vzhilin.charts.Model;
-import me.vzhilin.charts.MyGLRenderer;
+import me.vzhilin.charts.ChartRenderer;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.transitions.SinTransition;
 
@@ -16,28 +16,22 @@ public class GridComponent {
     private final Model model;
 
     private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // Note that the uMVPMatrix factor *must be first* in order
-                    // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
-                    "}";
-    private final SpriteRenderer spriteRenderer;
+        "uniform mat4 uMVPMatrix;" +
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        "  gl_Position = uMVPMatrix * vPosition;" +
+        "}";
 
-    // Use to access and set the view transformation
+    private final SpriteRenderer spriteRenderer;
     private int mMVPMatrixHandle;
 
     private final String fragmentShaderCode =
             "precision mediump float;" +
-                    "uniform float vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor.rgb = vec3(241.0 / 255.0, 241.0 / 255.0, 241.0 / 255.0);" +
-                    "  gl_FragColor.a = vColor;" +
-                    "}";
+            "uniform float vColor;" +
+            "void main() {" +
+            "  gl_FragColor.rgb = vec3(241.0 / 255.0, 241.0 / 255.0, 241.0 / 255.0);" +
+            "  gl_FragColor.a = vColor;" +
+            "}";
 
     private final int mProgram;
 
@@ -64,33 +58,21 @@ public class GridComponent {
         this.model = model;
         this.spriteRenderer = spriteRenderer;
 
-        // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
                 triangleCoords.length * 4);
-        // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
 
-        // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
-        // add the coordinates to the FloatBuffer
         vertexBuffer.put(triangleCoords);
-        // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = ChartRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = ChartRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        // create empty OpenGL ES Program
         mProgram = GLES31.glCreateProgram();
-
-        // add the vertex shader to program
         GLES31.glAttachShader(mProgram, vertexShader);
-
-        // add the fragment shader to program
         GLES31.glAttachShader(mProgram, fragmentShader);
-
-        // creates OpenGL ES program executables
         GLES31.glLinkProgram(mProgram);
     }
 
@@ -98,17 +80,11 @@ public class GridComponent {
         if (state == State.HIDDEN) {
             return;
         }
-        // Add program to OpenGL ES environment
+
         GLES31.glUseProgram(mProgram);
-
-        // get handle to vertex shader's vPosition member
         mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
-
-        // Enable a handle to the triangle vertices
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-
         vertexBuffer.clear();
-        // add the coordinates to the FloatBuffer
 
         float i1 = (float) maxValue / 6f;
         for (int i = 0; i < 10; i++) {
@@ -120,21 +96,14 @@ public class GridComponent {
 
         //-------------------- TOP
         vertexBuffer.put(triangleCoords);
-        // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        // Prepare the triangle coordinate data
         GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
                 GLES31.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
-        // get handle to fragment shader's vColor member
         mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
-
-        // Set color for drawing the triangle
         GLES31.glUniform1f(mColorHandle, opacity);
-
-        // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         float[] identity = new float[] {
@@ -148,24 +117,17 @@ public class GridComponent {
         float scrollFactor = (float) ViewConstants.CHART_OFFSET / height;
 
         float absoluteMax = (float) model.getSmoothMaxFactor();
-//        double maxFactor = yColumn.getMaxValue() / absoluteMax;
 
         float yScaleFactor = 2f / absoluteMax;
         yScaleFactor *= (1f - (float) ViewConstants.CHART_OFFSET / height);
-//        yScaleFactor *= maxFactor;
 
         Matrix.scaleM(identity, 0, 1f, yScaleFactor, 1f);
         Matrix.translateM(identity, 0, 0, -1/yScaleFactor, 0);
         Matrix.translateM(identity, 0, 0, 2 * scrollFactor / yScaleFactor, 0);
 
-        // Pass the projection and view transformation to the shader
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
-
         GLES31.glLineWidth(4f);
-        // Draw the triangle
         GLES31.glDrawArrays(GLES31.GL_LINES, 0, vertexCount);
-
-        // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);
 
         drawText(height, mvpMatrix);

@@ -9,7 +9,6 @@ import java.util.List;
 
 public class ScrollChartComponent {
     private final List<ChartComponent> chartComponents = new ArrayList<>();
-    private final List<ChartLineCapsComponent> chartCapsComponents = new ArrayList<>();
     private List<ScrollChartColumn> subcomponents = new ArrayList<>();
 
     public ScrollChartComponent(Model model, SpriteRenderer spriteRenderer) {
@@ -20,7 +19,6 @@ public class ScrollChartComponent {
             int color = chart.getColor(yColumn.getLabel());
             subcomponents.add(new ScrollChartColumn(xColumn, yColumn, color));
             chartComponents.add(new ChartComponent(model, xColumn, yColumn, color));
-//            chartCapsComponents.add(new ChartLineCapsComponent(spriteRenderer.getTypewriter(), model, xColumn, yColumn, color));
         }
     }
 
@@ -32,9 +30,5 @@ public class ScrollChartComponent {
         for (ChartComponent cmp: chartComponents) {
             cmp.draw(width, height, mMVPMatrix);
         }
-
-//        for (ChartLineCapsComponent cmp: chartCapsComponents) {
-//            cmp.draw(width, height, mMVPMatrix);
-//        }
     }
 }
