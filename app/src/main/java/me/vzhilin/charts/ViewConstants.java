@@ -30,7 +30,7 @@ public class ViewConstants {
     public static final float FONT_SIZE_1 = 36f;
     public static final float FONT_SIZE_2 = 52f;
 
-    public static final float MARKER_EXTERNAL_RADIUS = 15f;
-    public static final float MARKER_INNER_RADIUS = 10f;
+    public static final float MARKER_EXTERNAL_RADIUS = 12f;
+    public static final float MARKER_INNER_RADIUS = 8f;
 }
 

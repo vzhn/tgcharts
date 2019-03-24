@@ -126,6 +126,8 @@ public class Column {
 
 
     public int nearestIndex(double offset) {
+        offset = clamp(offset);
+
         int index = (int) Math.round(offset * (data.size() - 1));
         if (index < 0) {
             index = 0;
@@ -143,6 +145,9 @@ public class Column {
     }
 
     public List<Double> slice(double left, double right) {
+        left = clamp(left);
+        right = clamp(right);
+
         List<Double> rs = new ArrayList<>();
 
         int ix1 = (int) Math.floor(left * (data.size() - 1));
@@ -167,6 +172,9 @@ public class Column {
     }
 
     public List<Double> sample(int k, double left, double right) {
+        left = clamp(left);
+        right = clamp(right);
+
         List<Double> rs = new ArrayList<>();
 
         int inc = (1 << k);
@@ -174,11 +182,21 @@ public class Column {
         int start = (int) (Math.floor(left * (data.size() - 1) / inc) * inc);
         int end   = (int) (Math.ceil((data.size() - 1) * right));
 
-        for (int i = Math.max(0, start); i < end; i += inc) {
+        for (int i = start; i < end; i += inc) {
             rs.add(data.get(i));
         }
 
         return rs;
+    }
+
+    private double clamp(double v) {
+        if (v > 1.0) {
+            return 1.0;
+        }
+        if (v < 0) {
+            return 0;
+        }
+        return v;
     }
 
     public List<Double> sampleHalf(int k, double left, double right) {
@@ -187,6 +205,8 @@ public class Column {
 
         int start = (int) ((1 << k) + Math.floor(left * (data.size() - 1) / inc) * inc);
         int end   = (int) (Math.ceil((data.size() - 1) * right));
+
+        start = Math.max(0, start);
         for (int i = Math.max(0, start); i < end; i += inc) {
             rs.add(data.get(i));
         }

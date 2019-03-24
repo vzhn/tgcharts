@@ -5,9 +5,7 @@ import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 public class DateRibbonComponent {
     private final Model model;
@@ -41,7 +39,7 @@ public class DateRibbonComponent {
                 break;
         }
 
-        int yPos = (int) (15 + height - ViewConstants.SCROLL_HEIGHT -
+        int yPos = (int) (20 + height - ViewConstants.SCROLL_HEIGHT -
             spriteRenderer.getTypewriter().getContext(Typewriter.FontType.NORMAL_FONT).fontHeight);
 
         for (double date: xColumn.sample(effectiveK, model.getScrollLeft(), model.getScrollRight())) {

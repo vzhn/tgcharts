@@ -12,6 +12,8 @@ public final class PopupState {
     private final Model model;
     private final Typewriter tw;
 
+    public final static int MARGIN = 20;
+
     private int index;
     private double date;
 
@@ -71,22 +73,23 @@ public final class PopupState {
             }
 
             h += samples.get(0).getHeight(tw);
-            w += (samples.size() - 1) * 20;
+            w += (samples.size() - 1) * 40;
         }
 
         w = Math.max(w, dateWidth);
 
         int popupX = (int) (model.getX(date) - w * 0.25f);
-        if (popupX < 0) {
-            popupX = 0;
+        if (popupX < MARGIN) {
+            popupX = MARGIN;
         }
 
-        if (popupX + w > model.getWidth()) {
-            popupX = model.getWidth() - w;
+        if (popupX + w + MARGIN > model.getWidth()) {
+            popupX = model.getWidth() - w - MARGIN;
         }
-        int popupY = 0;
+        int popupY = 10;
 
-        return new Rect(popupX, popupY, popupX + w, popupY + h);
+        return new Rect(popupX - MARGIN, popupY - MARGIN,
+            popupX + w + MARGIN, popupY + h + MARGIN);
     }
 
     public void setPosition(int index, double date) {

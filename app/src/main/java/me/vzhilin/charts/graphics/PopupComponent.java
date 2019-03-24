@@ -80,7 +80,6 @@ public class PopupComponent {
         }
     }
 
-
     private void drawText(Rect r, List<Sample> samples, float[] mMVPMatrix) {
         String date = ViewConstants.FORMATTER_WITH_DATE.format(model.getPopupState().getDate());
 
@@ -89,11 +88,11 @@ public class PopupComponent {
         float bigHeight = tpw.getContext(Typewriter.FontType.BIG_FONT).fontHeight;
         float normalHeight = tpw.getContext(Typewriter.FontType.NORMAL_FONT).fontHeight;
 
-        int popupY = (int) (r.top + boldHeight);
+        int popupY = (int) (r.top + boldHeight) + PopupState.MARGIN;
 
-        tw.drawString(date, r.left, popupY, Color.BLACK, 1.0f, Typewriter.FontType.BOLD_FONT);
+        tw.drawString(date, r.left + PopupState.MARGIN, popupY, Color.BLACK, 1.0f, Typewriter.FontType.BOLD_FONT);
 
-        int sampleX = r.left;
+        int sampleX = r.left + PopupState.MARGIN;
         int sampleY = popupY;
         for (Sample s: samples) {
             int color = model.getChart().getColor(s.getLabel());
@@ -102,7 +101,7 @@ public class PopupComponent {
             tw.drawString(s.getLabel(), sampleX, (int) (sampleY + bigHeight + normalHeight), Color.BLACK,1.0f, Typewriter.FontType.NORMAL_FONT);
 
             sampleX += s.getWidth(tpw);
-            sampleX += 20;
+            sampleX += 40;
         }
     }
 
