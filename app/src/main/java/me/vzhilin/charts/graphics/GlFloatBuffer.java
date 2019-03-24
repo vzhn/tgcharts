@@ -6,15 +6,20 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class GlFloatBuffer {
-    static final int COORDS_PER_VERTEX = 3;
-
+public final class GlFloatBuffer {
     private final FloatBuffer floatBuffer;
-    private int vertexStride = COORDS_PER_VERTEX * 4;
-    private int vertexCount;
+    private final int vertexCount;
+    private final int vertexStride;
+    private final int coordsPerVertex;
 
     public GlFloatBuffer(int vertexCount) {
+        this(3, vertexCount);
+    }
+
+    public GlFloatBuffer(int coordsPerVertex, int vertexCount) {
+        this.coordsPerVertex = coordsPerVertex;
         this.vertexCount = vertexCount;
+        this.vertexStride = coordsPerVertex * 4;
         ByteBuffer bb = ByteBuffer.allocateDirect(vertexCount * vertexStride);
         bb.order(ByteOrder.nativeOrder());
         floatBuffer = bb.asFloatBuffer();
@@ -30,6 +35,13 @@ public class GlFloatBuffer {
         floatBuffer.put(z);
     }
 
+    public void putVertex(float r, float g, float b, float a) {
+        floatBuffer.put(r);
+        floatBuffer.put(g);
+        floatBuffer.put(b);
+        floatBuffer.put(a);
+    }
+
     public void clear() {
         floatBuffer.clear();
     }
@@ -39,8 +51,7 @@ public class GlFloatBuffer {
     }
 
     public void bindPointer(int handle) {
-        // Prepare the triangle coordinate data
-        GLES31.glVertexAttribPointer(handle, COORDS_PER_VERTEX,
+        GLES31.glVertexAttribPointer(handle, coordsPerVertex,
                 GLES31.GL_FLOAT, false,
                 vertexStride, floatBuffer);
     }
@@ -48,6 +59,4 @@ public class GlFloatBuffer {
     public int getVertexCount() {
         return vertexCount;
     }
-
-
 }

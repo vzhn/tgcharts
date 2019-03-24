@@ -31,7 +31,11 @@ public class Typewriter {
 
     private TextureCharacter circleTexture;
     private TextureCharacter cornersTexture;
+
     private int markerFillerId;
+
+    private List<Integer> cornerIds = new ArrayList<>();
+    private List<Integer> cornerSideIds = new ArrayList<>();
 
     public Typewriter(Resources resources) {
         this.resources = resources;
@@ -63,6 +67,47 @@ public class Typewriter {
     }
 
     private void addSprites() {
+        addMarker();
+        addCorner();
+        addSides(R.drawable.corner_side_h);
+        addSides(R.drawable.corner_side_v);
+    }
+
+    private void addSides(int resourceID) {
+        Bitmap b = BitmapFactory.decodeResource(resources, resourceID);
+        int bw = b.getWidth();
+        int bh = b.getHeight();
+        for (int i = 0; i < 360; i += 180) {
+            Bitmap bm = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888);
+            Canvas cv = new Canvas(bm);
+            Paint paint = new Paint();
+
+            cv.rotate(i, bw / 2f, bh / 2f);
+            cv.drawBitmap(b, 0, 0, paint);
+            bitmapSprites.add(new BitmapSprite(bm));
+
+            cornerSideIds.add(bitmapSprites.size() - 1);
+        }
+    }
+
+    private void addCorner() {
+        Bitmap b = BitmapFactory.decodeResource(resources, R.drawable.corner);
+        int bw = b.getWidth();
+        int bh = b.getHeight();
+        for (int i = 0; i < 360; i += 90) {
+            Bitmap bm = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888);
+            Canvas cv = new Canvas(bm);
+            Paint paint = new Paint();
+
+            cv.rotate(i, bw / 2f, bh / 2f);
+            cv.drawBitmap(b, 0, 0, paint);
+            bitmapSprites.add(new BitmapSprite(bm));
+
+            cornerIds.add(bitmapSprites.size() - 1);
+        }
+    }
+
+    private void addMarker() {
         int d = (int) ViewConstants.MARKER_INNER_RADIUS * 2;
         Bitmap bm = Bitmap.createBitmap(d, d, Bitmap.Config.ARGB_8888);
 
@@ -103,6 +148,14 @@ public class Typewriter {
 
     public int getTextureId() {
         return textureId;
+    }
+
+    public int getCornerId(int index) {
+        return cornerIds.get(index);
+    }
+
+    public int getSideId(int index) {
+        return cornerSideIds.get(index);
     }
 
     private int initTextures() {
@@ -147,19 +200,6 @@ public class Typewriter {
         }
 
         return generateTextures(bitmap);
-    }
-
-    private int drawCorners(Canvas canvas, float ws, float textureWidth) {
-        Bitmap bm = BitmapFactory.decodeResource(resources, R.drawable.corner);
-        canvas.drawBitmap(bm, ws, 0f, null);
-        int w = bm.getWidth();
-        int h = bm.getHeight();
-        bm.recycle();
-
-        cornersTexture = new TextureCharacter(ws / textureWidth,0, (ws + w) / textureWidth, h / textureHeight,
-                (float) w, (float) h);
-
-        return w;
     }
 
     public FontContext getContext(FontType size) {

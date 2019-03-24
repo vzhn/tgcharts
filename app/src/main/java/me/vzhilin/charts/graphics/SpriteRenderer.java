@@ -18,47 +18,33 @@ import java.util.List;
 
 public class SpriteRenderer {
     private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
             "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "attribute vec4 inputTextureCoordinate;" +
-                    "attribute float opacity;" +
-                    "attribute vec3 color;" +
-
-                    "varying vec2 textureCoordinate;" +
-                    "varying float vOpacity;" +
-                    "varying vec3 vColor;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // Note that the uMVPMatrix factor *must be first* in order
-                    // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
-                    "  vOpacity = opacity;" +
-                    "  vColor = color;" +
-                    "  textureCoordinate = inputTextureCoordinate.xy;" +
-                    "}";
+            "attribute vec4 vPosition;" +
+            "attribute vec4 inputTextureCoordinate;" +
+            "attribute vec4 color;" +
+            "varying vec2 textureCoordinate;" +
+            "varying vec4 vColor;" +
+            "void main() {" +
+            "  gl_Position = uMVPMatrix * vPosition;" +
+            "  vColor = color;" +
+            "  textureCoordinate = inputTextureCoordinate.xy;" +
+            "}";
 
     private final String fragmentShaderCode =
             "precision mediump float;"+
-                    "uniform sampler2D videoFrame;" +
-                    "varying vec3 vColor;" +
-
-                    "varying vec2 textureCoordinate;" +
-                    "varying float vOpacity;" +
-                    "void main() {" +
-                    "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
-                    "  color.rgb = vColor.rgb;" +
-//        "  color.r += 0.5;" +
-//        "  color.a += 0.5;" +
-                    "  color.a *= vOpacity;" + //FIXME
-                    "  gl_FragColor = color;" +
-                    "}";
+            "uniform sampler2D videoFrame;" +
+            "varying vec4 vColor;" +
+            "varying vec2 textureCoordinate;" +
+            "void main() {" +
+            "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
+            "  color.rgb += vColor.rgb;" +
+            "  color.a *= vColor.a;" +
+            "  gl_FragColor = color;" +
+            "}";
 
     private final Typewriter tw;
 
     private final int mPositionHandle;
-    private final int mOpacity;
     private final int mColor;
     private final int mInputTextureCoordinate;
     private final int mProgram;
@@ -95,12 +81,10 @@ public class SpriteRenderer {
         mProgram = GLES31.glCreateProgram();
 
         mPositionHandle = 1;
-        mOpacity = 2;
-        mColor = 3;
-        mInputTextureCoordinate = 4;
+        mColor = 2;
+        mInputTextureCoordinate = 3;
 
         GLES31.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
-        GLES31.glBindAttribLocation(mProgram, mOpacity, "opacity");
         GLES31.glBindAttribLocation(mProgram, mColor, "color");
         GLES31.glBindAttribLocation(mProgram, mInputTextureCoordinate, "inputTextureCoordinate");
 
@@ -129,6 +113,10 @@ public class SpriteRenderer {
         sprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity));
     }
 
+    public void drawSprite(int id, float x, float y, int color, float opacity, float sx, float sy) {
+        sprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity, sx, sy));
+    }
+
     public void drawString(String string, int x, int y, int color, float opacity) {
         stringSprites.add(new StringSprite(x, y, string, color, opacity, Typewriter.FontType.NORMAL_FONT));
     }
@@ -147,7 +135,7 @@ public class SpriteRenderer {
 
         squareBuffer = new GlFloatBuffer(6 * totalSprites);
         textureBuffer = new GlFloatBuffer(6 * totalSprites);
-        colorBuffer   = new GlFloatBuffer(6 * totalSprites);
+        colorBuffer   = new GlFloatBuffer(4, 6 * totalSprites);
 
         colorVertices = new float[6 * totalSprites];
     }
@@ -183,15 +171,8 @@ public class SpriteRenderer {
                     float r = Color.red(sc.color) / 255.0f;
                     float g = Color.green(sc.color) / 255.0f;
                     float b = Color.blue(sc.color) / 255.0f;
-                    colorBuffer.putVertex(r, g, b);
+                    colorBuffer.putVertex(r, g, b, sc.opacity);
                 }
-
-                colorVertices[i * 6 + 0] = sc.opacity;
-                colorVertices[i * 6 + 1] = sc.opacity;
-                colorVertices[i * 6 + 2] = sc.opacity;
-                colorVertices[i * 6 + 3] = sc.opacity;
-                colorVertices[i * 6 + 4] = sc.opacity;
-                colorVertices[i * 6 + 5] = sc.opacity;
                 offset += width;
                 ++i;
             }
@@ -199,7 +180,7 @@ public class SpriteRenderer {
 
         for (TextureSprite tx: sprites) {
             Typewriter.TextureCharacter ch = tx.character;
-            float x1 = tx.x, y1 = tx.y, x2 = tx.x + ch.width, y2 = tx.y + ch.width;
+            float x1 = tx.x, y1 = tx.y, x2 = tx.x + ch.width * tx.sx, y2 = tx.y + ch.height * tx.sy;
 
             squareBuffer.putVertex(x1, y1);
             squareBuffer.putVertex(x2, y1);
@@ -219,15 +200,8 @@ public class SpriteRenderer {
                 float r = Color.red(tx.color) / 255.0f;
                 float g = Color.green(tx.color) / 255.0f;
                 float b = Color.blue(tx.color) / 255.0f;
-                colorBuffer.putVertex(r, g, b);
+                colorBuffer.putVertex(r, g, b, tx.opacity);
             }
-
-            colorVertices[i * 6 + 0] = tx.opacity;
-            colorVertices[i * 6 + 1] = tx.opacity;
-            colorVertices[i * 6 + 2] = tx.opacity;
-            colorVertices[i * 6 + 3] = tx.opacity;
-            colorVertices[i * 6 + 4] = tx.opacity;
-            colorVertices[i * 6 + 5] = tx.opacity;
             ++i;
         }
 
@@ -242,7 +216,6 @@ public class SpriteRenderer {
         // get handle to vertex shader's vPosition member
         // Enable a handle to the triangle vertices
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glEnableVertexAttribArray(mOpacity);
         GLES31.glEnableVertexAttribArray(mColor);
         GLES31.glEnableVertexAttribArray(mInputTextureCoordinate);
 
@@ -253,12 +226,6 @@ public class SpriteRenderer {
         squareBuffer.bindPointer(mPositionHandle);
         textureBuffer.bindPointer(mInputTextureCoordinate);
         colorBuffer.bindPointer(mColor);
-
-        floatBuffer.clear();
-        floatBuffer.put(colorVertices);
-        floatBuffer.position(0);
-
-        GLES31.glVertexAttribPointer(mOpacity, 1, GLES31.GL_FLOAT, false, 4, floatBuffer);
 
         // get handle to shape's transformation matrix
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -277,7 +244,6 @@ public class SpriteRenderer {
         GLES31.glDisableVertexAttribArray(mPositionHandle);
         GLES31.glDisableVertexAttribArray(mColor);
         GLES31.glDisableVertexAttribArray(mInputTextureCoordinate);
-        GLES31.glDisableVertexAttribArray(mOpacity);
     }
 
     public Typewriter getTypewriter() {
@@ -288,15 +254,35 @@ public class SpriteRenderer {
         private final Typewriter.TextureCharacter character;
         public final float x;
         public final float y;
+        public final float sx;
+        public final float sy;
         public final float opacity;
         public final int color;
 
-        public TextureSprite(Typewriter.TextureCharacter character, float x, float y, int color, float opacity) {
+
+        public TextureSprite(Typewriter.TextureCharacter character,
+                             float x,
+                             float y,
+                             int color,
+                             float opacity,
+                             float sx,
+                             float sy) {
             this.color = color;
             this.character = character;
             this.x = x;
             this.y = y;
             this.opacity = opacity;
+            this.sx = sx;
+            this.sy = sy;
+        }
+
+        public TextureSprite(Typewriter.TextureCharacter character,
+                             float x,
+                             float y,
+                             int color,
+                             float opacity) {
+
+            this(character, x, y, color, opacity, 1f, 1f);
         }
     }
 }

@@ -29,7 +29,7 @@ public class PopupComponent {
         "precision mediump float;" +
         "uniform vec4 vColor;" +
         "void main() {" +
-        "  gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);" +
+        "  gl_FragColor = vColor;" +
         "}";
 
     private final int mProgram;
@@ -39,6 +39,8 @@ public class PopupComponent {
     private final GlFloatBuffer popupBackground;
     private final GlFloatBuffer verticalLine;
     private final GlFloatBuffer marker;
+    private final GlFloatBuffer borderLines;
+
     private final int popupBackgroundVertexCount = 6;
 
     public PopupComponent(Model model, SpriteRenderer tw) {
@@ -48,6 +50,7 @@ public class PopupComponent {
         popupBackground = new GlFloatBuffer(popupBackgroundVertexCount);
         verticalLine = new GlFloatBuffer(2);
         marker = new GlFloatBuffer(6 * model.getChart().getYColumns().size());
+        borderLines = new GlFloatBuffer(8);
 
         int vertexShader = MyGLRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = MyGLRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -69,14 +72,46 @@ public class PopupComponent {
 
     public void draw(int width, int height, float[] mMVPMatrix) {
         PopupState popupState = model.getPopupState();
+
         if (popupState.isVisible()) {
             PopupState state = popupState;
-            Rect popupDimensions = state.getDimensions();
+            Rect r = state.getDimensions();
 
-            drawBorder(popupDimensions, mMVPMatrix);
-            drawText(popupDimensions, state.getSamples(), mMVPMatrix);
-            drawGeometry(popupDimensions, mMVPMatrix);
-            drawMarkers(popupDimensions, mMVPMatrix);
+//            int ofs = 14;
+//            int left = pd.left + ofs;
+//            int top = pd.top + ofs;
+//            int right = pd.right + ofs;
+//            int bottom = pd.bottom + ofs;
+
+            borderLines.clear();
+            borderLines.putVertex(r.left, r.top);
+            borderLines.putVertex(r.left, r.bottom);
+            borderLines.putVertex(r.right, r.top);
+            borderLines.putVertex(r.right, r.bottom);
+
+            borderLines.putVertex(r.left, r.bottom);
+            borderLines.putVertex(r.right, r.bottom);
+            borderLines.putVertex(r.left, r.top);
+            borderLines.putVertex(r.right, r.top);
+
+            borderLines.position(0);
+
+            drawBorder(r, mMVPMatrix);
+            drawText(r, state.getSamples(), mMVPMatrix);
+            drawGeometry(r, mMVPMatrix);
+            drawMarkers(r, mMVPMatrix);
+
+//            Typewriter typewriter = model.getTypewriter();
+//            tw.drawSprite(typewriter.getCornerId(2), pd.left, pd.bottom, Color.BLACK, 1.0f);
+//            tw.drawSprite(typewriter.getCornerId(3), pd.left, pd.top, Color.BLACK, 1.0f);
+//            tw.drawSprite(typewriter.getCornerId(0), pd.right, pd.top, Color.BLACK, 1.0f);
+//            tw.drawSprite(typewriter.getCornerId(1), pd.r ight, pd.bottom, Color.BLACK, 1.0f);
+
+
+//            tw.drawSprite(typewriter.getSideId(0), pd.right, pd.top, Color.WHITE, 1.0f, 30f, 10f);
+//            tw.drawSprite(typewriter.getSideId(3), pd.left, pd.top, Color.WHITE, 1.0f, 100f, 100f);
+//            tw.drawSprite(typewriter.getSideId(0), pd.right, pd.top, Color.WHITE, 1.0f, 100f, 100f);
+//            tw.drawSprite(typewriter.getSideId(1), pd.right, pd.bottom, Color.WHITE, 1.0f, 100f, 100f);
         }
     }
 
@@ -113,7 +148,7 @@ public class PopupComponent {
         popupBackground.putVertex(r.left, r.top);
         popupBackground.putVertex(r.left, r.bottom);
         popupBackground.putVertex(r.right, r.top);
-        popupBackground.putVertex( r.right, r.bottom);
+        popupBackground.putVertex(r.right, r.bottom);
         popupBackground.putVertex(r.left, r.bottom);
         popupBackground.putVertex(r.right, r.top);
         popupBackground.position(0);
@@ -123,11 +158,12 @@ public class PopupComponent {
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
+        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_FRAME_COLOR, 0);
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
 
         popupBackground.bindPointer(mPositionHandle);
         GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, popupBackground.getVertexCount());
+
 
         // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);
@@ -145,11 +181,17 @@ public class PopupComponent {
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_COLOR, 0);
+        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.POPUP_COLOR, 0);
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+
+        GLES31.glLineWidth(3);
 
         verticalLine.bindPointer(mPositionHandle);
         GLES31.glDrawArrays(GLES31.GL_LINES, 0, verticalLine.getVertexCount());
+
+        borderLines.bindPointer(mPositionHandle);
+        GLES31.glDrawArrays(GLES31.GL_LINES, 0, borderLines.getVertexCount());
+
         GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
 

@@ -86,7 +86,7 @@ public final class PopupState {
         if (popupX + w + MARGIN > model.getWidth()) {
             popupX = model.getWidth() - w - MARGIN;
         }
-        int popupY = 10;
+        int popupY = MARGIN + 5;
 
         return new Rect(popupX - MARGIN, popupY - MARGIN,
             popupX + w + MARGIN, popupY + h + MARGIN);

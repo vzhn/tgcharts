@@ -230,13 +230,14 @@ public class Model {
     }
 
     public void tick() {
-        Iterator<Transition> it = animationList.iterator();
-        while (it.hasNext()) {
-            Transition v = it.next();
+        Set<Transition> removed = new HashSet<>();
+        for (Transition v : animationList) {
             if (!v.tick()) {
-                it.remove();
+                removed.add(v);
             }
         }
+
+        animationList.removeAll(removed);
     }
 
     public double getSmoothMaxFactor() {
