@@ -2,8 +2,8 @@ package me.vzhilin.charts.graphics;
 
 import android.graphics.Color;
 import android.opengl.GLES31;
-import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ChartRenderer;
+import me.vzhilin.charts.Model;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.FontInfo;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;

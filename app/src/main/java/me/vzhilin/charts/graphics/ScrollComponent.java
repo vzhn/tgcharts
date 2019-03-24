@@ -1,8 +1,8 @@
 package me.vzhilin.charts.graphics;
 
 import android.opengl.GLES31;
-import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ChartRenderer;
+import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ViewConstants;
 
 import java.nio.ByteBuffer;

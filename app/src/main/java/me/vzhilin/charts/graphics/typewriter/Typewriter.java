@@ -5,7 +5,6 @@ import android.graphics.*;
 import android.opengl.GLES31;
 import android.opengl.GLUtils;
 import android.text.TextPaint;
-import me.vzhilin.charts.R;
 import me.vzhilin.charts.ViewConstants;
 
 import java.util.ArrayList;

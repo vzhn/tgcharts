@@ -3,8 +3,8 @@ package me.vzhilin.charts.graphics;
 import android.graphics.Color;
 import android.opengl.GLES31;
 import android.opengl.Matrix;
-import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ChartRenderer;
+import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
