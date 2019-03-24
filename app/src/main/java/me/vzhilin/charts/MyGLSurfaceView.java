@@ -20,6 +20,8 @@ import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 class MyGLSurfaceView extends GLSurfaceView {
     private final ChartRenderer renderer;
@@ -37,7 +39,6 @@ class MyGLSurfaceView extends GLSurfaceView {
         model = new Model(data.getChart(4), tw);
         model.setScroll(0.5, 0.6);
 
-        // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(3);
 //        GLES31.glHint(GLES31.GL_NICEST);
 
@@ -51,9 +52,9 @@ class MyGLSurfaceView extends GLSurfaceView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
 
         LinearLayout mailLayout = ((Activity) getContext()).findViewById(R.id.mainLayout);
-
         Chart chart = model.getChart();
         for (final Column yColumn: chart.getYColumns()) {
             CheckBox checkBox = new CheckBox(getContext());
@@ -76,6 +77,15 @@ class MyGLSurfaceView extends GLSurfaceView {
                 }
             });
         }
+
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (model.isDirty()) {
+                    requestRender();
+                }
+            }
+        }, 0, 1000 / 60, TimeUnit.MILLISECONDS);
     }
 
     private Data readResource(Resources rs) {

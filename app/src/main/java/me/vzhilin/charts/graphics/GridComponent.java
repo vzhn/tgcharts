@@ -160,9 +160,9 @@ public class GridComponent {
         state = State.FADE_OUT;
     }
 
-    public void tick() {
+    public boolean tick() {
         if (state == State.HIDDEN || state == State.VISIBLE) {
-            return;
+            return false;
         }
 
         if (transition.tick()) {
@@ -175,6 +175,8 @@ public class GridComponent {
                 state = State.VISIBLE;
             }
         }
+
+        return true;
     }
 
     public void setMaxFactor(double max) {

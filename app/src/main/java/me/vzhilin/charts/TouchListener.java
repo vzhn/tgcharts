@@ -48,10 +48,10 @@ public class TouchListener {
 
             int ypos = model.getHeight() - ViewConstants.SCROLL_HEIGHT;
             if (!(e.getY() < ypos) && !(e.getY() > model.getHeight())) {
-                if (Math.abs(e.getX() - xleft) < 10) {
+                if (Math.abs(e.getX() - xleft) < 30) {
                     state = DragState.LEFT;
                 } else
-                if (Math.abs(e.getX() - xright) < 10) {
+                if (Math.abs(e.getX() - xright) < 30) {
                     state = DragState.RIGHT;
                 } else
                 if (e.getX() > xleft && e.getX() < xright) {

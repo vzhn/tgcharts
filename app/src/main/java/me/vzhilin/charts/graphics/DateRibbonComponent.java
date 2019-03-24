@@ -79,10 +79,10 @@ public class DateRibbonComponent {
         this.k = k;
     }
 
-    public void tick() {
+    public boolean tick() {
         switch (state) {
             case INIT:
-                break;
+                return false;
             case ZOOM_IN:
                 alpha += 1/20f;
                 if (alpha >= 1.0f) {
@@ -98,6 +98,8 @@ public class DateRibbonComponent {
                 }
                 break;
         }
+
+        return true;
     }
 
     private enum RibbonState {

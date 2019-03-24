@@ -32,6 +32,8 @@ public class Model {
 
     private final PopupState popupState;
 
+    private volatile boolean dirty = false;
+
 
     public Model(Chart chart, Typewriter tw) {
         this.chart = chart;
@@ -70,13 +72,13 @@ public class Model {
     public void setScrollLeft(double scrollLeft) {
         this.scrollLeft = scrollLeft;
 
-        onScroolUpdated();
+        refresh();
     }
 
     public void setScrollRight(double scrollRight) {
         this.scrollRight = scrollRight;
 
-        onScroolUpdated();
+        refresh();
     }
 
     public void setScroll(double scrollLeft, double scrollRight) {
@@ -84,16 +86,13 @@ public class Model {
             this.scrollLeft = scrollLeft;
             this.scrollRight = scrollRight;
 
-            onScroolUpdated();
+            refresh();
         }
     }
 
-    private void onScroolUpdated() {
-        popupState.refresh();
-        refreshMaxFactor();
-    }
-
     public void refresh() {
+        dirty = true;
+
         popupState.refresh();
         refreshMaxFactor();
     }
@@ -191,12 +190,10 @@ public class Model {
                     }
                 });
             }
-
-            refreshMaxFactor();
         }
 
         refreshScrollScaleFactors();
-        popupState.refresh();
+        refresh();
     }
 
     private void refreshScrollScaleFactors() {
@@ -226,7 +223,7 @@ public class Model {
         }
     }
 
-    public void tick() {
+    public boolean tick() {
         Set<Transition> removed = new HashSet<>();
         for (Transition v : animationList) {
             if (!v.tick()) {
@@ -235,6 +232,7 @@ public class Model {
         }
 
         animationList.removeAll(removed);
+        return !animationList.isEmpty();
     }
 
     public double getSmoothMaxFactor() {
@@ -278,5 +276,14 @@ public class Model {
 
     public Typewriter getTypewriter() {
         return tw;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void updateDirty(boolean dirty) {
+        this.dirty = dirty;
+
     }
 }

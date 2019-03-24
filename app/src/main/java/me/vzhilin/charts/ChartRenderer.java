@@ -31,8 +31,6 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
     }
 
     public void onDrawFrame(GL10 unused) {
-        long ts = System.currentTimeMillis();
-
         // Redraw background color
         GLES31.glClear(GLES31.GL_COLOR_BUFFER_BIT);
 
@@ -53,9 +51,10 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
+        boolean dirty = false;
         for (GridComponent gc: model.getGridComponents()) {
             gc.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-            gc.tick();
+            dirty |= gc.tick();
         }
 
         synchronized (Model.class) {
@@ -66,9 +65,11 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
             mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
             spriteRenderer.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
-            model.tick();
+            dirty |= model.tick();
             mDateComponent.tick();
         }
+
+        model.updateDirty(dirty);
     }
 
     @Override
