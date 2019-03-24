@@ -6,7 +6,6 @@ import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public final class PopupState {
     private final Model model;
@@ -36,7 +35,7 @@ public final class PopupState {
 
     public boolean isVisible() {
         double xPosition = model.getX(date);
-        return popupDimensions != null && !samples.isEmpty() && xPosition >= 0 && xPosition <= model.getWidth();
+        return date > 0 && popupDimensions != null && !samples.isEmpty() && xPosition >= 0 && xPosition <= model.getWidth();
     }
 
     public void setVisible(boolean visible) {

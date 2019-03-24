@@ -34,7 +34,7 @@ class MyGLSurfaceView extends GLSurfaceView {
         Typewriter tw = new Typewriter(resources);
 
         Data data = readResource(resources);
-        model = new Model(data.getChart(0), tw);
+        model = new Model(data.getChart(4), tw);
         model.setScroll(0.5, 0.6);
 
         // Create an OpenGL ES 2.0 context
