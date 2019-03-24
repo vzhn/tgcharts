@@ -58,17 +58,17 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
             gc.tick();
         }
 
-        mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-        scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-        scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-        mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-        mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-        spriteRenderer.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+        synchronized (Model.class) {
+            mScrollComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            scrollChartComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            scrollRibbonComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            spriteRenderer.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
 
-        model.tick();
-        mDateComponent.tick();
-
-        long delta = System.currentTimeMillis() - ts;
+            model.tick();
+            mDateComponent.tick();
+        }
     }
 
     @Override

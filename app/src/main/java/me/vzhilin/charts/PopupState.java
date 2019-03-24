@@ -35,7 +35,8 @@ public final class PopupState {
     }
 
     public boolean isVisible() {
-        return popupDimensions != null && !samples.isEmpty();
+        double xPosition = model.getX(date);
+        return popupDimensions != null && !samples.isEmpty() && xPosition >= 0 && xPosition <= model.getWidth();
     }
 
     public void setVisible(boolean visible) {

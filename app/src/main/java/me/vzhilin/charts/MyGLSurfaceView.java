@@ -70,8 +70,9 @@ class MyGLSurfaceView extends GLSurfaceView {
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    model.setVisible(label, isChecked);
-
+                    synchronized (Model.class) {
+                        model.setVisible(label, isChecked);
+                    }
                 }
             });
         }

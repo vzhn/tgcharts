@@ -15,8 +15,10 @@ public class TouchListener {
     }
 
     public void onTouchEvent(MotionEvent e) {
-        touchScroll(e);
-        touchChart(e);
+        synchronized (Model.class) {
+            touchScroll(e);
+            touchChart(e);
+        }
     }
 
     private void touchChart(MotionEvent e) {
