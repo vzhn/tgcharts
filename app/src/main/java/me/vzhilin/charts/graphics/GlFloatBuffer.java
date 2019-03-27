@@ -2,6 +2,7 @@ package me.vzhilin.charts.graphics;
 
 import android.opengl.GLES31;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -58,5 +59,9 @@ public final class GlFloatBuffer {
 
     public int getVertexCount() {
         return vertexCount;
+    }
+
+    public Buffer getBuffer() {
+        return floatBuffer;
     }
 }

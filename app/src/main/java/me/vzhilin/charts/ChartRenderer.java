@@ -17,6 +17,7 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
     private ScrollComponent mScrollComponent;
     private DateRibbonComponent mDateComponent;
     private PopupComponent mPopupComponent;
+    private VBOComponent vboComponent;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -51,6 +52,7 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
             mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
             mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
             spriteRenderer.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
+            vboComponent.draw(model.getWidth(), model.getWidth(), mViewMatrix);
 
             dirty |= model.tick();
             mDateComponent.tick();
@@ -72,6 +74,7 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
         scrollChartComponent = new ScrollChartComponent(model, spriteRenderer);
         scrollRibbonComponent = new ScrollRibbonComponent(model);
         mPopupComponent = new PopupComponent(model, spriteRenderer);
+        vboComponent = new VBOComponent();
 
         model.getGridComponents().add(new GridComponent(spriteRenderer, model));
         model.getGridComponents().add(new GridComponent(spriteRenderer, model));
