@@ -24,19 +24,29 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 class MyGLSurfaceView extends GLSurfaceView {
-    private final ChartRenderer renderer;
-    private final TouchListener touchListener;
+    private  ChartRenderer renderer;
+    private  TouchListener touchListener;
 
-    private final Model model;
+    private  Model model;
 
     public MyGLSurfaceView(Context context, AttributeSet attrs){
         super(context, attrs);
 
-        Resources resources = context.getResources();
+
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
+    }
+
+    public void addCheckboxes(int i) {
+        Resources resources = getResources();
         Typewriter tw = new Typewriter(resources);
 
         Data data = readResource(resources);
-        model = new Model(data.getChart(4), tw);
+        model = new Model(data.getChart(i), tw);
         model.setScroll(0.5, 0.6);
 
         setEGLContextClientVersion(3);
@@ -47,12 +57,6 @@ class MyGLSurfaceView extends GLSurfaceView {
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(renderer);
         touchListener = new TouchListener(model);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        setRenderMode(RENDERMODE_WHEN_DIRTY);
 
         LinearLayout mailLayout = ((Activity) getContext()).findViewById(R.id.mainLayout);
         Chart chart = model.getChart();

@@ -7,9 +7,6 @@ import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.transitions.SinTransition;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.Locale;
 
 public class GridComponent {
@@ -22,9 +19,6 @@ public class GridComponent {
         "  gl_Position = uMVPMatrix * vPosition;" +
         "}";
 
-    private final SpriteRenderer spriteRenderer;
-    private int mMVPMatrixHandle;
-
     private final String fragmentShaderCode =
             "precision mediump float;" +
             "uniform float vColor;" +
@@ -33,20 +27,14 @@ public class GridComponent {
             "  gl_FragColor.a = vColor;" +
             "}";
 
+
+    private final SpriteRenderer spriteRenderer;
+    private final GlFloatBuffer buffer;
+    private int mMVPMatrixHandle;
     private final int mProgram;
 
     private int mPositionHandle;
     private int mColorHandle;
-
-    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
-
-    private FloatBuffer vertexBuffer;
-
-    // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
-
-    static float triangleCoords[] = new float[3 * 24];
 
     private SinTransition transition;
     private float opacity;
@@ -57,15 +45,7 @@ public class GridComponent {
     public GridComponent(SpriteRenderer spriteRenderer, Model model) {
         this.model = model;
         this.spriteRenderer = spriteRenderer;
-
-        ByteBuffer bb = ByteBuffer.allocateDirect(
-                // (number of coordinate values * 4 bytes per float)
-                triangleCoords.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(triangleCoords);
-        vertexBuffer.position(0);
+        this.buffer = new GlFloatBuffer(24);
 
         int vertexShader = ChartRenderer.loadShader(GLES31.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = ChartRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -84,23 +64,16 @@ public class GridComponent {
         GLES31.glUseProgram(mProgram);
         mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-        vertexBuffer.clear();
+        buffer.clear();
 
         float i1 = (float) maxValue / 6f;
         for (int i = 0; i < 10; i++) {
-            triangleCoords[6 * i + 0] = -1f;
-            triangleCoords[6 * i + 1] = i1 * i;
-            triangleCoords[6 * i + 3] = +1f;
-            triangleCoords[6 * i + 4] = i1 * i;
+            buffer.putVertex(-1f, i1 * i);
+            buffer.putVertex(+1f, i1 * i);
         }
 
-        //-------------------- TOP
-        vertexBuffer.put(triangleCoords);
-        vertexBuffer.position(0);
-
-        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES31.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
+        buffer.position(0);
+        buffer.bindPointer(mPositionHandle);
 
         mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
         GLES31.glUniform1f(mColorHandle, opacity);
@@ -127,7 +100,7 @@ public class GridComponent {
 
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
         GLES31.glLineWidth(4f);
-        GLES31.glDrawArrays(GLES31.GL_LINES, 0, vertexCount);
+        GLES31.glDrawArrays(GLES31.GL_LINES, 0, buffer.getVertexCount());
         GLES31.glDisableVertexAttribArray(mPositionHandle);
 
         drawText(height, mvpMatrix);
@@ -143,7 +116,6 @@ public class GridComponent {
 
             yPos += step;
         }
-
     }
 
     public void show() {

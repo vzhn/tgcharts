@@ -53,6 +53,7 @@ public class ChartComponent {
     public void draw(int width, int height, float[] mvpMatrix) {
         GLES31.glUseProgram(mProgram);
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
+
         GLES31.glEnableVertexAttribArray(mPositionHandle);
         GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
                 GLES31.GL_FLOAT, false,
