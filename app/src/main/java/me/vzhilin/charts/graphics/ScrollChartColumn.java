@@ -7,13 +7,8 @@ import me.vzhilin.charts.ChartRenderer;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.Iterator;
-
-import static me.vzhilin.charts.graphics.ScrollComponent.COORDS_PER_VERTEX;
 
 final class ScrollChartColumn {
     private final int mProgram;
@@ -33,9 +28,12 @@ final class ScrollChartColumn {
 
 
     private final Column yColumn;
+    private final int vaoId;
 
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0, 0, 0, 1.0f };
+
+    private int mPositionHandle = 1;
 
     public ScrollChartColumn(Column xColumn, Column yColumn, int c) {
         this.yColumn = yColumn;
@@ -50,9 +48,12 @@ final class ScrollChartColumn {
         int fragmentShader = ChartRenderer.loadShader(GLES31.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
         mProgram = GLES31.glCreateProgram();
+        GLES31.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
         GLES31.glAttachShader(mProgram, vertexShader);
         GLES31.glAttachShader(mProgram, fragmentShader);
         GLES31.glLinkProgram(mProgram);
+
+        vaoId = yColumn.getVertexBuffer().createVAO(mPositionHandle);
     }
 
     private void initVertexBuffer(Column xColumn, Column yColumn) {
@@ -70,37 +71,21 @@ final class ScrollChartColumn {
         double xFactor = 1.0 / deltaX;
         double yFactor = 1.0 / deltaY;
 
-        int vertexCount = xColumn.size();
-        int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
-        FloatBuffer vertexBuffer = buildBytebuffer(xColumn).asFloatBuffer();
-
+        GlFloatBuffer vertexBuffer = new GlFloatBuffer(xColumn.size());
         while (itX.hasNext()) {
             float x = (float) ((itX.next().floatValue() - minX) * xFactor) * 2f - 1f;
             float y = (float) ((itY.next().floatValue() - minY) * yFactor);
 
-            vertexBuffer.put(x);
-            vertexBuffer.put(y);
-            vertexBuffer.put(0);
+            vertexBuffer.putVertex(x, y);
         }
-
         vertexBuffer.position(0);
 
-        yColumn.setVertexBuffer(vertexBuffer, vertexStride, vertexCount);
-    }
-
-    private ByteBuffer buildBytebuffer(Column xColumn) {
-        ByteBuffer bb = ByteBuffer.allocateDirect(xColumn.size() * 3 * 4);
-        bb.order(ByteOrder.nativeOrder());
-        return bb;
+        yColumn.setVertexBuffer(vertexBuffer);
     }
 
     public void draw(int width, int height, float[] mvpMatrix) {
         GLES31.glUseProgram(mProgram);
-        int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
-        GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES31.GL_FLOAT, false,
-                yColumn.getVertexStride(), yColumn.getVertexBuffer());
+        GLES31.glBindVertexArray(vaoId);
 
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
         color[3] = yColumn.getOpacity();
@@ -118,14 +103,11 @@ final class ScrollChartColumn {
         float scaleFactor = 0.8f * (float) 2 *  ViewConstants.SCROLL_HEIGHT / height * yColumn.getAnimatedScrollYScaleFactor();
 
         Matrix.scaleM(identity, 0, 1f, scaleFactor, 1f);
-
         Matrix.translateM(identity, 0, 0, (- 1f + (0.2f * ViewConstants.SCROLL_HEIGHT / height)) / scaleFactor  , 0);
-
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
 
         GLES31.glLineWidth(4f);
-        GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexCount());
-        GLES31.glLineWidth(1f);
-        GLES31.glDisableVertexAttribArray(mPositionHandle);
+        GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexBuffer().getVertexCount());
+        GLES31.glBindVertexArray(0);
     }
 }

@@ -52,7 +52,7 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
             mDateComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
             mPopupComponent.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
             spriteRenderer.draw(model.getWidth(), model.getHeight(), mMVPMatrix);
-            vboComponent.draw(model.getWidth(), model.getWidth(), mViewMatrix);
+//            vboComponent.draw(model.getWidth(), model.getWidth(), mViewMatrix);
 
             dirty |= model.tick();
             mDateComponent.tick();

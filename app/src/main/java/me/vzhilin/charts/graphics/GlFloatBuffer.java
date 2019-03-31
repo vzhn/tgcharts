@@ -2,7 +2,6 @@ package me.vzhilin.charts.graphics;
 
 import android.opengl.GLES31;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -21,6 +20,7 @@ public final class GlFloatBuffer {
         this.coordsPerVertex = coordsPerVertex;
         this.vertexCount = vertexCount;
         this.vertexStride = coordsPerVertex * 4;
+
         ByteBuffer bb = ByteBuffer.allocateDirect(vertexCount * vertexStride);
         bb.order(ByteOrder.nativeOrder());
         floatBuffer = bb.asFloatBuffer();
@@ -61,7 +61,23 @@ public final class GlFloatBuffer {
         return vertexCount;
     }
 
-    public Buffer getBuffer() {
-        return floatBuffer;
+    public int createVAO(int mPositionHandle) {
+        final int vbo[] = new int[1];
+        int[] vao = new int[1];
+
+        GLES31.glGenBuffers(1, vbo, 0);
+        int vboId = vbo[0];
+        GLES31.glBindBuffer(GLES31.GL_ARRAY_BUFFER, vboId);
+        GLES31.glBufferData(GLES31.GL_ARRAY_BUFFER, vertexCount * 3 * 4, floatBuffer, GLES31.GL_STATIC_DRAW);
+
+        GLES31.glGenVertexArrays(1, vao, 0);
+        int vaoId = vao[0];
+        GLES31.glBindVertexArray(vaoId);
+        GLES31.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glVertexAttribPointer(mPositionHandle, 3, GLES31.GL_FLOAT, false,3 * 4, 0);
+        GLES31.glBindVertexArray(0);
+        GLES31.glDisableVertexAttribArray(mPositionHandle);
+        GLES31.glBindBuffer(GLES31.GL_ARRAY_BUFFER, 0);
+        return vaoId;
     }
 }

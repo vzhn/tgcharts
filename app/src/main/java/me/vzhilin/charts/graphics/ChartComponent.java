@@ -8,8 +8,6 @@ import me.vzhilin.charts.Model;
 import me.vzhilin.charts.ViewConstants;
 import me.vzhilin.charts.data.Column;
 
-import static me.vzhilin.charts.graphics.ScrollComponent.COORDS_PER_VERTEX;
-
 public class ChartComponent {
     private final int mProgram;
     private final String vertexShaderCode =
@@ -55,9 +53,7 @@ public class ChartComponent {
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
 
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES31.GL_FLOAT, false,
-                yColumn.getVertexStride(), yColumn.getVertexBuffer());
+        yColumn.getVertexBuffer().bindPointer(mPositionHandle);
 
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
         color[3] = yColumn.getOpacity();
@@ -89,6 +85,6 @@ public class ChartComponent {
 
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
         GLES31.glLineWidth(ViewConstants.LINE_WIDTH);
-        GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexCount());
+        GLES31.glDrawArrays(GLES31.GL_LINE_STRIP, 0, yColumn.getVertexBuffer().getVertexCount());
     }
 }
