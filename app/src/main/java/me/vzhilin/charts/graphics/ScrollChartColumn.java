@@ -53,7 +53,9 @@ final class ScrollChartColumn {
         GLES31.glAttachShader(mProgram, fragmentShader);
         GLES31.glLinkProgram(mProgram);
 
-        vaoId = yColumn.getVertexBuffer().createVAO(mPositionHandle);
+        GlFloatBuffer vertexBuffer = yColumn.getVertexBuffer();
+        int vboId = vertexBuffer.createVBO();
+        vaoId = vertexBuffer.createVAO(vboId, mPositionHandle);
     }
 
     private void initVertexBuffer(Column xColumn, Column yColumn) {

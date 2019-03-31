@@ -61,19 +61,23 @@ public final class GlFloatBuffer {
         return vertexCount;
     }
 
-    public int createVAO(int mPositionHandle) {
+    public int createVBO() {
         final int vbo[] = new int[1];
-        int[] vao = new int[1];
 
         GLES31.glGenBuffers(1, vbo, 0);
         int vboId = vbo[0];
         GLES31.glBindBuffer(GLES31.GL_ARRAY_BUFFER, vboId);
         GLES31.glBufferData(GLES31.GL_ARRAY_BUFFER, vertexCount * 3 * 4, floatBuffer, GLES31.GL_STATIC_DRAW);
+        return vboId;
+    }
 
+    public int createVAO(int vboId, int mPositionHandle) {
+        int[] vao = new int[1];
         GLES31.glGenVertexArrays(1, vao, 0);
         int vaoId = vao[0];
         GLES31.glBindVertexArray(vaoId);
         GLES31.glEnableVertexAttribArray(mPositionHandle);
+        GLES31.glBindBuffer(GLES31.GL_ARRAY_BUFFER, vboId);
         GLES31.glVertexAttribPointer(mPositionHandle, 3, GLES31.GL_FLOAT, false,3 * 4, 0);
         GLES31.glBindVertexArray(0);
         GLES31.glDisableVertexAttribArray(mPositionHandle);

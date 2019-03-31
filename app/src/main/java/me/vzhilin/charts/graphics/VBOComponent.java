@@ -36,7 +36,8 @@ public class VBOComponent {
         vertexBuffer.putVertex(+1, -1);
         vertexBuffer.position(0);
 
-        vaoId = vertexBuffer.createVAO(GLES31.glGetAttribLocation(mProgram, "vPosition"));
+        int vboId = vertexBuffer.createVBO();
+        vaoId = vertexBuffer.createVAO(vboId, GLES31.glGetAttribLocation(mProgram, "vPosition"));
     }
 
     public void draw(int width, int height, float[] mViewMatrix) {
