@@ -8,7 +8,7 @@ import java.util.Map;
 
 public final class FontInfo {
     public final TextPaint textPaint;
-    public final Paint.FontMetrics fontMetrics1;
+    public final Paint.FontMetrics fontMetrics;
     public final float fontHeight;
     public final float fontWidth;
     public final float descent;
@@ -17,9 +17,9 @@ public final class FontInfo {
 
     public FontInfo(TextPaint textPaint, String alfabet) {
         this.textPaint = textPaint;
-        fontMetrics1 = textPaint.getFontMetrics();
-        this.descent = fontMetrics1.descent;
-        fontHeight = fontMetrics1.descent - fontMetrics1.top;
+        fontMetrics = textPaint.getFontMetrics();
+        this.descent = fontMetrics.descent;
+        fontHeight = fontMetrics.descent - fontMetrics.top;
         fontWidth = textPaint.measureText(alfabet);
     }
 

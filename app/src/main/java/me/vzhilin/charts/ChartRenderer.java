@@ -55,7 +55,7 @@ public class ChartRenderer implements GLSurfaceView.Renderer {
 //            vboComponent.draw(model.getWidth(), model.getWidth(), mViewMatrix);
 
             dirty |= model.tick();
-            mDateComponent.tick();
+            dirty |= mDateComponent.tick();
         }
 
         model.updateDirty(dirty);

@@ -120,8 +120,8 @@ public class Typewriter {
                 float charWidth = ctx.measureText(String.valueOf(ch));
                 float x1 = xOffset / textureWidth;
                 float y1 = yOffset / textureHeight;
-                float x2 = (xOffset + charWidth) / textureWidth;
-                float y2 = (yOffset + ctx.fontHeight) / textureHeight;
+                float x2 = (xOffset + charWidth - 1) / textureWidth;
+                float y2 = (yOffset + ctx.fontHeight - 1) / textureHeight;
                 xOffset += charWidth;
 
                 TextureCharacter tc =  new TextureCharacter(x1, y1, x2, y2, charWidth, ctx.fontHeight);
@@ -133,18 +133,18 @@ public class Typewriter {
 
         float xOffset = 0;
         for (BitmapSprite bm: bitmapSprites) {
-//            canvas.drawBitmap(bm, y);
             canvas.drawBitmap(bm.bm, xOffset, yOffset, null);
 
             float charWidth = bm.w;
             float x1 = xOffset / textureWidth;
             float y1 = yOffset / textureHeight;
-            float x2 = (xOffset + charWidth) / textureWidth;
-            float y2 = (yOffset + bm.h) / textureHeight;
+            float x2 = (xOffset + charWidth - 1) / textureWidth;
+            float y2 = (yOffset + bm.h - 1) / textureHeight;
             xOffset += charWidth;
 
             TextureCharacter tc = new TextureCharacter(x1, y1, x2, y2, charWidth, bm.h);
             textures.add(tc);
+            bm.bm.recycle();
         }
 
         return generateTextures(bitmap);
