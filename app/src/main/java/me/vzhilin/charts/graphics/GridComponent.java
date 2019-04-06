@@ -1,6 +1,5 @@
 package me.vzhilin.charts.graphics;
 
-import android.graphics.Color;
 import android.opengl.GLES31;
 import android.opengl.Matrix;
 import me.vzhilin.charts.ChartRenderer;
@@ -104,18 +103,19 @@ public class GridComponent {
         GLES31.glDisableVertexAttribArray(mPositionHandle);
 
         drawText(height, mvpMatrix);
-
-        spriteRenderer.drawSprite(spriteRenderer.getTypewriter().getCornerSideId(), 0, 0, Color.BLACK, 1.0f);
     }
 
     private void drawText(int height, float[] mvpMatrix) {
         float step = (height - ViewConstants.CHART_OFFSET) / 6;
 
         float yPos = 0;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 20; i++) {
             int y = (int) (-10 + height - ViewConstants.CHART_OFFSET - yPos * 1 / (model.getSmoothMaxFactor() / maxValue));
-            spriteRenderer.drawString(String.format("%.0f", i * maxValue / 6f, Locale.US), 5, y, ViewConstants.VIEW_GRAY, opacity);
 
+            if (y < 0 || y > height) {
+                break;
+            }
+            spriteRenderer.drawString(String.format("%.0f", i * maxValue / 6f, Locale.US), 5, y, ViewConstants.VIEW_GRAY, opacity);
             yPos += step;
         }
     }
