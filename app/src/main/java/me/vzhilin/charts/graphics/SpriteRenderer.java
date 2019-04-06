@@ -118,8 +118,6 @@ public class SpriteRenderer {
     }
 
     private void fillBuffers() {
-        int i = 0;
-
         for (StringSprite sc: stringSprites) {
             float offset = sc.x;
 
@@ -151,13 +149,14 @@ public class SpriteRenderer {
                     colorBuffer.putVertex(r, g, b, sc.opacity);
                 }
                 offset += width;
-                ++i;
             }
         }
 
         for (TextureSprite tx: sprites) {
             Sprite ch = tx.character;
-            float x1 = tx.x, y1 = tx.y, x2 = tx.x + ch.width * tx.sx, y2 = tx.y + ch.height * tx.sy;
+            int w = ch.width;
+            int h = ch.height;
+            float x1 = tx.x, y1 = tx.y, x2 = tx.x + w * tx.sx, y2 = tx.y + h * tx.sy;
 
             squareBuffer.putVertex(x1, y1);
             squareBuffer.putVertex(x2, y1);
@@ -179,7 +178,6 @@ public class SpriteRenderer {
                 float b = Color.blue(tx.color) / 255.0f;
                 colorBuffer.putVertex(r, g, b, tx.opacity);
             }
-            ++i;
         }
     }
 

@@ -3,6 +3,7 @@ package me.vzhilin.charts.graphics.typewriter;
 import android.content.res.Resources;
 import android.graphics.*;
 import android.text.TextPaint;
+import me.vzhilin.charts.R;
 import me.vzhilin.charts.ViewConstants;
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public class Typewriter {
     private final SpritePack spritePack;
     private final Resources resources;
     private int markerFillerId;
+    private int cornerSideId;
 
     public Typewriter(Resources resources) {
         this.resources = resources;
@@ -37,6 +39,15 @@ public class Typewriter {
 
     private void addSprites() {
         addMarker();
+        addSample();
+    }
+
+    private void addSample() {
+        cornerSideId = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.sample));
+    }
+
+    public int getCornerSideId() {
+        return cornerSideId;
     }
 
     private void addMarker() {

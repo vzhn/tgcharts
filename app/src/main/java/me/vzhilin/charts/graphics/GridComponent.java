@@ -89,7 +89,6 @@ public class GridComponent {
         Matrix.setIdentityM(identity, 0);
 
         float scrollFactor = (float) ViewConstants.CHART_OFFSET / height;
-
         float absoluteMax = (float) model.getSmoothMaxFactor();
 
         float yScaleFactor = 2f / absoluteMax;
@@ -106,7 +105,7 @@ public class GridComponent {
 
         drawText(height, mvpMatrix);
 
-        spriteRenderer.drawSprite(-1, 0, 0, Color.BLACK, 1.0f);
+        spriteRenderer.drawSprite(spriteRenderer.getTypewriter().getCornerSideId(), 0, 0, Color.BLACK, 1.0f);
     }
 
     private void drawText(int height, float[] mvpMatrix) {
