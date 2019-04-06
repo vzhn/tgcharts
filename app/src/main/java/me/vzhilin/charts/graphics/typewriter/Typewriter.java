@@ -2,36 +2,26 @@ package me.vzhilin.charts.graphics.typewriter;
 
 import android.content.res.Resources;
 import android.graphics.*;
-import android.opengl.GLES31;
-import android.opengl.GLUtils;
 import android.text.TextPaint;
 import me.vzhilin.charts.ViewConstants;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Typewriter {
+    private final String alfabet =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                    "abcdefghijklmnopqrstuvwxyz" +
+                    "01234567890.,+-= ";
+
     private final Map<FontType, FontInfo> fontContexts;
-    private final List<BitmapSprite> bitmapSprites = new ArrayList<>();
-    private final List<TextureCharacter> textures = new ArrayList<>();
-
-    String alfabet =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        "abcdefghijklmnopqrstuvwxyz" +
-        "01234567890.,+-= ";
-
-    private float textureHeight;
+    private final SpritePack spritePack;
     private final Resources resources;
-
-    private int textureId;
-    private float textureWidth;
-
     private int markerFillerId;
 
     public Typewriter(Resources resources) {
         this.resources = resources;
+        this.spritePack = new SpritePack();
 
         fontContexts = new HashMap<>();
     }
@@ -40,23 +30,9 @@ public class Typewriter {
         addNormalFont();
         addBigFont();
         addBoldFont();
-
         addSprites();
 
-        float maxWidth = 0;
-        for (FontInfo ctx: fontContexts.values()) {
-            textureHeight += ctx.fontHeight;
-            maxWidth = Math.max(maxWidth, ctx.fontWidth);
-        }
-
-        float bmHeight = 0;
-        for (BitmapSprite s: bitmapSprites) {
-            bmHeight = Math.max(bmHeight, s.w);
-        }
-        textureHeight += bmHeight;
-
-        textureWidth = maxWidth;
-        textureId = initTextures();
+        initTextures();
     }
 
     private void addSprites() {
@@ -71,9 +47,7 @@ public class Typewriter {
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_INNER_RADIUS, paint);
-        bitmapSprites.add(new BitmapSprite(bm));
-
-        this.markerFillerId = bitmapSprites.size() - 1;
+        this.markerFillerId = spritePack.put(bm);
     }
 
     private void addNormalFont() {
@@ -98,81 +72,38 @@ public class Typewriter {
         normalTextPaint.setARGB(0xff, 0, 0, 0);
         normalTextPaint.setTextSize(ViewConstants.FONT_SIZE_1);
         normalTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-
         fontContexts.put(FontType.BOLD_FONT, new FontInfo(normalTextPaint, alfabet));
     }
 
     public int getTextureId() {
-        return textureId;
+        return spritePack.getTextureId();
     }
 
-    private int initTextures() {
-        Bitmap bitmap = Bitmap.createBitmap((int) textureWidth, (int) textureHeight, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-
-        float yOffset = 0;
+    private void initTextures() {
         for (FontInfo ctx: fontContexts.values()) {
-            float xOffset = 0;
-            canvas.drawText(alfabet, 0, yOffset + ctx.fontHeight - ctx.descent, ctx.textPaint);
-
             for (int i = 0; i < alfabet.length(); i++) {
                 char ch = alfabet.charAt(i);
-                float charWidth = ctx.measureText(String.valueOf(ch));
-                float x1 = xOffset / textureWidth;
-                float y1 = yOffset / textureHeight;
-                float x2 = (xOffset + charWidth - 1) / textureWidth;
-                float y2 = (yOffset + ctx.fontHeight - 1) / textureHeight;
-                xOffset += charWidth;
+                int charWidth = (int) Math.ceil(ctx.measureText(String.valueOf(ch)));
+                int charHeight = (int) Math.ceil(ctx.fontHeight);
 
-                TextureCharacter tc =  new TextureCharacter(x1, y1, x2, y2, charWidth, ctx.fontHeight);
-                ctx.put(ch, tc);
+                Bitmap bitmap = Bitmap.createBitmap(charWidth, charHeight, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawText(String.valueOf(ch), 0, charHeight - ctx.fontMetrics.descent, ctx.textPaint);
+
+                int spriteId = spritePack.put(bitmap);
+                ctx.put(ch, spriteId);
             }
-
-            yOffset += ctx.fontHeight;
         }
 
-        float xOffset = 0;
-        for (BitmapSprite bm: bitmapSprites) {
-            canvas.drawBitmap(bm.bm, xOffset, yOffset, null);
-
-            float charWidth = bm.w;
-            float x1 = xOffset / textureWidth;
-            float y1 = yOffset / textureHeight;
-            float x2 = (xOffset + charWidth - 1) / textureWidth;
-            float y2 = (yOffset + bm.h - 1) / textureHeight;
-            xOffset += charWidth;
-
-            TextureCharacter tc = new TextureCharacter(x1, y1, x2, y2, charWidth, bm.h);
-            textures.add(tc);
-            bm.bm.recycle();
-        }
-
-        return generateTextures(bitmap);
+        spritePack.build();
     }
 
     public FontInfo getContext(FontType size) {
         return fontContexts.get(size);
     }
 
-    private int generateTextures(Bitmap bitmap) {
-        int[] textures = new int[1];
-        GLES31.glGenTextures(1, textures, 0);
-        GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, textures[0]);
-        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_MIN_FILTER, GLES31.GL_NEAREST);
-        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_MAG_FILTER, GLES31.GL_LINEAR);
-        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_WRAP_S, GLES31.GL_REPEAT);
-        GLES31.glTexParameterf(GLES31.GL_TEXTURE_2D, GLES31.GL_TEXTURE_WRAP_T, GLES31.GL_REPEAT);
-        GLUtils.texImage2D(GLES31.GL_TEXTURE_2D, 0, bitmap, 0);
-        bitmap.recycle();
-        return textures[0];
-    }
-
-    public float getHeight() {
-        return textureHeight;
-    }
-
-    public TextureCharacter getSprite(int id) {
-        return textures.get(id);
+    public Sprite getSprite(int id) {
+        return spritePack.get(id);
     }
 
     public int newMarker(int columnColor) {
@@ -183,13 +114,12 @@ public class Typewriter {
         Paint paint = new Paint();
 
         paint.setColor(columnColor);
-        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_EXTERNAL_RADIUS, paint);
+        cv.drawCircle((float) d / 2, (float)d / 2, ViewConstants.MARKER_EXTERNAL_RADIUS, paint);
 
         paint.setColor(Color.WHITE);
-        cv.drawCircle(d / 2, d / 2, ViewConstants.MARKER_INNER_RADIUS, paint);
+        cv.drawCircle((float) d / 2, (float) d / 2, ViewConstants.MARKER_INNER_RADIUS, paint);
 
-        bitmapSprites.add(new BitmapSprite(bm));
-        return bitmapSprites.size() - 1;
+        return spritePack.put(bm);
     }
 
     public int getMarkerFillerId() {
@@ -200,37 +130,5 @@ public class Typewriter {
         NORMAL_FONT,
         BOLD_FONT,
         BIG_FONT
-    }
-
-    public final static class BitmapSprite {
-        public final float w;
-        public final float h;
-        private final Bitmap bm;
-
-        public BitmapSprite(Bitmap bm) {
-            this.w = bm.getWidth();
-            this.h = bm.getHeight();
-            this.bm = bm;
-        }
-    }
-
-    public final static class TextureCharacter {
-        public final float x1;
-        public final float y1;
-        public final float x2;
-        public final float y2;
-
-        public final float width;
-        public final float height;
-
-        public TextureCharacter(float x1, float y1, float x2, float y2, float width, float height) {
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
-
-            this.width = width;
-            this.height = height;
-        }
     }
 }

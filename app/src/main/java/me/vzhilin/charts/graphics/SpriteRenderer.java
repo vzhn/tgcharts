@@ -6,6 +6,7 @@ import me.vzhilin.charts.ChartRenderer;
 import me.vzhilin.charts.Model;
 import me.vzhilin.charts.data.Column;
 import me.vzhilin.charts.graphics.typewriter.FontInfo;
+import me.vzhilin.charts.graphics.typewriter.Sprite;
 import me.vzhilin.charts.graphics.typewriter.Typewriter;
 
 import java.util.ArrayList;
@@ -124,7 +125,7 @@ public class SpriteRenderer {
 
             FontInfo context = tw.getContext(sc.size);
             for (int j = 0; j < sc.s.length(); j++) {
-                Typewriter.TextureCharacter ch = context.get(sc.s.charAt(j));
+                Sprite ch = tw.getSprite(context.get(sc.s.charAt(j)));
                 float width = ch.width;
 
                 float x1 = offset, y1 = sc.y - ch.height, x2 = offset + width, y2 = sc.y;
@@ -136,12 +137,12 @@ public class SpriteRenderer {
                 squareBuffer.putVertex(x2, y2);
                 squareBuffer.putVertex(x1, y2);
 
-                textureBuffer.putVertex(ch.x1, ch.y1);
-                textureBuffer.putVertex(ch.x2, ch.y1);
-                textureBuffer.putVertex(ch.x1, ch.y2);
-                textureBuffer.putVertex(ch.x2, ch.y1);
-                textureBuffer.putVertex(ch.x2, ch.y2);
-                textureBuffer.putVertex(ch.x1, ch.y2);
+                textureBuffer.putVertex(ch.getU1(), ch.getV1());
+                textureBuffer.putVertex(ch.getU2(), ch.getV1());
+                textureBuffer.putVertex(ch.getU1(), ch.getV2());
+                textureBuffer.putVertex(ch.getU2(), ch.getV1());
+                textureBuffer.putVertex(ch.getU2(), ch.getV2());
+                textureBuffer.putVertex(ch.getU1(), ch.getV2());
 
                 for (int k = 0; k < 6; k++) {
                     float r = Color.red(sc.color) / 255.0f;
@@ -155,7 +156,7 @@ public class SpriteRenderer {
         }
 
         for (TextureSprite tx: sprites) {
-            Typewriter.TextureCharacter ch = tx.character;
+            Sprite ch = tx.character;
             float x1 = tx.x, y1 = tx.y, x2 = tx.x + ch.width * tx.sx, y2 = tx.y + ch.height * tx.sy;
 
             squareBuffer.putVertex(x1, y1);
@@ -165,12 +166,12 @@ public class SpriteRenderer {
             squareBuffer.putVertex(x2, y2);
             squareBuffer.putVertex(x1, y2);
 
-            textureBuffer.putVertex(ch.x1, ch.y1);
-            textureBuffer.putVertex(ch.x2, ch.y1);
-            textureBuffer.putVertex(ch.x1, ch.y2);
-            textureBuffer.putVertex(ch.x2, ch.y1);
-            textureBuffer.putVertex(ch.x2, ch.y2);
-            textureBuffer.putVertex(ch.x1, ch.y2);
+            textureBuffer.putVertex(ch.getU1(), ch.getV1());
+            textureBuffer.putVertex(ch.getU2(), ch.getV1());
+            textureBuffer.putVertex(ch.getU1(), ch.getV2());
+            textureBuffer.putVertex(ch.getU2(), ch.getV1());
+            textureBuffer.putVertex(ch.getU2(), ch.getV2());
+            textureBuffer.putVertex(ch.getU1(), ch.getV2());
 
             for (int k = 0; k < 6; k++) {
                 float r = Color.red(tx.color) / 255.0f;
@@ -217,7 +218,7 @@ public class SpriteRenderer {
     }
 
     private class TextureSprite {
-        private final Typewriter.TextureCharacter character;
+        private final Sprite character;
         public final float x;
         public final float y;
         public final float sx;
@@ -225,7 +226,7 @@ public class SpriteRenderer {
         public final float opacity;
         public final int color;
 
-        public TextureSprite(Typewriter.TextureCharacter character,
+        public TextureSprite(Sprite character,
                              float x,
                              float y,
                              int color,
@@ -241,7 +242,7 @@ public class SpriteRenderer {
             this.sy = sy;
         }
 
-        public TextureSprite(Typewriter.TextureCharacter character,
+        public TextureSprite(Sprite character,
                              float x,
                              float y,
                              int color,

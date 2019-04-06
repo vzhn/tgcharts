@@ -1,5 +1,6 @@
 package me.vzhilin.charts.graphics;
 
+import android.graphics.Color;
 import android.opengl.GLES31;
 import android.opengl.Matrix;
 import me.vzhilin.charts.ChartRenderer;
@@ -104,6 +105,8 @@ public class GridComponent {
         GLES31.glDisableVertexAttribArray(mPositionHandle);
 
         drawText(height, mvpMatrix);
+
+        spriteRenderer.drawSprite(-1, 0, 0, Color.BLACK, 1.0f);
     }
 
     private void drawText(int height, float[] mvpMatrix) {

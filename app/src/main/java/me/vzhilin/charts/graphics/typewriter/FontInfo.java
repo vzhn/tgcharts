@@ -13,7 +13,8 @@ public final class FontInfo {
     public final float fontWidth;
     public final float descent;
 
-    private Map<Character, Typewriter.TextureCharacter> characters = new HashMap<>();
+    /** Character -> spriteId */
+    private Map<Character, Integer> characters = new HashMap<>();
 
     public FontInfo(TextPaint textPaint, String alfabet) {
         this.textPaint = textPaint;
@@ -27,11 +28,11 @@ public final class FontInfo {
         return textPaint.measureText(ch);
     }
 
-    public void put(char ch, Typewriter.TextureCharacter tc) {
-        characters.put(ch, tc);
+    public void put(char ch, int spriteId) {
+        characters.put(ch, spriteId);
     }
 
-    public Typewriter.TextureCharacter get(char ch) {
+    public int get(char ch) {
         if (!characters.containsKey(ch)) {
             throw new RuntimeException("unknown character: " + ch);
         }
