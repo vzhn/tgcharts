@@ -184,7 +184,15 @@ public class SpriteRenderer {
         GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, tw.getTextureId());
         GLES31.glUniform1i(mTexture, 0);
 
+        if (!colored) {
+            GLES31.glBlendFunc(GLES31.GL_DST_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
+        }
+
         GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, squareBuffer.getVertexCount());
+
+        if (!colored) {
+            GLES31.glBlendFunc(GLES31.GL_SRC_ALPHA, GLES31.GL_ONE_MINUS_SRC_ALPHA);
+        }
 
         GLES31.glDisableVertexAttribArray(mPositionHandle);
         GLES31.glDisableVertexAttribArray(mColor);

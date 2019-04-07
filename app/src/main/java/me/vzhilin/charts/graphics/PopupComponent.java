@@ -74,7 +74,7 @@ public class PopupComponent {
 
             drawBorder(r, mMVPMatrix);
             drawText(r, state.getSamples(), mMVPMatrix);
-//            drawGeometry(r, mMVPMatrix);
+            drawGeometry(r, mMVPMatrix);
             drawMarkers(r, mMVPMatrix);
         }
     }
@@ -116,28 +116,28 @@ public class PopupComponent {
         popupBackground.putVertex(r.right, r.top);
         popupBackground.position(0);
 
-        int side = 15;
-        tw.drawSprite(tw.getTypewriter().getCornerSideId(0), r.right - side, r.top - side);
-        tw.drawSprite(tw.getTypewriter().getCornerSideId(3), r.left - side, r.top - side);
-        tw.drawSprite(tw.getTypewriter().getCornerSideId(1), r.right - side, r.bottom - side);
-        tw.drawSprite(tw.getTypewriter().getCornerSideId(2), r.left - side, r.bottom - side);
+        int side = 13;
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(2), r.right - side, r.top - side);
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(0), r.left - side, r.top - side);
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(4), r.right - side, r.bottom - side);
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(6), r.left - side, r.bottom - side);
 
-        tw.drawSprite(tw.getTypewriter().getCornerSideH1(), r.left + side, r.top - side, (float) (r.right - r.left - 2 * side), 1f);
-        tw.drawSprite(tw.getTypewriter().getCornerSideH2(), r.left + side, r.bottom - side, (float) (r.right - r.left - 2 * side), 1f);
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(1), r.left + side, r.top - side, (float) (r.right - r.left - 2 * side), 1f);
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(5), r.left + side, r.bottom - side, (float) (r.right - r.left - 2 * side), 1f);
 
-        tw.drawSprite(tw.getTypewriter().getCornerSideV1(), r.right - side, r.top + side, 1f, (float) (r.bottom - r.top - 2 * side));
-        tw.drawSprite(tw.getTypewriter().getCornerSideV2(), r.left - side, r.top + side, 1f, (float) (r.bottom - r.top - 2 * side));
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(3), r.right - side, r.top + side, 1f, (float) (r.bottom - r.top - 2 * side));
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(7), r.left - side, r.top + side, 1f, (float) (r.bottom - r.top - 2 * side));
 
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
 
         GLES31.glEnableVertexAttribArray(mPositionHandle);
-        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.SCROLL_FRAME_COLOR, 0);
+        GLES31.glUniform4fv(mColorHandle, 1, ViewConstants.POPUP_BACKGROUND_COLOR, 0);
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
 
         popupBackground.bindPointer(mPositionHandle);
-//        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, popupBackground.getVertexCount());
+        GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, popupBackground.getVertexCount());
         // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);
     }
@@ -161,9 +161,6 @@ public class PopupComponent {
 
         verticalLine.bindPointer(mPositionHandle);
         GLES31.glDrawArrays(GLES31.GL_LINES, 0, verticalLine.getVertexCount());
-
-        borderLines.bindPointer(mPositionHandle);
-        GLES31.glDrawArrays(GLES31.GL_LINES, 0, borderLines.getVertexCount());
 
         GLES31.glDisableVertexAttribArray(mPositionHandle);
     }

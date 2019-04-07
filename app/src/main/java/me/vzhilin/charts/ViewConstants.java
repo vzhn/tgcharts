@@ -24,6 +24,7 @@ public class ViewConstants {
 
     public static final int DATE_LABEL_HEIGHT = 25;
 
+    public static final float[] POPUP_BACKGROUND_COLOR = new float[]{1f,1f, 1f, 1f};
     public static final float[] SCROLL_FRAME_COLOR = new float[]{ 219f / 255f, 231f/ 255f, 240f/ 255f, 1f};
     public static final float[] SCROLL_COLOR = new float[]{ 235 / 255f, 241/ 255f, 243 / 255f, 0.5f};
     public static final float[] POPUP_COLOR = new float[]{ 198 / 255f, 198/ 255f, 198 / 255f, 1f};

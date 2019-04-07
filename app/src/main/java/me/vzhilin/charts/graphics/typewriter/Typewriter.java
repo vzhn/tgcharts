@@ -20,11 +20,8 @@ public class Typewriter {
     private final Resources resources;
     private int markerFillerId;
 
-    private final int[] cornerIds = new int[4];
-    private int cornerSideH1;
-    private int cornerSideH2;
-    private int cornerSideV1;
-    private int cornerSideV2;
+    private final int[] cornerIds = new int[8];
+
 
     public Typewriter(Resources resources) {
         this.resources = resources;
@@ -45,21 +42,25 @@ public class Typewriter {
     private void addSprites() {
         addMarker();
 
-        addCorners();
+//        addCorners();
         addBorders();
     }
 
     private void addBorders() {
-        cornerSideH1 = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner2_side_h));
-        cornerSideH2 = addCorner(180,  R.drawable.corner2_side_h);
-        cornerSideV1 = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner2_side_v));
-        cornerSideV2 = addCorner(180,  R.drawable.corner2_side_v);
+        cornerIds[0] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_left_top));
+        cornerIds[1] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_top));
+        cornerIds[2] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_right_top));
+        cornerIds[3] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_right));
+        cornerIds[4] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_right_bottom));
+        cornerIds[5] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_bottom));
+        cornerIds[6] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_left_bottom));
+        cornerIds[7] = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_left));
 //        cornerSideH = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_side_h));
     }
 
     private void addCorners() {
         for (int i = 0; i < 4; i++) {
-            cornerIds[i] = addCorner(i, R.drawable.corner_2);
+            cornerIds[i] = addCorner(i, R.drawable.corner_1);
         }
     }
 
@@ -78,22 +79,6 @@ public class Typewriter {
 
     public int getCornerSideId(int rot) {
         return cornerIds[rot];
-    }
-
-    public int getCornerSideH1() {
-        return cornerSideH1;
-    }
-
-    public int getCornerSideH2() {
-        return cornerSideH2;
-    }
-
-    public int getCornerSideV1() {
-        return cornerSideV1;
-    }
-
-    public int getCornerSideV2() {
-        return cornerSideV2;
     }
 
     private void addMarker() {
