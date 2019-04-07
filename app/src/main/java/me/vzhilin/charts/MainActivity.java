@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < 1; i++) {
             MyGLSurfaceView view = new MyGLSurfaceView(this, null);
-            view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 800));
+            view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1200));
             mainLayout.addView(view);
 
 
