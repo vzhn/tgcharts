@@ -50,7 +50,6 @@ public class SpriteRenderer {
     private GlFloatBuffer squareBuffer;
     private GlFloatBuffer colorBuffer;
 
-    private final List<StringSprite> stringSprites = new ArrayList<StringSprite>();
     private final List<TextureSprite> sprites = new ArrayList<>();
 
     public SpriteRenderer(Model model) {
@@ -86,7 +85,6 @@ public class SpriteRenderer {
         drawBuffer(mMVPMatrix);
 
         sprites.clear();
-        stringSprites.clear();
     }
 
     public void drawSprite(int id, float x, float y, int color, float opacity) {
@@ -98,19 +96,24 @@ public class SpriteRenderer {
     }
 
     public void drawString(String string, int x, int y, int color, float opacity) {
-        stringSprites.add(new StringSprite(x, y, string, color, opacity, Typewriter.FontType.NORMAL_FONT));
+        drawString(string, x, y, color, opacity, Typewriter.FontType.NORMAL_FONT);
     }
 
     public void drawString(String string, int x, int y, int color, float opacity, Typewriter.FontType type) {
-        stringSprites.add(new StringSprite(x, y, string, color, opacity, type));
+        float offset = x;
+        FontInfo context = tw.getContext(type);
+        for (int j = 0; j < string.length(); j++) {
+            Sprite ch = tw.getSprite(context.get(string.charAt(j)));
+            float width = ch.width;
+
+            float x1 = offset, y1 = y - ch.height, x2 = offset + width, y2 = y;
+            sprites.add(new TextureSprite(ch, x1, y1, color, opacity));
+            offset += width;
+        }
     }
 
     private void prepareBuffers() {
         int totalSprites = 0;
-        for (StringSprite sc: stringSprites) {
-            totalSprites += sc.s.length();
-        }
-
         totalSprites += sprites.size();
 
         squareBuffer = new GlFloatBuffer(6 * totalSprites);
@@ -119,40 +122,6 @@ public class SpriteRenderer {
     }
 
     private void fillBuffers() {
-        for (StringSprite sc: stringSprites) {
-            float offset = sc.x;
-
-            FontInfo context = tw.getContext(sc.size);
-            for (int j = 0; j < sc.s.length(); j++) {
-                Sprite ch = tw.getSprite(context.get(sc.s.charAt(j)));
-                float width = ch.width;
-
-                float x1 = offset, y1 = sc.y - ch.height, x2 = offset + width, y2 = sc.y;
-
-                squareBuffer.putVertex(x1, y1);
-                squareBuffer.putVertex(x2, y1);
-                squareBuffer.putVertex(x1, y2);
-                squareBuffer.putVertex(x2, y1);
-                squareBuffer.putVertex(x2, y2);
-                squareBuffer.putVertex(x1, y2);
-
-                textureBuffer.putVertex(ch.getU1(), ch.getV1());
-                textureBuffer.putVertex(ch.getU2(), ch.getV1());
-                textureBuffer.putVertex(ch.getU1(), ch.getV2());
-                textureBuffer.putVertex(ch.getU2(), ch.getV1());
-                textureBuffer.putVertex(ch.getU2(), ch.getV2());
-                textureBuffer.putVertex(ch.getU1(), ch.getV2());
-
-                for (int k = 0; k < 6; k++) {
-                    float r = Color.red(sc.color) / 255.0f;
-                    float g = Color.green(sc.color) / 255.0f;
-                    float b = Color.blue(sc.color) / 255.0f;
-                    colorBuffer.putVertex(r, g, b, sc.opacity);
-                }
-                offset += width;
-            }
-        }
-
         for (TextureSprite tx: sprites) {
             Sprite ch = tx.character;
             int w = ch.width;
