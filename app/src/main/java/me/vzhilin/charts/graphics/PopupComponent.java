@@ -116,7 +116,7 @@ public class PopupComponent {
         popupBackground.putVertex(r.right, r.top);
         popupBackground.position(0);
 
-        tw.drawSprite(tw.getTypewriter().getCornerSideId(), r.left, r.top, Color.BLACK, 1.0f);
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(), r.left, r.top);
 
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");

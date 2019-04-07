@@ -50,6 +50,7 @@ public class SpriteRenderer {
     private GlFloatBuffer squareBuffer;
     private GlFloatBuffer colorBuffer;
 
+    private final List<TextureSprite> coloredSprites = new ArrayList<>();
     private final List<TextureSprite> sprites = new ArrayList<>();
 
     public SpriteRenderer(Model model) {
@@ -80,19 +81,23 @@ public class SpriteRenderer {
     public void draw(int width, int height, float[] mMVPMatrix) {
         GLES31.glUseProgram(mProgram);
 
-        prepareBuffers();
-        fillBuffers();
-        drawBuffer(mMVPMatrix);
+        draw(mMVPMatrix, sprites, false);
+        draw(mMVPMatrix, coloredSprites, true);
+    }
 
+    private void draw(float[] mMVPMatrix, List<TextureSprite> sprites, boolean colored) {
+        prepareBuffers(sprites);
+        fillBuffers(sprites);
+        drawBuffer(mMVPMatrix, colored);
         sprites.clear();
     }
 
     public void drawSprite(int id, float x, float y, int color, float opacity) {
-        sprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity));
+        coloredSprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity));
     }
 
-    public void drawSprite(int id, float x, float y, int color, float opacity, float sx, float sy) {
-        sprites.add(new TextureSprite(tw.getSprite(id), x, y, color, opacity, sx, sy));
+    public void drawSprite(int id, float x, float y) {
+        sprites.add(new TextureSprite(tw.getSprite(id), x, y, Color.BLACK, 1f));
     }
 
     public void drawString(String string, int x, int y, int color, float opacity) {
@@ -107,21 +112,20 @@ public class SpriteRenderer {
             float width = ch.width;
 
             float x1 = offset, y1 = y - ch.height, x2 = offset + width, y2 = y;
-            sprites.add(new TextureSprite(ch, x1, y1, color, opacity));
+            coloredSprites.add(new TextureSprite(ch, x1, y1, color, opacity));
             offset += width;
         }
     }
 
-    private void prepareBuffers() {
-        int totalSprites = 0;
-        totalSprites += sprites.size();
+    private void prepareBuffers(List<TextureSprite> sprites) {
+        int totalSprites = sprites.size();
 
         squareBuffer = new GlFloatBuffer(6 * totalSprites);
         textureBuffer = new GlFloatBuffer(6 * totalSprites);
         colorBuffer   = new GlFloatBuffer(4, 6 * totalSprites);
     }
 
-    private void fillBuffers() {
+    private void fillBuffers(List<TextureSprite> sprites) {
         for (TextureSprite tx: sprites) {
             Sprite ch = tx.character;
             int w = ch.width;
@@ -151,7 +155,7 @@ public class SpriteRenderer {
         }
     }
 
-    private void drawBuffer(float[] mMVPMatrix) {
+    private void drawBuffer(float[] mMVPMatrix, boolean colored) {
         GLES31.glEnableVertexAttribArray(mPositionHandle);
         GLES31.glEnableVertexAttribArray(mColor);
         GLES31.glEnableVertexAttribArray(mInputTextureCoordinate);
@@ -169,13 +173,12 @@ public class SpriteRenderer {
 
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
-        GLES31.glUniform2ui(mParams, 1, 1);
+        GLES31.glUniform2ui(mParams, colored ? 1 : 0, colored ? 1 : 0);
 
         int mTexture = GLES31.glGetUniformLocation(mProgram, "videoFrame");
         GLES31.glActiveTexture(GLES31.GL_TEXTURE0);
         GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, tw.getTextureId());
         GLES31.glUniform1i(mTexture, 0);
-
 
         GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, squareBuffer.getVertexCount());
 
@@ -221,6 +224,13 @@ public class SpriteRenderer {
 
             this(character, x, y, color, opacity, 1f, 1f);
         }
+    }
+
+    private enum SpriteMode {
+        COLOR_OPAQUE,
+        COLOR,
+        OPAQUE,
+        NONE
     }
 }
 
