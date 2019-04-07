@@ -19,7 +19,12 @@ public class Typewriter {
     private final SpritePack spritePack;
     private final Resources resources;
     private int markerFillerId;
-    private int cornerSideId;
+
+    private final int[] cornerIds = new int[4];
+    private int cornerSideH1;
+    private int cornerSideH2;
+    private int cornerSideV1;
+    private int cornerSideV2;
 
     public Typewriter(Resources resources) {
         this.resources = resources;
@@ -39,15 +44,56 @@ public class Typewriter {
 
     private void addSprites() {
         addMarker();
-        addCorner();
+
+        addCorners();
+        addBorders();
     }
 
-    private void addCorner() {
-        cornerSideId = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner));
+    private void addBorders() {
+        cornerSideH1 = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner2_side_h));
+        cornerSideH2 = addCorner(180,  R.drawable.corner2_side_h);
+        cornerSideV1 = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner2_side_v));
+        cornerSideV2 = addCorner(180,  R.drawable.corner2_side_v);
+//        cornerSideH = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner_side_h));
     }
 
-    public int getCornerSideId() {
-        return cornerSideId;
+    private void addCorners() {
+        for (int i = 0; i < 4; i++) {
+            cornerIds[i] = addCorner(i, R.drawable.corner_2);
+        }
+    }
+
+    private int addCorner(int rot, int resourceId) {
+        Bitmap bm = BitmapFactory.decodeResource(resources, resourceId);
+
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas cv = new Canvas(b);
+        cv.rotate(rot * 90, (float) width / 2, (float) height/ 2);
+        cv.drawBitmap(bm, 0, 0, null);
+
+        return spritePack.put(b);
+    }
+
+    public int getCornerSideId(int rot) {
+        return cornerIds[rot];
+    }
+
+    public int getCornerSideH1() {
+        return cornerSideH1;
+    }
+
+    public int getCornerSideH2() {
+        return cornerSideH2;
+    }
+
+    public int getCornerSideV1() {
+        return cornerSideV1;
+    }
+
+    public int getCornerSideV2() {
+        return cornerSideV2;
     }
 
     private void addMarker() {

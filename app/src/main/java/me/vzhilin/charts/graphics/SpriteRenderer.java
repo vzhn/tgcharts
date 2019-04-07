@@ -100,6 +100,10 @@ public class SpriteRenderer {
         sprites.add(new TextureSprite(tw.getSprite(id), x, y, Color.BLACK, 1f));
     }
 
+    public void drawSprite(int id, float x, float y, float sx, float sy) {
+        sprites.add(new TextureSprite(tw.getSprite(id), x, y, Color.BLACK, 1f, sx, sy));
+    }
+
     public void drawString(String string, int x, int y, int color, float opacity) {
         drawString(string, x, y, color, opacity, Typewriter.FontType.NORMAL_FONT);
     }
