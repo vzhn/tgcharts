@@ -116,6 +116,8 @@ public class PopupComponent {
         popupBackground.putVertex(r.right, r.top);
         popupBackground.position(0);
 
+        tw.drawSprite(tw.getTypewriter().getCornerSideId(), r.left, r.top, Color.BLACK, 1.0f);
+
         int mPositionHandle = GLES31.glGetAttribLocation(mProgram, "vPosition");
         int mColorHandle = GLES31.glGetUniformLocation(mProgram, "vColor");
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -126,8 +128,6 @@ public class PopupComponent {
 
         popupBackground.bindPointer(mPositionHandle);
         GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, popupBackground.getVertexCount());
-
-
         // Disable vertex array
         GLES31.glDisableVertexAttribArray(mPositionHandle);
     }

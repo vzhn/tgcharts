@@ -30,12 +30,13 @@ public class SpriteRenderer {
     private final String fragmentShaderCode =
             "precision mediump float;"+
             "uniform sampler2D videoFrame;" +
+            "uniform bvec2 vFlags;" +
             "varying vec4 vColor;" +
             "varying vec2 textureCoordinate;" +
             "void main() {" +
             "  vec4 color = texture2D(videoFrame, textureCoordinate);" +
-            "  color.rgb = vColor.rgb;" +
-            "  color.a *= vColor.a;" +
+            "  if (vFlags[0]) color.rgb = vColor.rgb;" +
+            "  if (vFlags[1]) color.a *= vColor.a;" +
             "  gl_FragColor = color;" +
             "}";
 
@@ -57,7 +58,6 @@ public class SpriteRenderer {
 
         for (Column column: model.getChart().getYColumns()) {
             int columnColor = model.getChart().getColor(column.getLabel());
-
             column.setMarkerSpriteId(tw.newMarker(columnColor));
         }
 
@@ -72,6 +72,7 @@ public class SpriteRenderer {
         GLES31.glBindAttribLocation(mProgram, mPositionHandle, "vPosition");
         GLES31.glBindAttribLocation(mProgram, mColor, "color");
         GLES31.glBindAttribLocation(mProgram, mInputTextureCoordinate, "inputTextureCoordinate");
+
         GLES31.glAttachShader(mProgram, vertexShader);
         GLES31.glAttachShader(mProgram, fragmentShader);
         GLES31.glLinkProgram(mProgram);
@@ -195,14 +196,17 @@ public class SpriteRenderer {
         colorBuffer.bindPointer(mColor);
 
         int mMVPMatrixHandle = GLES31.glGetUniformLocation(mProgram, "uMVPMatrix");
+        int mParams = GLES31.glGetUniformLocation(mProgram, "vFlags");
 
         float[] identity = Arrays.copyOf(mMVPMatrix, 16);
         GLES31.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, identity, 0);
+        GLES31.glUniform2ui(mParams, 1, 1);
 
         int mTexture = GLES31.glGetUniformLocation(mProgram, "videoFrame");
         GLES31.glActiveTexture(GLES31.GL_TEXTURE0);
         GLES31.glBindTexture(GLES31.GL_TEXTURE_2D, tw.getTextureId());
         GLES31.glUniform1i(mTexture, 0);
+
 
         GLES31.glDrawArrays(GLES31.GL_TRIANGLES, 0, squareBuffer.getVertexCount());
 

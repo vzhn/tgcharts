@@ -39,11 +39,11 @@ public class Typewriter {
 
     private void addSprites() {
         addMarker();
-        addSample();
+        addCorner();
     }
 
-    private void addSample() {
-        cornerSideId = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.sample));
+    private void addCorner() {
+        cornerSideId = spritePack.put(BitmapFactory.decodeResource(resources, R.drawable.corner));
     }
 
     public int getCornerSideId() {
