@@ -4,5 +4,3 @@
 * Smooth animations
 * OpenGL ES 3.1, Vertex Array Objects
 
-#### Links
-* Unsigned application: [tgcharts.apk](https://github.com/vzhn/tgcharts/releases/download/v1.0/tgcharts.apk)
