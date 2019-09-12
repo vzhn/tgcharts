@@ -34,7 +34,6 @@ public class Model {
 
     private volatile boolean dirty = false;
 
-
     public Model(Chart chart, Typewriter tw) {
         this.chart = chart;
         this.tw = tw;
